@@ -158,8 +158,22 @@ int mbug_2165_set_sequence( mbug_device dev, unsigned char* data, size_t nbytes,
 }
 
 //------------------------------------------------------------------------------
-// Set transmission sequence with 16-bit values (max 127 items)
-int mbug_2165_set_sequence_16bit( mbug_device dev, unsigned short* data, size_t nitems )
+// Set transmission sequence in bitstream mode (max 255 bytes)
+int mbug_2165_set_seq_bitstream( mbug_device dev, unsigned char* data, size_t nbytes )
+{
+	return mbug_2165_set_sequence( dev, data, nbytes, TX_MODE_BITSTREAM );
+}
+
+//------------------------------------------------------------------------------
+// Set transmission sequence in 8-bit time mode (max 255 bytes)
+int mbug_2165_set_seq_times_8bit( mbug_device dev, unsigned char* data, size_t nbytes )
+{
+	return mbug_2165_set_sequence( dev, data, nbytes, TX_MODE_TIMED_8 );
+}
+
+//------------------------------------------------------------------------------
+// Set transmission sequence in 16-bit time mode (max 127 items)
+int mbug_2165_set_seq_times_16bit( mbug_device dev, unsigned short* data, size_t nitems )
 {
 	return mbug_2165_set_sequence( dev, (unsigned char*)data, nitems*2, TX_MODE_TIMED_16 );
 }

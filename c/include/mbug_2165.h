@@ -17,6 +17,7 @@
 	mbug_2165_open()					- Open a device with specified serial number
 	mbug_2165_open_str()	            - Open a device with specified id string
 	mbug_2165_close()
+	mbug_2151_set_sequence()            - Set transmission sequence (selectable transmission mode)
 	mbug_2165_set_seq_bitstream()		- Set bitstream transmission sequence (max 255 bytes)
 	mbug_2165_set_seq_times_8bit()		- Set 8-bit timed transmission sequence (max 255 bytes)
 	mbug_2165_set_seq_times_16bit()		- Set 16-bit timed transmission sequence (max 127 words)
@@ -69,13 +70,22 @@ mbug_device mbug_2165_open_str( const char *id );
  */
 void mbug_2165_close( mbug_device dev );
 
-/** Set transmission sequence (max 255 bytes length)
+/** Set transmission sequence (max 255 bytes length) with selectable transmission mode.
  */
 int mbug_2165_set_sequence( mbug_device dev, unsigned char* data, size_t nbytes, mbug_2165_tx_mode tx_mode );
 
-/** Set transmission sequence with 16-bit values (max 127 items)
+/** Set transmission sequence in bitstream mode (max 255 bytes length)
  */
-int mbug_2165_set_sequence_16bit( mbug_device dev, unsigned short* data, size_t nitems );
+int mbug_2165_set_seq_bitstream( mbug_device dev, unsigned char* data, size_t nbytes );
+
+/** Set transmission sequence in timed mode (8-bit resolution, max 255 bytes length)
+ */
+int mbug_2165_set_seq_times_8bit( mbug_device dev, unsigned char* data, size_t nbytes );
+
+/** Set transmission sequence in timed mode (16-bit resolution, max 127 bytes length)
+ */
+int mbug_2165_set_seq_times_16bit( mbug_device dev, unsigned short* data, size_t nbytes );
+
 
 /** Get the length of the currently stored transmission sequence in bytes
  */
