@@ -58,16 +58,33 @@ class mbug_2151
 				if (ret<0) throw mbug::error("mbug_2151: Error in set_sequence.");
 			}
 
-		void set_sequence( std::vector<unsigned char> sequence, mbug_2151_tx_mode tx_mode )
+		void set_sequence( std::vector<unsigned short> sequence )
+			{
+				// Unsigned short data buffer indicates 16-bit timed mode
+				// NOTE: We may pass a pointer to the first sequence element, since vector elements
+				//       are guaranteed to be stored contiguously in memory.
+				int ret = mbug_2151_set_sequence( dev, (unsigned char*)&sequence[0], 
+					                              2*sequence.size(), TX_MODE_TIMED_16 );
+				if (ret<0) throw mbug::error("mbug_2151: Error in set_sequence.");
+			}
+
+		void set_seq_bitstream( std::vector<unsigned char> sequence )
 			{
 				// NOTE: We may pass a pointer to the first sequence element, since vector elements
 				//       are guaranteed to be stored contiguously in memory.
-				int ret = mbug_2151_set_sequence( dev, &sequence[0], sequence.size(), tx_mode );
-				if (ret<0) throw mbug::error("mbug_2151: Error in set_sequence.");
-			
+				int ret = mbug_2151_set_sequence( dev, &sequence[0], sequence.size(), TX_MODE_BITSTREAM );
+				if (ret<0) throw mbug::error("mbug_2151: Error in set_sequence.");			
 			}
 
-		void set_sequence( std::vector<unsigned short> sequence )
+		void set_seq_times_8bit( std::vector<unsigned char> sequence )
+			{
+				// NOTE: We may pass a pointer to the first sequence element, since vector elements
+				//       are guaranteed to be stored contiguously in memory.
+				int ret = mbug_2151_set_sequence( dev, &sequence[0], sequence.size(), TX_MODE_TIMED_8 );
+				if (ret<0) throw mbug::error("mbug_2151: Error in set_sequence.");
+			}
+
+		void set_seq_times_16bit( std::vector<unsigned short> sequence )
 			{
 				// NOTE: We may pass a pointer to the first sequence element, since vector elements
 				//       are guaranteed to be stored contiguously in memory.
