@@ -12,14 +12,17 @@ lib:
 tool:  
 	$(MAKE) -C  c/linux/  tool
 	
-install:
+install: udev_rule
 	$(MAKE) -C  c/linux/  install
 	$(MAKE) -C  py/  install
-	cp  99-mbug.rules  $(sysconfdir)/udev/rules.d
 	
-python:
+python: udev_rule
 	$(MAKE) -C  py/  install
 	cp  99-mbug.rules  $(sysconfdir)/udev/rules.d
+
+udev_rule:
+	echo  SUBSYSTEM=="usb", ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="fbc3", MODE="0666" \
+	  > $(sysconfdir)/udev/rules.d/99-mbug.rules
 
 uninstall:
 	$(MAKE) -C  c/linux/  uninstall
