@@ -1,0 +1,68 @@
+-------------------------------------------
+MBUG host software
+Installation instructions
+-------------------------------------------
+
+1. LINUX
+
+
+1.1 Prerequisites:
+
+    To build the C library and the command line tools, you will need the Gnu 
+    C/C++ compiler and the libusb-dev package.  For example, on Ubuntu run:
+    
+      sudo apt-get install g++ libusb-dev
+      
+    If you only want the python module, you only need the libusb-0.1 library,
+    which will probably already be installed on our system.  If not:
+    
+      sudo apt-get install libusb-0.1-4
+      
+
+1.2 Installation
+
+    The software comes with a Makefile.
+
+      make all
+      
+    This will compile the C library and the command line tools.
+    
+      sudo make install
+    
+    This will install the C library to /usr/local/lib, the libraries header
+    files to /usr/local/include and the command line tools to /usr/local/bin.
+    It will also install the python module and create an udev-rule that gives 
+    all users full access to all plugged-in mbug devices.  
+    
+    
+2. WINDOWS
+
+
+1.1 Prerequisites
+
+    None.  
+
+    
+1.2 Installation
+
+    The software comes with a pre-built library and command line tools. Copy
+    the command line tools from folder mbug_host\c\windows\bin\ to your system
+    folder (typically C:\windows), or to any other folder contained in your 
+    search path.
+    
+    To use the C library in your own programs, use the static library from 
+    mbug_host\c\windows\lib\mbug.lib and the header files from folder 
+    mbug_host\c\include\ . The windows library is already contains all depen-
+    dencies to the underlying libusb library.  
+
+
+1.3 Device drivers
+
+    To use an MBUG device on a Windows platform, a device driver is needed.
+    After plugging in a new MBUG device, the operating system will ask for
+    a driver location.  Point it to mbug_host\driver\mbug.inf . The driver
+    should then be installed automatically.  You can safely disregard any
+    messages concerning compatibility or certification.
+    
+    
+3. HAVE FUN

@@ -1,0 +1,51 @@
+<html>
+ <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Beer temperature</title>
+    <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="flot/excanvas.min.js"></script><![endif]-->
+    <script language="javascript" type="text/javascript" src="flot/jquery.js"></script>
+    <script language="javascript" type="text/javascript" src="flot/jquery.flot.js"></script>
+    <script language="javascript" type="text/javascript" src="flot/jquery.flot.navigate.js"></script>
+
+ </head>
+    <body>
+    <h1>Beer temperature</h1>
+
+    <div id="placeholder" style="width:1000px;height:300px;"></div>
+
+<script type="text/javascript">
+function plotit() {
+	var data = [[],]
+    var datafile = jQuery.ajax({url: 'temperature.dat', datatype: 'text', async: false} ).responseText
+	lines = datafile.split('\n')	// split into array of lines
+	index = 0
+	for(i=0; i<lines.length; i++)
+	{
+		aa = lines[i].trim().split(/\s+/)	// split by whitespaces
+		if (aa[0]=='')						// on blank line: start new data set
+		{
+			data.push([])
+			index ++
+			continue
+		}
+		dd = [1e3*(aa[0]), +(aa[1])]		// note: time in javascript is in milliseconds
+		data[index].push(dd)
+	}
+
+    // plot
+    var options = {
+        series: { shadowSize: 0 },
+        xaxis: {mode: 'time', timeformat: "%m-%d<br/>%H:%M"},
+        yaxis:{zoomRange: false},
+        zoom: { interactive: true },
+      	pan: { interactive: true }
+    };
+    var plot = jQuery.plot($("#placeholder"), data, options);
+    plot.draw()
+
+}
+plotit()
+</script>
+
+ </body>
+</html>

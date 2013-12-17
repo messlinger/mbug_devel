@@ -1,0 +1,23 @@
+#
+# Demo script for the MBUG_2810 device interface class
+#
+
+import mbug_2810
+import time
+
+# Open the first device and print the current temperature
+therm = mbug_2810.open(1)
+
+# Open file
+file = open('temperature.dat', 'a', 0)
+
+# Read until break
+while(1):
+    T = therm.read()
+    t = time.time()
+    print t, T
+    file.write("%.2f\t%.3f\n" % (t, T) )
+    file.flush()
+    time.sleep(10)
+    
+

@@ -1,0 +1,48 @@
+<head>
+	<title> {serial} </title>
+	<meta http-equiv="refresh" content="{update}">
+</head>
+<h2> Thermometer {serial} </h2>
+<table><tr>
+<td>
+	<table border="0" style="margin-left:10px;">
+		<tr>
+			<td><b>Temperature:&nbsp;&nbsp;<b></td>
+			<td><b>{temp}</b></td>
+		</tr>
+		<tr>
+			<td>Minimum:</td>
+			<td>{min}</td>
+		</tr>
+		<tr>
+			<td>Maximum:</td>
+			<td>{max}</td>
+		</tr>
+		<tr><td>&nbsp<td></tr>
+	</table>
+</td>
+<td>
+	<form action="/index.html" method="GET">
+	<table border="0" style="margin-left:40px;">
+		<tr>
+			<td>Update interval (sec):&nbsp;&nbsp;
+		    <input type="text" name="update" size=4 value="{update}">
+		    <input type="submit" value="Apply"> </td>
+		</tr>
+		<tr>
+			<td>Display interval:&nbsp;&nbsp;</td>
+		</tr>
+		<tr>
+			<td><input type="radio" name="display" value="1h">1h
+			<input type="radio" name="display" value="8h">8h
+			<input type="radio" name="display" value="24h">24h
+			<input type="radio" name="display" value="7d">7d
+			<input type="radio" name="display" value="1m">1m
+			<input type="radio" name="display" value="6m">6m
+		</tr>
+	</table>
+	</form>
+</td>
+</tr></table>
+<br>
+<img src="{plotfile}"/>

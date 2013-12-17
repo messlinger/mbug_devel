@@ -1,0 +1,217 @@
+-------------------------------------------
+MBUG-2110 GPIO
+Documentation
+-------------------------------------------
+
+
+1. OVERVIEW
+
+    The MBUG-2110 GPIO is a general purpose USB input/output device.  Besides
+    12 channels digital input/outputs it provides 8 analog inputs (10 bit resolution),
+    1 PWM output (10 bits duty cycle resolution) and one channel asynchronous 
+    serial input/output. 
+    The device comes with cross platform C library, Python library and command 
+    line tool.  A graphical user interface tool is in preparation.  On Linux,
+    platform the device works without drivers by using the libusb-0 library. 
+    For Windows platforms, a libusb-win32 based driver is provided.
+    
+    
+1.1 Future extensions
+
+    SPI/I2C
+    Counter/Timer input
+    Digital input interrupt on change
+    Impulse generator
+
+
+
+2. HARDWARE
+
+    The device is based on a PIC18F14k50 microcontroller.  More extensive 
+    specifications on the various hardware modules can be found in the 
+    datasheet.  See www.microchip.com for the latest revision.
+    
+    
+2.1 Power supply
+
+    The device is supplied by the USB voltage and does not need an additional 
+    power supply.  The current consumption is below 10 mA plus the current 
+    delivered by the digital outputs.  The device is available in 5 Volt or
+    3.3 Volt versions.
+    
+
+2.2 Connections
+
+           (top view)
+     _______________________
+     |                     |
+     |  _J1_        _J2_   |
+     |                     |
+     |  0  1        0  1   |
+     |  2  3        2  3   |
+     |  4  5        4  5   |
+     |  6  7        6  7   |
+     |  8  9        8  9   |
+     |  10 11       10 11  |
+     |  12 13       12 13  |
+     |  14 15       14 15  |
+     |________     ________| 
+             | USB |
+             |_____|
+
+    The electrical connection are merged into two 2x8 pinhead connectors. 
+    All I/O pins are contained in J1. J2 provides additional supply voltage
+    and ground connections.
+    
+    
+    Table 1: MBUG-2110 connector assignments
+    
+    External                        Internal (see PIC18F14k50 datasheet)
+    J1    gpio  ana   pwm   uart    port  adc             
+    0     0     -     0	    -	    RC5   
+    1     1     -     -     -       RC4             
+    2     2     -     -     tx	    RB7             
+    3     3     0     -     -       RC7   9        
+    4     4     1     -     -       RC6   8       
+    5     5     2     -     -       RC3   7       
+    6     6     3     -     -       RC0   4       
+    7     7     4     -     -       RC1   5             
+    8     8     5     -     -	    RC2	  6 
+    9     9     6     -     -       RB4   10      
+    10    10    7     -     rx      RB5   11              
+    11    11    -     -     -       RB6   -          
+    -     -     -     -     -       RA4   3       
+    12  GND
+    13  GND
+    14  V+
+    15  V+
+    
+    J2
+    even V+
+    odd  GND
+    
+    
+2.3 Digital I/O
+
+    The MUBG-2110 provides 12 channels bidirectional digital I/O ports. The 
+    port directions for every channel can be set independently.  The maximum 
+    current sunk or sourced by any port is 25 mA.  The sum of currents sunk or
+    sourced by all ports may not exceed 90 mA.
+    Since the digital I/O ports share pins with the other subsystems, the 
+    number of available ports depends on which other subsystems are used.  See 
+    Tab. 1 for the pin mapping. 
+
+
+2.4 Analog input
+
+    GPIO 3 to 10 can be individually used as analog inputs.  If a port is 
+    configured as analog input, the digital input buffer is disabled.  The port
+    can still be used as digital output, however.  To use a port as analog 
+    input, set the port direction to input and configure it as analog input.
+    The analog inputs can only be read simultaneously.  The ADC resolution is
+    10 bits.  For upward compatibilty to higher resolution devices, the ADC
+    results are returned left justified in a 16 bit word.
+    
+    
+2.5 PWM output
+
+    Port 0 can be configured as pulse width modulated output.  The digital 
+    output function is disabled in this case.  Currently, the PWM frequency 
+    is fixed to 11718.75 Hz.  (However, future revisions my allow to change
+    the PWM frequency.)  The PWM duty cycle can be set with 10 bit resolution
+    (range 0..1023), corresponding to duty cycles in the range 0..1023/1024.
+    
+    
+2.6 Asynchronous serial port (UART)
+
+    The MBUG-2110 provides one asynchronous serial port (UART). If the UART
+    is enabled, the serial recieve input (rx) is mapped to port 10 and the 
+    serial transmit output (tx) is mapped to port 2.  In this mode, the digi-
+    tal I/O functions on these ports are disabled.  The baudrate can be set to 
+    arbitrary values in the range 50-256k, parity van be set to none, set, 
+    clear, odd, even. The UARTs subsystem provides transmit and receive queues 
+    that can hold up to 64 bytes each. The UART subsystem registers framing 
+    errors, parity errors and overrun errors of the transmit and receive 
+    queues.
+    
+    
+2.7 Synchronus serial port (I2C)
+
+    Not yet implemented.
+
+
+2.8 Synchronus serial port (SPI)
+    
+    Not yet implemented.
+    
+
+
+3. SOFTWARE 
+
+    The device can by accessed via a host software library consisting of a 
+    C/C++ library, a python module and a command line tool.
+   
+   
+3.1 C-library
+
+3.2 C++-library
+
+3.3 Python library
+
+3.4 Command line tool
+
+
+
+4. USB interface
+
+    This section describes the low level properties of the instruments USB 
+    interface. The information provided here is typically not of interest for 
+    the user since it is hidden by the host library. It is of interest mainly 
+    if the instrument is to be controlled by a third party library or directly
+    via low level USB interface functions.
+
+
+4.1 Device properties
+    
+    idVendor:  0x04D8  (Microchip Inc.)
+    idProduct: 0xFBC3  (MBUG sub vendor id)
+    bcdDevice: 0x2110  (identifies mbug device type)
+    Serial:    MBUG-2110-NNNNNN
+    Device class: 0xFF (vendor-specific), 
+    Device speed: full speed
+    Data Endpoints 	
+        Out:  0x01 (out), 64 byte, interrupt, 1 ms interval
+        In:   0x81 (in),  64 byte, interrupt, 1 ms interval
+        
+    Endpoints support only complete single packet transfers.
+    
+
+4.2 USB commands
+    
+    0xE0 0x00 bits bits  Set GPIO output state (12 bits) 
+    0xE1 0x00            Get GPIO input state (12 bits)
+    0xE2 0x00 bits bits  Set GPIO TRIS state (12 bits; 1:in, 0:out)
+    
+    0xE4 0x00 0x01 0x00  Enable PWM output (12 bits, only channel 1 implemented)
+    0xE5 0x01 duty duty  Set PWM duty cycle (10 bit duty cacle)
+    
+    0xE8 0x00 chan chan  Enable analog inputs (12 bits)
+    0xE9 0x00            Read all analog inputs 
+    
+    0xEA 0xNN data       USART send N bytes
+         Return: s n     s:status, n:bytes written
+    0xEB 0xNN            USART receive N bytes
+         Return: s n     s:status, n:bytes read
+    0xEC 0x00            Turn USART off
+    0xEC 0x01 entx enrx  Enable TX, RX
+    0xEC 0x02 b b b b p  Configure UART (b:baudrate, p:parity)
+    0xEC 0x70            Query uart status
+         Return: s 0x00 txq[2] rxq[2]   s:status, txq,rxq: tx/rx queue sizes
+    
+    0xED 0x00 Nout Nin data   I2C transceive
+         Return: s 0x00 Nout Nin data   s:status
+    0xEE 
+    0xEF 0x01 kbaud      Init I2C
+    0xEF 0x00            Turn I2C off
+
+    For additional information refer to the library implementations.
