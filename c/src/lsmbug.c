@@ -93,21 +93,26 @@ void parse_type( char* str )
 
 void parse_options( int argc, char* argv[] )
 {
-	int i;
-	for (i=1; i<argc; i++)
-	{
-		char* ap = argv[i];
-		while ( *ap=='-' || *ap=='/' )  ap++;
-		ap = strtok( ap, ":= ");
+	int i, j;
+	char *cmd, **args;
+	args = calloc( 2*argc+1, sizeof(char*) );
+	for (i=1, j=0; i<argc; i++) {
+		args[j++] = strtok( argv[i], ":=" );
+		if (args[j] = strtok( 0, "" ))
+			j++;
+	}
 
-		if (str_in( ap, "l", "list", 0 ))
+	for (j=0; cmd=args[j++]; )
+	{
+		while ( *cmd=='-' || *cmd=='/' )  cmd++;
+		if (str_in( cmd, "l", "list", 0 ))
 			action = List;
-		else if (str_in( ap, "h", "help", 0 ))
+		else if (str_in( cmd, "h", "help", 0 ))
 			action = Help;
-		else if (str_in( ap, "t", "type", 0 ))
-			parse_type( strtok( 0, "" ) );
+		else if (str_in( cmd, "t", "type", 0 ))
+			parse_type( args[j++] );
 		else
-			errorf( "#### Unknown command: %s", argv[i]);
+			errorf( "#### Unknown command: %s", cmd );
 	}
 }
 
