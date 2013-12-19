@@ -24,11 +24,13 @@ lib: libmbug.a libmbug.so
 
 libmbug.a: $(LIB_OBJS)
 	$(AR) -rcs  $@  $(LIB_OBJS)
+	mkdir -p lib/
 	cp  $@  lib/$@
 	
 libmbug.so: $(LIB_OBJS)
 	$(LD) -shared -soname  $@.$(LIB_MVER)  -o $@.$(LIB_VER)  $(LIB_OBJS)  -lusb -lc
 	ln -sf  $@.$(LIB_VER)  $@
+	mkdir -p lib/
 	cp  $@.$(LIB_VER) lib/$@.$(LIB_VER)
 	ln -sf  lib/$@.$(LIB_VER)  lib/$@
 
@@ -53,10 +55,12 @@ mbug_demo: mbug_demo.cpp libmbug.so
 
 $(CBINS):
 	$(CC)  -o  $@  $<  -I../include  -L.  -lmbug
+	mkdir -p bin/
 	cp  $@  bin/$@
 
 $(CXXBINS): 
 	$(CXX)  -o  $@  $<  -I../include  -L.  -lmbug
+	mkdir -p bin/
 	cp  $@  bin/$@
 
 #==========================================================================
