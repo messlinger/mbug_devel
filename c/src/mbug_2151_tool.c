@@ -18,10 +18,13 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include <strings.h>
+//#include <strings.h>
 #include <ctype.h>
 #include <errno.h>
 #include <time.h>
+#ifdef _WIN32
+  #include <windows.h>
+#endif
 
 #include "mbug_2151.h"
 #include "mbug_2151_targets.h"
@@ -166,10 +169,11 @@ double str_to_float( char* str )
 	return val;
 }
 
-char *tokenize(tokenize_state_t *state, char *argv[], const char *sep) 
+char *tokenize(tokenize_state_t *state, char *argv[], const char *sep)
 {
 	char **s = *(char***) state;
 	char *arg = NULL;
+	char *ret;
 	if(state == NULL) {
 		return NULL;
 	}
@@ -183,7 +187,7 @@ char *tokenize(tokenize_state_t *state, char *argv[], const char *sep)
 		return NULL;
 	}
 
-	char *ret = strtok(arg, sep);
+	ret = strtok(arg, sep);
 	while(ret == NULL) {
 		s++;
 		if((*s) == NULL) {
@@ -295,7 +299,9 @@ void parse_sequence( char* sseq )
 */
 void parse_target_ab440s(tokenize_state_t *s) {
 	char *id;
-	int state;
+	int state, i;
+	mbug_device transmitter;
+	double it_time;
 
 	char *ids = tokenize(s, NULL, ""); // Store the next string in ids for later use
 	char *statestr = tokenize(s, NULL, "");
@@ -313,14 +319,14 @@ void parse_target_ab440s(tokenize_state_t *s) {
 		return;
 	}
 
-	mbug_device transmitter = mbug_2151_open( device_serial );
+	transmitter = mbug_2151_open( device_serial );
 	while(transmitter == NULL) {
 		printf("Meh!\n");
 		transmitter = mbug_2151_open(device_serial);
 	}
 	while(mbug_2151_get_busy(transmitter)) {
 		int length = mbug_2151_get_seq_length(transmitter);
-		
+
 		if(length == -1) {
 			mbug_2151_close(transmitter);
 			transmitter = mbug_2151_open( device_serial );
@@ -331,21 +337,25 @@ void parse_target_ab440s(tokenize_state_t *s) {
 			//printf("killing\n");
 			mbug_2151_stop_gracefully(transmitter);
 		}
-		double it_time = (double) length * 5
+		it_time = (double) length * 5
 			* mbug_2151_get_clock_div(transmitter)
 			/ mbug_2151_get_base_clock(transmitter);
-		struct timespec ts;
-		ts.tv_sec = (int) it_time;
-		ts.tv_nsec = (it_time - ts.tv_sec) * 1e9;
-		nanosleep(&ts, NULL);
+		#ifdef _WIN32
+			Sleep( (int)(1. + it_time*1e3));
+		#else
+			struct timespec ts;
+			ts.tv_sec = (int) it_time;
+			ts.tv_nsec = (it_time - ts.tv_sec) * 1e9;
+			nanosleep(&ts, NULL);
+		#endif
 	}
-	
+
 	mbug_2151_set_bitrate(transmitter, 3125);
 	mbug_2151_set_iterations(transmitter, 3);
 
 	seq_length = 16;
 
-	for(int i = 0; i < 12; i++) {
+	for(i = 0; i < 12; i++) {
 		seq_bytes[i] = 0x71;
 	}
 	if(state == 1) {
@@ -359,7 +369,7 @@ void parse_target_ab440s(tokenize_state_t *s) {
 	for(id = strtok(ids, ",");
 		id != NULL;
 		id = strtok(NULL, ",")) {
-		for(int i = 0; i < 10; i++) {
+		for(i = 0; i < 10; i++) {
 			seq_bytes[i] = 0x71;
 		}
 		for(; *id; id++) {
@@ -392,10 +402,11 @@ void parse_target_ikt201(tokenize_state_t *s) {
 
 }
 
-void (*get_target_parse_function(char *target))()
+target_parse_func_type *get_target_parse_function(char *target)
 {
-	for(int i = 0; i < NUM_MBUG_2151_TARGETS; i++) {
-		if(!strcasecmp(target, mbug_2151_targets[i].name)) {
+	int i;
+	for(i = 0; i < NUM_MBUG_2151_TARGETS; i++) {
+		if(!strcmp(str_toupper(target), mbug_2151_targets[i].name)) {
 			return mbug_2151_targets[i].parse_function;
 		}
 	}
@@ -412,7 +423,6 @@ int is_target( char *token )
 void parse_options( int argc, char* argv[] )
 {
 	tokenize_state_t st;
-	int i;
 	char *ap;
 	for (ap = tokenize(&st, argv+1, "-/"); ap; ap = tokenize(&st, NULL, "-/"))
 	{
@@ -436,10 +446,11 @@ void parse_options( int argc, char* argv[] )
 			parse_sequence(tokenize(&st, NULL, ""));
 		else if (is_target(ap)) {
 			action = None;
-			return get_target_parse_function(ap)(&st);
+			get_target_parse_function(ap)(&st);
+			return;
 		}
 		else
-			errorf( "#### Unknown command: %s", argv[i]);
+			errorf( "#### Unknown command: %s", ap);
 	}
 }
 

@@ -2,6 +2,8 @@
 #define MBUG_2151_TARGETS_H 1
 typedef char** tokenize_state_t;
 
+typedef void (target_parse_func_type)(tokenize_state_t *);
+
 void parse_target_ab440s(tokenize_state_t *state);
 void parse_target_he302eu(tokenize_state_t *state);
 void parse_target_dmv7008(tokenize_state_t *state);
@@ -9,7 +11,7 @@ void parse_target_ikt201(tokenize_state_t *state);
 
 struct {
 	char *name;
-	void (*parse_function)(tokenize_state_t *);
+	target_parse_func_type *parse_function; 
 } mbug_2151_targets[] = {
 	{ "AB440S",  parse_target_ab440s },
 	{ "HE302EU", parse_target_he302eu },
