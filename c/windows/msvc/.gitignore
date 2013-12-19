@@ -1,0 +1,6 @@
+# Ignore visual studio stuff
+*.suo
+*.ncb
+*.user
+Debug/
+Release/

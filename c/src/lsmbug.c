@@ -91,6 +91,35 @@ void parse_type( char* str )
 	if (device_type < 0) errorf( "#### Invalid device type: %s", str );
 }
 
+char* arg_tok( char**argv, const char* sep )
+{
+	static char *a = 0, **av = &a;
+	if (argv) return av = argv, a = 0;
+	if (a) if (a = strtok( 0, sep )) return a;
+	return *av ? a = strtok( *av++, sep ) : 0;  // Remember: Standard requires argv[argc]==0 
+}
+
+void parse_options( int argc, char* argv[] )
+{
+	char *cmd;
+	arg_tok( argv+1, "" );
+	while (cmd = arg_tok(0,":="))
+	{
+		cmd += strspn( cmd, "-/" );
+		if (str_in( cmd, "l", "list", 0 ))
+			action = List;
+		else if (str_in( cmd, "h", "help", 0 ))
+			action = Help;
+		else if (str_in( cmd, "t", "type", 0 ))
+			parse_type( arg_tok(0,"") );
+		else
+			errorf( "#### Unknown command: %s", cmd );
+	}
+}
+
+
+
+/*
 void parse_options( int argc, char* argv[] )
 {
 	int i, j;
@@ -115,7 +144,7 @@ void parse_options( int argc, char* argv[] )
 			errorf( "#### Unknown command: %s", cmd );
 	}
 }
-
+*/
 
 //---------------------------------------------------------------
 
