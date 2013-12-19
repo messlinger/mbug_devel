@@ -18,7 +18,7 @@ class mbug_2151_target(object):
         # Wait for device to become ready
         if self._dev.get_busy():
             iter = self._dev.get_iterations()
-            if force or iter==0: self._dev.stop(immediately=1)
+            if force or iter==0: self._dev.stop(instantly=1)
             tout = _time.time() + self._timeout
             while (self._dev.get_busy()):
                 _time.sleep(0.01)
