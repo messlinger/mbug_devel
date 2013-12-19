@@ -18,10 +18,13 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <strings.h>
 #include <ctype.h>
 #include <errno.h>
+#include <time.h>
 
 #include "mbug_2151.h"
+#include "mbug_2151_targets.h"
 
 //----------------------------------------------------------------------------------
 
@@ -34,7 +37,7 @@ const char* usage =
 "    For convenience, most commands have multiple abbrevations.  Commands can  \n"
 "    be prepended by '-' (unix option style),  '/' (windows option style),     \n"
 "    or nothing.  Some commands take a parameter. The parameter has to be      \n"
-"    separeted by a ':' or '=' (NO whitespaces!).                              \n"
+"    separeted by a ':', '=', or whitespace.                                   \n"
 "                                                                              \n"
 "    If a transmission sequence is specified (see below), the the program      \n"
 "    first stops the device gracefully (see below) and waits until the         \n"
@@ -89,7 +92,7 @@ const char* usage =
 //-----------------------------------------------------------------------------------
 
 long device_serial = 0;
-enum Action { Help, Send, List, Wait, Quit, Busy, Reset } action = Send;
+enum Action { Help, Send, List, Wait, Quit, Busy, Reset, None } action = Send;
 
 double mod_freq = 38e3;		// Modulation frequency
 double timebase = 1e-3;		// timebase for sequence
@@ -161,6 +164,37 @@ double str_to_float( char* str )
 	val = strtod(str, &endp );
 	if (errno || *endp!='\0') return -1;
 	return val;
+}
+
+char *tokenize(tokenize_state_t *state, char *argv[], const char *sep) 
+{
+	char **s = *(char***) state;
+	char *arg = NULL;
+	if(state == NULL) {
+		return NULL;
+	}
+	if(argv != NULL) {
+		*state = argv;
+		s = argv;
+		arg = *s;
+	}
+
+	if(*s == NULL) {
+		return NULL;
+	}
+
+	char *ret = strtok(arg, sep);
+	while(ret == NULL) {
+		s++;
+		if((*s) == NULL) {
+			*state = s;
+			return NULL;
+		}
+		ret = strtok(*s, sep);
+	}
+
+	*(char ***)state = s;
+	return ret;
 }
 
 void parse_device_id( char* str )
@@ -256,21 +290,138 @@ void parse_sequence( char* sseq )
 
 //---------------------------------------------------------------
 
+/* Expected command format:
+   id{,id}* (on|1|off|0)
+*/
+void parse_target_ab440s(tokenize_state_t *s) {
+	char *id;
+	int state;
+
+	char *ids = tokenize(s, NULL, ""); // Store the next string in ids for later use
+	char *statestr = tokenize(s, NULL, "");
+
+	if(ids == NULL || statestr == NULL) {
+		errorf("Usage: AB440S <id,id,...> (on|1|off|0)\n");
+	}
+
+	if(str_in(statestr, "1", "on", 0)) {
+		state = 1;
+	} else if(str_in(statestr, "0", "off", 0)) {
+		state = 0;
+	} else {
+		errorf("Usage: AB440S <id1,id2,...> (on|1|off|0)\n");
+		return;
+	}
+
+	mbug_device transmitter = mbug_2151_open( device_serial );
+	while(transmitter == NULL) {
+		printf("Meh!\n");
+		transmitter = mbug_2151_open(device_serial);
+	}
+	while(mbug_2151_get_busy(transmitter)) {
+		int length = mbug_2151_get_seq_length(transmitter);
+		
+		if(length == -1) {
+			mbug_2151_close(transmitter);
+			transmitter = mbug_2151_open( device_serial );
+			printf("error, retrying\n");
+		}
+
+		if(mbug_2151_get_iterations(transmitter) == 0) {
+			//printf("killing\n");
+			mbug_2151_stop_gracefully(transmitter);
+		}
+		double it_time = (double) length * 5
+			* mbug_2151_get_clock_div(transmitter)
+			/ mbug_2151_get_base_clock(transmitter);
+		struct timespec ts;
+		ts.tv_sec = (int) it_time;
+		ts.tv_nsec = (it_time - ts.tv_sec) * 1e9;
+		nanosleep(&ts, NULL);
+	}
+	
+	mbug_2151_set_bitrate(transmitter, 3125);
+	mbug_2151_set_iterations(transmitter, 3);
+
+	seq_length = 16;
+
+	for(int i = 0; i < 12; i++) {
+		seq_bytes[i] = 0x71;
+	}
+	if(state == 1) {
+		seq_bytes[10] = 0x11;
+	} else {
+		seq_bytes[11] = 0x11;
+	}
+	seq_bytes[12] = 1;
+	seq_bytes[13] = seq_bytes[14] = seq_bytes[15] = 0;
+
+	for(id = strtok(ids, ",");
+		id != NULL;
+		id = strtok(NULL, ",")) {
+		for(int i = 0; i < 10; i++) {
+			seq_bytes[i] = 0x71;
+		}
+		for(; *id; id++) {
+			if(*id >= '1' && *id <= '5') {
+				seq_bytes[*id - '1'] = 0x11;
+			} else if(toupper(*id) >= 'A' && toupper(*id) <= 'E') {
+				seq_bytes[5 + toupper(*id) - 'A'] = 0x11;
+			}
+		}
+		//printf("Sending ");
+		//for(int i = 0; i < 16; i++) {
+		//	printf("%02x ", seq_bytes[i]);
+		//}
+		//printf("\n");
+		mbug_2151_set_sequence(transmitter, seq_bytes, 16, TX_MODE_BITSTREAM);
+		mbug_2151_start(transmitter);
+	}
+	mbug_2151_close(transmitter);
+}
+
+void parse_target_he302eu(tokenize_state_t *s) {
+
+}
+
+void parse_target_dmv7008(tokenize_state_t *s) {
+
+}
+
+void parse_target_ikt201(tokenize_state_t *s) {
+
+}
+
+void (*get_target_parse_function(char *target))()
+{
+	for(int i = 0; i < NUM_MBUG_2151_TARGETS; i++) {
+		if(!strcasecmp(target, mbug_2151_targets[i].name)) {
+			return mbug_2151_targets[i].parse_function;
+		}
+	}
+	return NULL;
+}
+
+int is_target( char *token )
+{
+	return get_target_parse_function(token) != NULL;
+}
+
+//---------------------------------------------------------------
+
 void parse_options( int argc, char* argv[] )
 {
+	tokenize_state_t st;
 	int i;
-	for (i=1; i<argc; i++)
+	char *ap;
+	for (ap = tokenize(&st, argv+1, "-/"); ap; ap = tokenize(&st, NULL, "-/"))
 	{
-		char* ap = argv[i];
-		while ( *ap=='-' || *ap=='/' ) ap++;
-		ap = strtok( ap, ":= ");
-
 		if (str_in( ap, "l", "list", 0 ))
 			action = List;
 		else if (str_in( ap, "h", "help", 0))
 			action = Help;
 		else if (str_in( ap, "d", "dev", "device", 0 ))
-			parse_device_id( strtok( 0, "" ) );
+			parse_device_id(tokenize(&st, NULL, ""));
 		else if (str_in( ap, "r", "reset", 0 ))
 			action = Reset;
 		else if (str_in( ap, "w", "wait", 0 ))
@@ -280,9 +431,13 @@ void parse_options( int argc, char* argv[] )
 		else if (str_in( ap, "b", "busy", 0 ))
 			action = Busy;
 		else if (str_in( ap, "i", "it", "iter", 0 ))
-			parse_iterations( strtok( 0, "" ) );
+			parse_iterations(tokenize(&st, NULL, ""));
 		else if (str_in( ap, "s", "seq", 0 ))
-			parse_sequence( strtok( 0, "" ) );
+			parse_sequence(tokenize(&st, NULL, ""));
+		else if (is_target(ap)) {
+			action = None;
+			return get_target_parse_function(ap)(&st);
+		}
 		else
 			errorf( "#### Unknown command: %s", argv[i]);
 	}
@@ -314,6 +469,11 @@ int main( int argc, char* argv[] )
 		}
 
 	// Open device
+
+	if (action == None) {
+		return 0;
+	}
+
 	transmitter = mbug_2151_open( device_serial );
 	if (transmitter == 0)
 		errorf("#### Error opening device.");
