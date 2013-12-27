@@ -300,3 +300,112 @@ int mbug_2151_get_busy( mbug_device dev )
 }
 
 //------------------------------------------------------------------------------
+
+int mbug_2151_ab440s_str_to_addr( char *str ) {
+	int addr = 0;
+	int i = 0;
+
+	for(i = 0; str[i]; i++) {
+		if(str[i] >= '1' && str[i] <= '5') {
+			addr |= 1<<(9-str[i]+'1');
+		} else if(toupper(str[i]) >= 'A' && toupper(str[i]) <= 'E') {
+			addr |= 1<<(4-toupper(str[i])+'A');
+		}
+	}
+
+	return addr;
+}
+
+int mbug_2151_ab440s_switch_addr( mbug_device dev, int addr, int state ) {
+	unsigned char seq[16];
+	int i;
+
+	if(mbug_2151_set_bitrate(dev, 3125) == -1) {
+		return -1;
+	}
+
+	if(mbug_2151_set_iterations(dev, 3) == -1) {
+		return -1;
+	}
+
+	for(i = 0; i < 12; i++) {
+		seq[i] = 0x71;
+	}
+
+	if(state == 1) {
+		seq[10] = 0x11;
+	} else {
+		seq[11] = 0x11;
+	}
+	seq[12] = 1;
+	seq[13] = seq[14] = seq[15] = 0;
+	for(i = 0; i < 10; i++) {
+		seq[9-i] = (addr & (1<<i)) ? 0x11 : 0x71;
+	}
+	if(mbug_2151_set_sequence(dev, seq, 16, TX_MODE_BITSTREAM) == -1) {
+		return -1;
+	}
+	return mbug_2151_start(dev);
+}
+
+int mbug_2151_ab440s_switch_str( mbug_device dev, const char *addr, int state ) {
+	return mbug_2151_ab440s_switch_addr(dev, 
+										mbug_2151_ab440s_str_to_addr(addr),
+										state);
+}
+
+int mbug_2151_dmv7008_cmd_addr(mbug_device dev, int syscode, int channel, int cmd) {
+	int i;
+	char seq[59];
+	int bits;
+	const unsigned char cmdbits[5][4] = {
+		{ 0xE1, 0x70, 0xEB, 0x7A },
+		{ 0x00, 0x11, 0x0A, 0x1B },
+		{ 0x82, 0x93, 0x88, 0x99 },
+		{ 0x41, 0x50, 0x4B, 0x5A },
+		{ 0xC3, 0xD2, 0xC9, 0xD8 }
+	};
+
+	syscode = syscode & 0xFFF;
+	if(channel < 0 || channel > 4) {
+		return -1;
+	}
+
+	bits = (1 << 20) | (syscode << 8) | (cmdbits[channel][cmd] << 0);
+
+	for(i = 0; i < 21; i++) {
+		seq[i] = ((bits >> (20-i)) & 1) ? 0xC0 : 0xFC;
+	}
+	for( ; i < 59; i++) {
+		seq[i] = 0;
+	}
+
+	if(mbug_2151_set_bitrate(dev, 4167) == -1) {
+		return -1;
+	}
+
+	if(mbug_2151_set_iterations(dev, 4) == -1) {
+		return -1;
+	}
+
+	if(mbug_2151_set_sequence(dev, seq, 59, TX_MODE_BITSTREAM) == -1) {
+		return -1;
+	}
+
+	return mbug_2151_start(dev);
+}
+
+int mbug_2151_dmv7008_cmd_str(mbug_device dev, const char *addr, int cmd) {
+	static int syscode = 0;
+	int channel;
+
+	char *colon = strchr(addr, ':');
+	if(colon != NULL) {
+		syscode = atoi(addr);
+		channel = atoi(colon+1);
+	} else {
+		channel = atoi(addr);
+	}
+
+	return mbug_2151_dmv7008_cmd_addr(dev, syscode, channel, cmd);
+}
