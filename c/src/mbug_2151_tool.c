@@ -294,6 +294,38 @@ void parse_sequence( char* sseq )
 
 //---------------------------------------------------------------
 
+int wait_device(mbug_device *dev, int kill_infinite) {
+	double it_time;
+	while(mbug_2151_get_busy(*dev)) {
+		int length = mbug_2151_get_seq_length(*dev);
+
+		if(length == -1) {
+			mbug_2151_close(*dev);
+			*dev = mbug_2151_open( device_serial );
+		}
+
+		if(mbug_2151_get_iterations(*dev) == 0) {
+			if(kill_infinite) {
+				mbug_2151_stop_gracefully(*dev);
+			} else {
+				return 0;
+			}
+		}
+		it_time = (double) length * 5
+			* mbug_2151_get_clock_div(*dev)
+			/ mbug_2151_get_base_clock(*dev);
+#ifdef _WIN32
+		Sleep( (int)(1. + it_time*1e3));
+#else
+		struct timespec ts;
+		ts.tv_sec = (int) it_time;
+		ts.tv_nsec = (it_time - ts.tv_sec) * 1e9;
+		nanosleep(&ts, NULL);
+#endif
+	}
+	return 1;
+}
+
 /* Expected command format:
    id{,id}* (on|1|off|0)
 */
@@ -301,7 +333,6 @@ void parse_target_ab440s(tokenize_state_t *s) {
 	char *id;
 	int state, i;
 	mbug_device transmitter;
-	double it_time;
 
 	char *ids = tokenize(s, NULL, ""); // Store the next string in ids for later use
 	char *statestr = tokenize(s, NULL, "");
@@ -319,73 +350,22 @@ void parse_target_ab440s(tokenize_state_t *s) {
 		return;
 	}
 
-	transmitter = mbug_2151_open( device_serial );
-	while(transmitter == NULL) {
-		printf("Meh!\n");
-		transmitter = mbug_2151_open(device_serial);
+	i=0;
+	do {
+		transmitter = mbug_2151_open( device_serial );
+		i++;
+	} while(i < 5 && transmitter == NULL);
+
+	if(i == 5) {
+		errorf("##### Can't open device\n");
+		return;
 	}
-	while(mbug_2151_get_busy(transmitter)) {
-		int length = mbug_2151_get_seq_length(transmitter);
-
-		if(length == -1) {
-			mbug_2151_close(transmitter);
-			transmitter = mbug_2151_open( device_serial );
-			printf("error, retrying\n");
-		}
-
-		if(mbug_2151_get_iterations(transmitter) == 0) {
-			//printf("killing\n");
-			mbug_2151_stop_gracefully(transmitter);
-		}
-		it_time = (double) length * 5
-			* mbug_2151_get_clock_div(transmitter)
-			/ mbug_2151_get_base_clock(transmitter);
-		#ifdef _WIN32
-			Sleep( (int)(1. + it_time*1e3));
-		#else
-			struct timespec ts;
-			ts.tv_sec = (int) it_time;
-			ts.tv_nsec = (it_time - ts.tv_sec) * 1e9;
-			nanosleep(&ts, NULL);
-		#endif
-	}
-
-	mbug_2151_set_bitrate(transmitter, 3125);
-	mbug_2151_set_iterations(transmitter, 3);
-
-	seq_length = 16;
-
-	for(i = 0; i < 12; i++) {
-		seq_bytes[i] = 0x71;
-	}
-	if(state == 1) {
-		seq_bytes[10] = 0x11;
-	} else {
-		seq_bytes[11] = 0x11;
-	}
-	seq_bytes[12] = 1;
-	seq_bytes[13] = seq_bytes[14] = seq_bytes[15] = 0;
 
 	for(id = strtok(ids, ",");
 		id != NULL;
 		id = strtok(NULL, ",")) {
-		for(i = 0; i < 10; i++) {
-			seq_bytes[i] = 0x71;
-		}
-		for(; *id; id++) {
-			if(*id >= '1' && *id <= '5') {
-				seq_bytes[*id - '1'] = 0x11;
-			} else if(toupper(*id) >= 'A' && toupper(*id) <= 'E') {
-				seq_bytes[5 + toupper(*id) - 'A'] = 0x11;
-			}
-		}
-		//printf("Sending ");
-		//for(int i = 0; i < 16; i++) {
-		//	printf("%02x ", seq_bytes[i]);
-		//}
-		//printf("\n");
-		mbug_2151_set_sequence(transmitter, seq_bytes, 16, TX_MODE_BITSTREAM);
-		mbug_2151_start(transmitter);
+		wait_device(&transmitter, 1);
+		mbug_2151_ab440s_switch_str(transmitter, id, state);
 	}
 	mbug_2151_close(transmitter);
 }
