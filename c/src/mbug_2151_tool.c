@@ -375,7 +375,48 @@ void parse_target_he302eu(tokenize_state_t *s) {
 }
 
 void parse_target_dmv7008(tokenize_state_t *s) {
+	char *id;
+	int state, i;
+	mbug_device transmitter;
 
+	char *ids = tokenize(s, NULL, ""); // Store the next string in ids for later use
+	char *statestr = tokenize(s, NULL, "");
+
+	if(ids == NULL || statestr == NULL) {
+		errorf("Usage: DMV7008|FIF4280|GT7008 <syscode:id1,[syscode:]id2,...> (on|1|off|0|-1|dim|dec|+1|hell|inc)\n");
+	}
+
+	if(str_in(statestr, "1", "on", 0)) {
+		state = MBUG_2151_DMV7008_ON;
+	} else if(str_in(statestr, "0", "off", 0)) {
+		state = MBUG_2151_DMV7008_OFF;
+	} else if(str_in(statestr, "-1", "dim", "dec", 0)) {
+		state = MBUG_2151_DMV7008_DEC;
+	} else if(str_in(statestr, "+1", "hell", "inc", 0)) {
+		state = MBUG_2151_DMV7008_INC;
+	} else {
+		errorf("Usage: DMV7008|FIF4280|GT7008 <syscode:id1,[syscode:]id2,...> (on|1|off|0|-1|dim|dec|+1|hell|inc)\n");
+		return;
+	}
+
+	i=0;
+	do {
+		transmitter = mbug_2151_open( device_serial );
+		i++;
+	} while(i < 5 && transmitter == NULL);
+
+	if(i == 5) {
+		errorf("##### Can't open device\n");
+		return;
+	}
+
+	for(id = strtok(ids, ",");
+		id != NULL;
+		id = strtok(NULL, ",")) {
+		wait_device(&transmitter, 1);
+		mbug_2151_dmv7008_cmd_str(transmitter, id, state);
+	}
+	mbug_2151_close(transmitter);
 }
 
 void parse_target_ikt201(tokenize_state_t *s) {
