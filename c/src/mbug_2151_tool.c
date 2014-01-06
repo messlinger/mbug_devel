@@ -524,7 +524,7 @@ int main( int argc, char* argv[] )
 			}
 
 			mbug_2151_reset( transmitter );
-			mbug_2151_set_interval( transmitter, timebase );
+			mbug_2151_set_timebase( transmitter, timebase );
 			mbug_2151_set_iterations( transmitter, iterations );
 			mbug_2151_set_sequence( transmitter, seq_bytes, seq_length, tx_mode );
 			mbug_2151_start( transmitter );

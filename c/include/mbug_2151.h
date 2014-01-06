@@ -55,7 +55,7 @@ const mbug_device_list  mbug_2151_list( void );
  */
 mbug_device mbug_2151_open( int serial_num );
 
-/** Open a device specified by it's id string (equals the 
+/** Open a device specified by it's id string (equals the
  *  usb serial string as returned by mbug_2820_list )
  */
 mbug_device mbug_2151_open_str( const char *id );
@@ -110,9 +110,9 @@ int mbug_2151_get_clock_div( mbug_device dev );
  */
 double mbug_2151_set_bitrate( mbug_device dev, double freq );
 
-/** Set the base interval (via clock div). Returns the actually set value.
+/** Set the timebase (via clock div). Returns the actually set value.
  */
-double mbug_2151_set_interval( mbug_device dev, double interval );
+double mbug_2151_set_timebase( mbug_device dev, double interval );
 
 /** Start transmission.
  */

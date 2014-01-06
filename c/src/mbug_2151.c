@@ -1,7 +1,7 @@
 
 //==============================================================================
 /* MBUG-2151 interface implementation
-		
+
 		Mostly identical to mbug_2165.c, but without carrier modulation.
 		Any changes in this file should also be applied in mbug_2165.c.
 */
@@ -25,7 +25,7 @@ enum  mbug_2151_param {
 };
 
 //------------------------------------------------------------------------------
-// Get a list of all available mbug-2151 devices. 
+// Get a list of all available mbug-2151 devices.
 const mbug_device_list  mbug_2151_list( void )
 {
 	return mbug_get_device_list(2151);
@@ -36,10 +36,10 @@ const mbug_device_list  mbug_2151_list( void )
 //   all mbug-2151 devices and only read the very first time a device is opened.
 //   Currently, _base_clock = _mod_clock = 4 MHz.
 
-static int base_clock = 0;	
+static int base_clock = 0;
 
 //------------------------------------------------------------------------------
-// Open a device specified by it's serial number (as int, 
+// Open a device specified by it's serial number (as int,
 // last digits of the serial number are matched only).
 mbug_device mbug_2151_open( int serial_num )
 {
@@ -75,9 +75,9 @@ void mbug_2151_close( mbug_device dev )
 }
 
 //------------------------------------------------------------------------------
-// Private helper function:  
+// Private helper function:
 //   Generic I/O command: Send cmd, receive integer parameter
-//   Return values <0 indicate errors. 
+//   Return values <0 indicate errors.
 static int io( mbug_device dev,  unsigned char* out,  size_t size )
 {
 	unsigned char in[8] = {0};
@@ -88,7 +88,7 @@ static int io( mbug_device dev,  unsigned char* out,  size_t size )
 		return -1;
 	if (mbug_read( dev, in, sizeof(in) ) <0)
 		return -1;
-	
+
 	// First 2 bytes contain the return status (signed 16 bit)
 	status = *(short*) in;
 	// Next 4 bytes contain the returned output value
@@ -98,8 +98,8 @@ static int io( mbug_device dev,  unsigned char* out,  size_t size )
 }
 
 //------------------------------------------------------------------------------
-// Private helper function:  
-//   Set parameter value. 
+// Private helper function:
+//   Set parameter value.
 static int set_param( mbug_device dev, enum mbug_2151_param param, unsigned int value )
 {
 	unsigned char out[8] = {0xB0, param, 0, 0, 0, 0, 0, 0};
@@ -108,8 +108,8 @@ static int set_param( mbug_device dev, enum mbug_2151_param param, unsigned int 
 }
 
 //------------------------------------------------------------------------------
-// Private helper function:  
-//   Get parameter value. 
+// Private helper function:
+//   Get parameter value.
 static int get_param( mbug_device dev, enum mbug_2151_param param )
 {
 	unsigned char out[2] = {0xC0, param};
@@ -122,15 +122,15 @@ int mbug_2151_set_sequence( mbug_device dev, unsigned char* data, size_t nbytes,
 {
 	unsigned char out[64] = {0xB0, 0};
 	unsigned char* pd = data;
-	size_t  s, smax; 
+	size_t  s, smax;
 
 	if (nbytes>255)  nbytes=255;
-	if (tx_mode > TX_MODE_TIMED_16)  
+	if (tx_mode > TX_MODE_TIMED_16)
 		tx_mode = TX_MODE_BITSTREAM;
 
 	smax = 64 - 4;  // Maximum data length per packet
 
-	// First packet: Set sequence	
+	// First packet: Set sequence
 	// Command format: {0xB0, 0, mode<<4, len, data[:] }
 	s = nbytes>smax ? smax : nbytes;
 	out[2] = tx_mode<<4;  out[3] = s;
@@ -182,16 +182,16 @@ int mbug_2151_get_seq_length( mbug_device dev )
 }
 
 //------------------------------------------------------------------------------
-// Set number of transmission sequence iterations, 
+// Set number of transmission sequence iterations,
 // 0: infinite, Maximum: 2**16-1
 int mbug_2151_set_iterations( mbug_device dev, unsigned int niter )
 {
 	if (niter >= 1<<16 )  niter = (1<<16)-1;
-	return set_param( dev, PARAM_ITER, niter );  
+	return set_param( dev, PARAM_ITER, niter );
 }
 
 //------------------------------------------------------------------------------
-// Get the currently set number of transmission sequence iterations, 
+// Get the currently set number of transmission sequence iterations,
 // 0: infinite
 int mbug_2151_get_iterations( mbug_device dev )
 {
@@ -201,13 +201,13 @@ int mbug_2151_get_iterations( mbug_device dev )
 //------------------------------------------------------------------------------
 // Get the devices base transmission clock frequency in Hz
 int mbug_2151_get_base_clock( mbug_device dev )
-{	
+{
 	return get_param( dev, PARAM_BASE_CLOCK );
 }
 
 //------------------------------------------------------------------------------
 // Set clock divider. => Bitrate = base_clock/div
-// Minimum div is 10 for bitstream mode, 1 for timed modes, 
+// Minimum div is 10 for bitstream mode, 1 for timed modes,
 // Maximum div is 2**16-1 (65535).
 int mbug_2151_set_clock_div( mbug_device dev, unsigned int div )
 {
@@ -239,12 +239,12 @@ double mbug_2151_set_bitrate( mbug_device dev, double freq )
 }
 
 //------------------------------------------------------------------------------
-// Set the transmission base interval (in seconds, via clock div).
-// Minimum base interval is 2.5us for bitstream mode, 0.25us for timed modes.
-// Maximum base interval is 16.38375ms.
+// Set the transmission time base (in seconds, via clock div).
+// Minimum timebase is 2.5us for bitstream mode, 0.25us for timed modes.
+// Maximum timebase is 16.38375ms.
 // Resolution is 0.25us.
-// Returns the actually set interval or <0 in case of an error.
-double mbug_2151_set_interval( mbug_device dev, double interval )
+// Returns the actually set timebase or <0 in case of an error.
+double mbug_2151_set_timebase( mbug_device dev, double interval )
 {
 	int div;
 	div = (int)(0.5 + 1.0*interval*base_clock);
@@ -263,7 +263,7 @@ int mbug_2151_start( mbug_device dev )
 
 
 //------------------------------------------------------------------------------
-// Stop transmission 
+// Stop transmission
 //	 force = 0: Stop gracefully after ongoing iteration
 //	 force = 1: Stop instantly
 int mbug_2151_stop( mbug_device dev, int force )

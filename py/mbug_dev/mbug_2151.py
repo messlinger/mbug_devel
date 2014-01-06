@@ -77,6 +77,16 @@ class mbug_2151(mbug):
             self._iocmd( bytearray(( 0xB0, 0x00, 0x01, len(d) )) + bytearray(d) )
         return
 
+    def set_sequence(self, data, seq_type):
+        """Set a transmission sequence of the type specified by seq_type
+        ('bitstream', 'timed_8', 'timed_16')."""
+        if seq_type=='bitstream':
+            return self.set_sequence_bitstream(data)
+        elif seq_type.startswith('timed_8'):
+            return self.sequence_times_8(data)
+        elif seq_type.startswith('timed_16'):
+            return self.sequence_times_16(data)
+        else: raise ValueError('Invalid sequence type')
     
     def set_iterations(self, niter):
         """ Set the number of transmission iterations.
@@ -107,7 +117,7 @@ class mbug_2151(mbug):
         self.set_clock_div(div)
         return rfreq
 
-    def set_interval(self, interval):
+    def set_timebase(self, interval):
         """ Set the transmission base interval (in seconds, via clock div).
         Minimum interval is 2.5us for bitstream mode, 0.25us for timed modes.
         Maximum base interval is 16.38375ms. Resolution is 0.25us.

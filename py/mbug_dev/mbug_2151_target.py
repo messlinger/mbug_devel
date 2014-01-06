@@ -6,7 +6,8 @@ import time as _time
 class mbug_2151_target(object):
     _dev = None          # Controller device
     _bitrate = None       # Default parameters     
-    _iterations = None
+    _iterations = 3
+    _seq_type = 'bitstream'
     _timeout = None
 
     def __init__(self, dev):
@@ -28,7 +29,7 @@ class mbug_2151_target(object):
         self._wait_busy(force)
         self._dev.set_bitrate(self._bitrate)
         self._dev.set_iterations(self._iterations)
-        self._dev.set_sequence_bitstream(sequence)
+        self._dev.set_sequence(sequence,_seq_type)
         self._dev.start()
 
 #---------------------------------------------------------------------------
