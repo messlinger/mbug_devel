@@ -83,9 +83,9 @@ class mbug_2151(mbug):
         if seq_type=='bitstream':
             return self.set_sequence_bitstream(data)
         elif seq_type.startswith('timed_8'):
-            return self.sequence_times_8(data)
+            return self.set_sequence_times_8(data)
         elif seq_type.startswith('timed_16'):
-            return self.sequence_times_16(data)
+            return self.set_sequence_times_16(data)
         else: raise ValueError('Invalid sequence type')
     
     def set_iterations(self, niter):
@@ -108,7 +108,7 @@ class mbug_2151(mbug):
         """ Set the transmission rate (in Hz, via clock div). Minimum rate is 61sec.
         Maximum rate is 400kHz for bitstream mode, 4Mhz for timed modes.
         Returns the actually set bitrate."""
-        if freq==0: raise ValueError('Invalid bitrate.')
+        if freq<=0: raise ValueError('Invalid bitrate.')
         div = round(1.*self._base_clock/freq)
         if div>2**16-1: div=2**16-1;
         rfreq = self._base_clock/div
@@ -125,7 +125,7 @@ class mbug_2151(mbug):
         div = round(1.*self._base_clock*interval)
         if div>2**16-1: div=2**16-1;
         self.set_clock_div(div)
-        return int(round(1.0*div/base_clock))
+        return int(round(1.0*div/self._base_clock))
 
     def start(self):
         """ Start transmission. """
@@ -202,6 +202,8 @@ class mbug_2151(mbug):
             return mbug_2151_target.FIF4280(dev=self._dev, addr=addr)
         def IKT201(self, addr=None):
             return mbug_2151_target.IKT201(dev=self._dev, addr=addr)
+        def RS200(self, addr=None):
+            return mbug_2151_target.RS200(dev=self._dev, addr=addr)
         
     target = target()   # Make this an instance 
 
