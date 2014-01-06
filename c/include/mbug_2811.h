@@ -65,7 +65,8 @@ double mbug_2811_read( mbug_device dev );
  */
 int mbug_2811_set_mode( mbug_device dev, mbug_2811_mode mode );
 
-/** Read raw data coming directly from the sensor
+/** Read raw data coming directly from the sensor.
+ *  Return value <0 indicates a communication arror.
  */
 int mbug_2811_read_raw( mbug_device dev );
 

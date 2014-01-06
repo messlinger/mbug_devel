@@ -176,6 +176,14 @@
 			<File
 				RelativePath="..\..\src\mbug_2151_tool.c"
 				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						CompileAs="1"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
@@ -189,6 +197,10 @@
 			</File>
 			<File
 				RelativePath="..\..\include\mbug_2151.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\mbug_2151_targets.h"
 				>
 			</File>
 		</Filter>

@@ -41,9 +41,9 @@ int mbug_2810_read_raw( mbug_device dev )
 	unsigned char in[16] = {0};
 
 	if (mbug_write( dev, "\xFA\xA0\xF2", 3) <3)	// Raw format (0xF2 is the old revisions read cmd)
-		return NOT_A_TEMPERATURE;
+		return -1;
 	if (mbug_read( dev, in, 8 ) <8)
-		return NOT_A_TEMPERATURE;
+		return -1;
 	return in[0]+(in[1]<<8);
 }
 

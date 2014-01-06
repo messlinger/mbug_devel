@@ -104,18 +104,18 @@ double mbug_2820_read_humidity( mbug_device dev )
 
 //------------------------------------------------------------------------------
 // Read raw data
-unsigned long mbug_2820_read_raw( mbug_device dev )
+long mbug_2820_read_raw( mbug_device dev )
 {
 	char data[8] = {0};
 	int ret;
 
 	ret = mbug_write( dev, "\xA0\x00\x00", 3);
-	if (ret<3) return 0xFFFFFFFF;
+	if (ret<3) return -1;
 
 	ret = mbug_read( dev, data, 8 );
-	if (ret<8) return 0xFFFFFFFF;
+	if (ret<8) return -1;
 
-	return *(unsigned long*)data;
+	return *(long*)data;
 }
 //------------------------------------------------------------------------------
 

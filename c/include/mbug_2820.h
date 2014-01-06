@@ -70,7 +70,7 @@ double mbug_2820_read_humidity( mbug_device dev );
  *  Data is returned as a single 32 bit integer. Return value 0xFFFFFFFF
  *  indicates a sensor error.
  */
-unsigned long mbug_2820_read_raw( mbug_device dev );
+long mbug_2820_read_raw( mbug_device dev );
 
 //------------------------------------------------------------------------------
 #ifdef __cplusplus

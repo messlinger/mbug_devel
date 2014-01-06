@@ -1,6 +1,6 @@
 # Ignore visual studio stuff
-*.suo
 *.ncb
 *.user
+*.suo
 Debug/
 Release/

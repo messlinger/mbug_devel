@@ -45,7 +45,7 @@ int main(void)
 			switch (type)
 			{
 				// -------------------------------------------------------------
-				case 2110:	// MBUG-2110 GPIO 
+				case 2110:	// MBUG-2110 GPIO
 				{
 					mbug::mbug_2110 dev;
 
@@ -56,7 +56,7 @@ int main(void)
 						dev.set_gpio( 1<<ch );
 					}
 					cout << endl;
-					
+
 					cout << "Set PWM ";
 					dev.enable_pwm(1);
 					for (int d=0; d<1024; d+=50)
@@ -66,7 +66,7 @@ int main(void)
 					}
 					dev.enable_pwm(0);
 					cout << endl;
-					
+
 					cout << "Get GPIO: ";
 					int gpio = dev.get_gpio();
 					for (int bit=0; bit<12; bit++ )
@@ -99,7 +99,7 @@ int main(void)
 
 					dev.set_iterations(0);  // infinitely
 					unsigned char seq_b[] = {0x01,0x03,0x07,0x0F,0x1F,0x3F,0x7F,0xFF};
-					dev.set_sequence( seq_b, sizeof(seq_b), TX_MODE_BITSTREAM ); 
+					dev.set_sequence( seq_b, sizeof(seq_b), TX_MODE_BITSTREAM );
 					dev.start();
 					dev.stop_gracefully();
 					while (dev.get_busy()) {
@@ -131,7 +131,7 @@ int main(void)
 
 					dev.set_iterations(0);  // infinitely
 					unsigned char seq_b[] = {0x01,0x03,0x07,0x0F,0x1F,0x3F,0x7F,0xFF};
-					dev.set_sequence( seq_b, sizeof(seq_b), TX_MODE_BITSTREAM ); 
+					dev.set_sequence( seq_b, sizeof(seq_b), TX_MODE_BITSTREAM );
 					dev.start();
 					dev.stop_gracefully();
 					while (dev.get_busy()) {
@@ -145,7 +145,7 @@ int main(void)
 					dev.set_sequence( seq_c );
 					dev.start();
 				}
-				
+
 				//-------------------------------------------------------------
 				case 2810:	// MBUG-2810 Ambient Thermometer
 				{
@@ -165,7 +165,7 @@ int main(void)
 				}
 
 				// -------------------------------------------------------------
-				case 2818:	// MBUG-2818 8-channel Thermometer 
+				case 2818:	// MBUG-2818 8-channel Thermometer
 				{
 					mbug::mbug_2818 dev;
 					std::vector<double> tem = dev.read_all();
