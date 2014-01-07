@@ -17,10 +17,10 @@ const char* usage =
 "                                                                              \n"
 "Usage:   mbug_2811  cmd, cmd2, ...                                            \n"
 "                                                                              \n"
-"    For convenience, most commands have multiple abbrevations.  Commands can  \n"
+"    For convenience, commands have multiple abbrevations.  Commands can       \n"
 "    be prepended by on or multiple '-' (unix option style),  '/' (windows     \n"
-"    option style), or nothing.  Some commands take a parameter. The parameter \n"
-"    has to be  separeted by a ':' or '=' (NO whitespaces!).                   \n"
+"    option style), or nothing.  Some commands take parameters, which have     \n"
+"    to be separeted from the command by a ':', '=' or a whitespace.           \n"
 "                                                                              \n"
 "Commands:                                                                     \n"
 "                                                                              \n"
@@ -53,6 +53,7 @@ enum Format { Celsius, Fahrenheit, Kelvin, Raw } format = Celsius;
 
 //---------------------------------------------------------------
 
+/** Print a formatted error message (printf format) and exit. */
 void errorf( const char *format, ... )
 {
    va_list args;
@@ -62,20 +63,15 @@ void errorf( const char *format, ... )
    exit(1);
 }
 
-int char_in( char c, const char* set )
-{
-	while (*set != 0)
-		if (c == *set++) return 1;
-	return 0;
-}
-
+/** Compare the first string against a list of other strings, return 1 for match.
+ *  The list of strings must be terminated by a null pointer or an empty string. 
+ */
 int str_in( const char* str, ... )
 {
 	va_list args;
 	int match = 0;
 	va_start(args, str);
-	while(1)
-	{
+	while(1) {
 		const char *next = va_arg(args, const char*);
 		if (next==0 || *next==0) break;
 		if (match = !strcmp(str,next)) break;
@@ -84,17 +80,20 @@ int str_in( const char* str, ... )
 	return match;
 }
 
-char *str_toupper( char *str )
+/** strncmp independent of character case. */
+int strncmp_upper( const char *str1, const char *str2, size_t n )
 {
-	char *p = str;
-	while (*p) {
-		*p = toupper(*p);
-		p++;
+	int left, right;
+	while (n-- && (left=toupper(*str1)) && (right=toupper(*str2))) {
+		if (left==right) str1++, str2++;
+		else return left-right;
 	}
-	return str;
+	return 0;
 }
 
-long str_to_int( char* str )
+/** Convert string to unsigned integer. No trailing unconvertable characters are allowed.
+ *  Returns -1 in cae of a conversion error. */
+long str_to_uint( char* str )
 {
 	char *endp = 0;
 	long val = -1;
@@ -105,15 +104,16 @@ long str_to_int( char* str )
 	return val;
 }
 
+/** Extract device serial. */
 void parse_device_id( char* str )
 {
-	str_toupper( str );
-	if (strncmp(str,"MBUG-2811",9) == 0)
+	if (strncmp_upper(str,"MBUG-2811",9) == 0)
 		device_serial = mbug_serial_from_id(str);
-	else device_serial = str_to_int(str);
+	else device_serial = str_to_uint(str);
 	if (device_serial < 0) errorf( "#### Invalid device id: %s", str );
 }
 
+/** Extract temperature format. */
 void parse_format( char* str )
 {
 	char* s = str;
@@ -126,27 +126,40 @@ void parse_format( char* str )
 	else errorf( "#### Invalid format: %s", str );
 }
 
+/** Tokenize command line parameters.
+ *  First call: arg_tok( argv, 0 )  sets the arg vector to use for subsequent calls, returns nothing.
+ *  Further calls: arg_tok( 0, ":=" )  returns tokens separated by one of separators ':' or '=' (like
+ *      strtok() _OR_ separated by a whitespace (ie. the next argument if necessary).
+ *  This allows the specification of command line parameters in the forms param=value or param value. 
+ */
+char* arg_tok( char**argv, const char* sep )
+{
+	static char *a = 0, **av = &a;
+	if (argv) return av = argv, a = 0;
+	if (a) if (a = strtok( 0, sep )) return a;
+	return *av ? a = strtok( *av++, sep ) : 0;  // Remember: Standard requires argv[argc]==0 
+}
+
+/** Parse the argv for command line parameters. */
 void parse_options( int argc, char* argv[] )
 {
-	int i;
-	for (i=1; i<argc; i++)
+	char *cmd;
+	arg_tok( argv+1, 0 );
+	while (cmd = arg_tok(0,":="))
 	{
-		char* ap = argv[i];
-		while ( *ap=='-' || *ap=='/' )  ap++;
-		ap = strtok( ap, ":= ");
-
-		if (str_in( ap, "l", "list", 0 ))
+		cmd += strspn( cmd, "-/" );
+		if (str_in( cmd, "l", "list", 0 ))
 			action = List;
-		else if (str_in( ap, "r", "rd", "read", 0 ))
+		else if (str_in( cmd, "r", "rd", "read", 0 ))
 			action = Read;
-		else if (str_in( ap, "h", "help", 0 ))
+		else if (str_in( cmd, "h", "help", 0 ))
 			action = Help;
-		else if (str_in( ap, "d", "dev", "device", 0 ))
-			parse_device_id( strtok( 0, "" ) );
-		else if (str_in( ap, "f", "fmt", "format", 0 ))
-			parse_format( strtok( 0, "" ) );
+		else if (str_in( cmd, "d", "dev", "device", 0 ))
+			parse_device_id( arg_tok(0,"") );
+		else if (str_in( cmd, "f", "fmt", "format", 0 ))
+			parse_format( arg_tok(0,"") );
 		else
-			errorf( "#### Unknown command: %s", argv[i]);
+			errorf( "#### Unknown command: %s", cmd);
 	}
 }
 

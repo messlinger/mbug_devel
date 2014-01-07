@@ -1,4 +1,4 @@
-:: Build the entire project (release uld only)
+:: Build the entire project (release build only)
 :: Binaries go to bin/
 :: Libraries got to lib/
 
