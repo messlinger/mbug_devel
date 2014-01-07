@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>  // toupper()
 #include "mbug_2151.h"
 
 //------------------------------------------------------------------------------
@@ -301,7 +302,7 @@ int mbug_2151_get_busy( mbug_device dev )
 
 //------------------------------------------------------------------------------
 
-int mbug_2151_ab440s_str_to_addr( char *str ) {
+int mbug_2151_ab440s_str_to_addr( const char *str ) {
 	int addr = 0;
 	int i = 0;
 

@@ -142,7 +142,7 @@ int mbug_2151_get_busy( mbug_device dev );
 
 /** Convert a string like "14D" to a numerical address for AB440S targets.
  */
-int mbug_2151_ab440s_str_to_addr(char *str);
+int mbug_2151_ab440s_str_to_addr(const char *str);
 
 /** Toggles an AB440S target using a numerical address
  */
