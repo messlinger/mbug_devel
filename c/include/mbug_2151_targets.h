@@ -4,6 +4,13 @@ typedef char** tokenize_state_t;
 
 typedef void (target_parse_func_type)(tokenize_state_t *);
 
+enum {
+	MBUG_2151_DMV7008_ON  = 0,
+	MBUG_2151_DMV7008_OFF = 1,
+	MBUG_2151_DMV7008_INC = 2,
+	MBUG_2151_DMV7008_DEC = 3
+};
+
 void parse_target_ab440s(tokenize_state_t *state);
 void parse_target_he302eu(tokenize_state_t *state);
 void parse_target_dmv7008(tokenize_state_t *state);
