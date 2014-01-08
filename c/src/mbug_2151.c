@@ -410,3 +410,74 @@ int mbug_2151_dmv7008_cmd_str(mbug_device dev, const char *addr, int cmd) {
 
 	return mbug_2151_dmv7008_cmd_addr(dev, syscode, channel, cmd);
 }
+
+int mbug_2151_rs200_cmd_addr(mbug_device dev, int syscode, int channel, int cmd) {
+	int i;
+	unsigned short seq[26*2];
+	unsigned int data;
+
+	if(syscode < 0 || syscode > 255) {
+		return -1;
+	}
+
+	if(channel < 0 || channel == 4 || channel > 5) {
+		return -1;
+	}
+
+	data = (channel << 4) | (cmd << 7) | ((1^cmd) << 2);
+	if(channel == 1 || channel == 2) {
+		data ^= 1<<7;
+	}
+	data = (0x19 << 20)
+		| (syscode << 12)
+		| (data << 4)
+		| (0x9 + syscode + (syscode>>4) + data + (data>>4)) & 0x0F;
+
+	for(i = 0; i < 26; i++) {
+		if(data & (1<<(25-i))) {
+			seq[2*i+0] = 600;
+			seq[2*i+1] = 3400;
+		} else {
+			seq[2*i+0] = 1300;
+			seq[2*i+1] = 3400;
+		}
+	}
+	seq[26*2-1] += 30000;
+	
+	if(mbug_2151_set_timebase(dev, 1e-6) == -1) {
+		return -1;
+	}
+
+	if(mbug_2151_set_iterations(dev, 4) == -1) {
+		return -1;
+	}
+
+	if(mbug_2151_set_seq_times_16bit(dev, seq, 26*2) == -1) {
+		return -1;
+	}
+
+	return mbug_2151_start(dev);
+}
+
+int mbug_2151_rs200_cmd_str(mbug_device dev, char *addr, int cmd) {
+	static int syscode = 0;
+	int channel;
+
+	char *colon = strchr(addr, ':');
+	char *chanptr;
+	if(colon != NULL) {
+		syscode = atoi(addr);
+		chanptr = colon+1;
+	} else {
+		chanptr = addr;
+	}
+
+	if(toupper(*chanptr) == 'A'
+	   || toupper(*chanptr) == 'M') {
+		channel = 5;
+	} else {
+		channel = atoi(chanptr) - 1;
+	}
+
+	return mbug_2151_rs200_cmd_addr(dev, syscode, channel, cmd);
+}

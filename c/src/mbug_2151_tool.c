@@ -423,6 +423,47 @@ void parse_target_ikt201(tokenize_state_t *s) {
 
 }
 
+void parse_target_rs200(tokenize_state_t *s) {
+	char *id;
+	int state, i;
+	mbug_device transmitter;
+
+	char *ids = tokenize(s, NULL, ""); // Store the next string in ids for later use
+	char *statestr = tokenize(s, NULL, "");
+
+	if(ids == NULL || statestr == NULL) {
+		errorf("Usage: RS200 <syscode:id1,[syscode:]id2,...> (on|1|off|0) (id: 1-4 and M or A for all)\n");
+	}
+
+	if(str_in(statestr, "1", "on", 0)) {
+		state = MBUG_2151_RS200_ON;
+	} else if(str_in(statestr, "0", "off", 0)) {
+		state = MBUG_2151_RS200_OFF;
+	} else {
+		errorf("Usage: RS200 <syscode:id1,[syscode:]id2,...> (on|1|off|0) (id: 1-4 and M or A for all)\n");
+		return;
+	}
+
+	i=0;
+	do {
+		transmitter = mbug_2151_open( device_serial );
+		i++;
+	} while(i < 5 && transmitter == NULL);
+
+	if(i == 5) {
+		errorf("##### Can't open device\n");
+		return;
+	}
+
+	for(id = strtok(ids, ",");
+		id != NULL;
+		id = strtok(NULL, ",")) {
+		wait_device(&transmitter, 1);
+		mbug_2151_rs200_cmd_str(transmitter, id, state);
+	}
+	mbug_2151_close(transmitter);
+}
+
 target_parse_func_type *get_target_parse_function(char *target)
 {
 	int i;
