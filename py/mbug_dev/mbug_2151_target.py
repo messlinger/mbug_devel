@@ -269,7 +269,7 @@ class DMV7008(mbug_2151_target):
         if cmd in ('hell','dimmen'): cmd={'hell':2, 'dimmen':3}[cmd]
         if not cmd in (0,1,2,3): raise ValueError('Invalid command.')
 
-        seq_addr_cmd = { ## 0:on, 1:of, 2:hell, 3:dimmen
+        seq_addr_cmd = { ## 0:off, 1:on, 2:hell, 3:dimmen
             0: {0: 0b11100001, 1: 0b11110000, 2: 0b11101011, 3: 0b11111010},  # master (all receivers) 
             1: {0: 0b00000000, 1: 0b00010001, 2: 0b00001010, 3: 0b00011011},  # channel 1
             2: {0: 0b10000010, 1: 0b10010011, 2: 0b10001000, 3: 0b10011001},  #         2

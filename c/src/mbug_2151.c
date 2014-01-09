@@ -360,7 +360,7 @@ int mbug_2151_dmv7008_cmd_addr(mbug_device dev, int syscode, int channel, int cm
 	char seq[59];
 	int bits;
 	const unsigned char cmdbits[5][4] = {
-		{ 0xE1, 0x70, 0xEB, 0x7A },
+		{ 0xE1, 0xF0, 0xEB, 0xFA },
 		{ 0x00, 0x11, 0x0A, 0x1B },
 		{ 0x82, 0x93, 0x88, 0x99 },
 		{ 0x41, 0x50, 0x4B, 0x5A },
@@ -409,4 +409,75 @@ int mbug_2151_dmv7008_cmd_str(mbug_device dev, const char *addr, int cmd) {
 	}
 
 	return mbug_2151_dmv7008_cmd_addr(dev, syscode, channel, cmd);
+}
+
+int mbug_2151_rs200_cmd_addr(mbug_device dev, int syscode, int channel, int cmd) {
+	int i;
+	unsigned short seq[26*2];
+	unsigned int data;
+
+	if(syscode < 0 || syscode > 255) {
+		return -1;
+	}
+
+	if(channel < 0 || channel == 4 || channel > 5) {
+		return -1;
+	}
+
+	data = (channel << 4) | (cmd << 7) | ((1^cmd) << 2);
+	if(channel == 1 || channel == 2) {
+		data ^= 1<<7;
+	}
+	data = (0x19 << 20)
+		| (syscode << 12)
+		| (data << 4)
+		| (0x9 + syscode + (syscode>>4) + data + (data>>4)) & 0x0F;
+
+	for(i = 0; i < 26; i++) {
+		if(data & (1<<(25-i))) {
+			seq[2*i+0] = 600;
+			seq[2*i+1] = 3400;
+		} else {
+			seq[2*i+0] = 1300;
+			seq[2*i+1] = 3400;
+		}
+	}
+	seq[26*2-1] += 30000;
+	
+	if(mbug_2151_set_timebase(dev, 1e-6) == -1) {
+		return -1;
+	}
+
+	if(mbug_2151_set_iterations(dev, 4) == -1) {
+		return -1;
+	}
+
+	if(mbug_2151_set_seq_times_16bit(dev, seq, 26*2) == -1) {
+		return -1;
+	}
+
+	return mbug_2151_start(dev);
+}
+
+int mbug_2151_rs200_cmd_str(mbug_device dev, char *addr, int cmd) {
+	static int syscode = 0;
+	int channel;
+
+	char *colon = strchr(addr, ':');
+	char *chanptr;
+	if(colon != NULL) {
+		syscode = atoi(addr);
+		chanptr = colon+1;
+	} else {
+		chanptr = addr;
+	}
+
+	if(toupper(*chanptr) == 'A'
+	   || toupper(*chanptr) == 'M') {
+		channel = 5;
+	} else {
+		channel = atoi(chanptr) - 1;
+	}
+
+	return mbug_2151_rs200_cmd_addr(dev, syscode, channel, cmd);
 }
