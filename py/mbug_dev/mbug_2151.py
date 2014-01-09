@@ -77,6 +77,16 @@ class mbug_2151(mbug):
             self._iocmd( bytearray(( 0xB0, 0x00, 0x01, len(d) )) + bytearray(d) )
         return
 
+    def set_sequence(self, data, seq_type):
+        """Set a transmission sequence of the type specified by seq_type
+        ('bitstream', 'timed_8', 'timed_16')."""
+        if seq_type=='bitstream':
+            return self.set_sequence_bitstream(data)
+        elif seq_type.startswith('timed_8'):
+            return self.set_sequence_times_8(data)
+        elif seq_type.startswith('timed_16'):
+            return self.set_sequence_times_16(data)
+        else: raise ValueError('Invalid sequence type')
     
     def set_iterations(self, niter):
         """ Set the number of transmission iterations.
@@ -98,7 +108,7 @@ class mbug_2151(mbug):
         """ Set the transmission rate (in Hz, via clock div). Minimum rate is 61sec.
         Maximum rate is 400kHz for bitstream mode, 4Mhz for timed modes.
         Returns the actually set bitrate."""
-        if freq==0: raise ValueError('Invalid bitrate.')
+        if freq<=0: raise ValueError('Invalid bitrate.')
         div = round(1.*self._base_clock/freq)
         if div>2**16-1: div=2**16-1;
         rfreq = self._base_clock/div
@@ -107,7 +117,7 @@ class mbug_2151(mbug):
         self.set_clock_div(div)
         return rfreq
 
-    def set_interval(self, interval):
+    def set_timebase(self, interval):
         """ Set the transmission base interval (in seconds, via clock div).
         Minimum interval is 2.5us for bitstream mode, 0.25us for timed modes.
         Maximum base interval is 16.38375ms. Resolution is 0.25us.
@@ -115,7 +125,7 @@ class mbug_2151(mbug):
         div = round(1.*self._base_clock*interval)
         if div>2**16-1: div=2**16-1;
         self.set_clock_div(div)
-        return int(round(1.0*div/base_clock))
+        return int(round(1.0*div/self._base_clock))
 
     def start(self):
         """ Start transmission. """
@@ -192,6 +202,8 @@ class mbug_2151(mbug):
             return mbug_2151_target.FIF4280(dev=self._dev, addr=addr)
         def IKT201(self, addr=None):
             return mbug_2151_target.IKT201(dev=self._dev, addr=addr)
+        def RS200(self, addr=None):
+            return mbug_2151_target.RS200(dev=self._dev, addr=addr)
         
     target = target()   # Make this an instance 
 

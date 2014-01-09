@@ -5,8 +5,9 @@ import time as _time
 
 class mbug_2151_target(object):
     _dev = None          # Controller device
-    _bitrate = None       # Default parameters     
-    _iterations = None
+    _timebase = None       # Default parameters     
+    _iterations = 3
+    _seq_type = 'bitstream'
     _timeout = None
 
     def __init__(self, dev):
@@ -18,7 +19,7 @@ class mbug_2151_target(object):
         # Wait for device to become ready
         if self._dev.get_busy():
             iter = self._dev.get_iterations()
-            if force or iter==0: self._dev.stop(immediately=1)
+            if force or iter==0: self._dev.stop(instantly=1)
             tout = _time.time() + self._timeout
             while (self._dev.get_busy()):
                 _time.sleep(0.01)
@@ -26,9 +27,9 @@ class mbug_2151_target(object):
 
     def _send(self, sequence, force=0):
         self._wait_busy(force)
-        self._dev.set_bitrate(self._bitrate)
+        self._dev.set_timebase(self._timebase)
         self._dev.set_iterations(self._iterations)
-        self._dev.set_sequence_bitstream(sequence)
+        self._dev.set_sequence(sequence, self._seq_type)
         self._dev.start()
 
 #---------------------------------------------------------------------------
@@ -38,7 +39,7 @@ class AB440S(mbug_2151_target):
     of addressable switches or a single switch (if instantiated with given address)."""
 
     # Transmission parameters
-    _bitrate = 3125
+    _timebase = 320e-6
     _iterations = 10
     _timeout = 2
     _addr = None
@@ -116,7 +117,7 @@ class HE302EU(mbug_2151_target):
     of addressable switches or a single switch (if instantiated with given address)."""
 
     # Transmission parameters
-    _bitrate = 3906
+    _timebase = 256e-6
     _iterations = 5
     _timeout = 2
     addr = None
@@ -238,7 +239,7 @@ class DMV7008(mbug_2151_target):
     Dimmer function not implemented yet."""
 
     # Transmission parameters
-    _bitrate = 4167  # 1/1.92e-3 * 8
+    _timebase = 240e-6  # 1.92ms / 8
     _iterations = 4
     _timeout = 2
     addr = None
@@ -263,12 +264,12 @@ class DMV7008(mbug_2151_target):
         
         syscode = int(syscode)&0xfff
         addr = int(addr)
-        if addr in ('master','all'): addr=0
+        if addr in ('m','M','master','all'): addr=0
         if not addr in (0,1,2,3,4): raise ValueError('Invalid address.')
         if cmd in ('hell','dimmen'): cmd={'hell':2, 'dimmen':3}[cmd]
         if not cmd in (0,1,2,3): raise ValueError('Invalid command.')
 
-        seq_addr_cmd = { ## 0:on, 1:of, 2:hell, 3:dimmen
+        seq_addr_cmd = { ## 0:off, 1:on, 2:hell, 3:dimmen
             0: {0: 0b11100001, 1: 0b11110000, 2: 0b11101011, 3: 0b11111010},  # master (all receivers) 
             1: {0: 0b00000000, 1: 0b00010001, 2: 0b00001010, 3: 0b00011011},  # channel 1
             2: {0: 0b10000010, 1: 0b10010011, 2: 0b10001000, 3: 0b10011001},  #         2
@@ -292,7 +293,7 @@ class DMV7008(mbug_2151_target):
         Use with tuple (syscode,addr) as addr, or integer addr only, in which case a
         previously stored syscode is used (default syscode = 0)."""
         try: addr = (addr[0],addr[1])
-        except: addr = (self.syscode,addr)
+        except: addr = (self.addr[0],addr)
         self.addr = addr
         seq = self._addr_sequence(addr, on)
         self._send( seq, force )
@@ -307,7 +308,7 @@ class DMV7008(mbug_2151_target):
         dim level is 50. Note, that the dimming is not completely reliable, since
         the receivers sometimes drop single commands."""
         try: addr = (addr[0],addr[1])
-        except: addr = (self.syscode,addr)
+        except: addr = (self.addr[0],addr)
         level = int(level)
         cmd = 2 if level>0 else 3
         steps = abs(level)
@@ -355,15 +356,13 @@ FIF4280 = DMV7008
 
 #---------------------------------------------------------------------------
 
-#-----------------------------------------------------------------------
-
 class IKT201(mbug_2151_target):
     """IKT201 Remote power system (UPM/Ikea). This device class represents a
     bunch of addressable switches/dimmers or a single switch (if instantiated
     with given address)."""
 
     # Transmission parameters
-    _bitrate = 4682
+    _timebase = 214e-6
     _iterations = 2
     _timeout = 2
     addr = None
@@ -416,7 +415,7 @@ class IKT201(mbug_2151_target):
         Use with tuple (syscode,addrlist) as addr, or addrlist only, in which case a
         previously stored syscode is used (default syscode = 0)."""
         try: addr = (addr[0],addr[1])
-        except: addr = (self.syscode,addr)
+        except: addr = (self.addr[0],addr)
         self.addr = addr
         seq = self._sequence(addr, on)
         self._send( seq, force )
@@ -428,7 +427,7 @@ class IKT201(mbug_2151_target):
         Use with tuple (syscode,addrlist) as addr, or addrlist only, in which case a
         previously stored syscode is used (default syscode = 0)."""
         try: addr = (addr[0],addr[1])
-        except: addr = (self.syscode,addr)
+        except: addr = (self.addr[0],addr)
         self.addr = addr
         seq = self._sequence(addr, level=level)
         self._send( seq, force )
@@ -450,4 +449,89 @@ class IKT201(mbug_2151_target):
         if self.addr==None: raise ValueError('Target address has not yet been set.')
         self.switch(self.addr,0)        
 
+
+#-----------------------------------------------------------------------
+
+
+class RS200(mbug_2151_target):
+    """RS-200 Remote power system (Europe Supplies/Conrad). This device class represents a
+    bunch of addressable switchesor a single switch (if instantiated with given address)."""
+
+    # Transmission parameters
+    _timebase = 1e-6
+    _iterations = 4
+    _timeout = 2
+    _seq_type = 'timed_16'
+    addr = None
+
+    def __init__(self, dev, addr=None):
+        mbug_2151_target.__init__(self, dev)
+        self.addr = addr
+
+    def _sequence(self, (syscode, chan), on=1 ):
+        # Adresses consist of an 8 bit system code and a switch channel of 1-4 or master (switches all).
+        # On the original transmitter, the system code is set at power up by a 4 digit code of 1-4.
+        # Here, the system code can be passed as number 0-255 or as the 4 digits code typed on the receiver.
+        # Valid switch channels are 1-4 and 'M' for master.
+        # Receivers must be learned to an address (after pressing the learn button).
+        # Note: The transmitter subsequently sends 2 different packet types, from which only the first type
+        # is used here. The second packet type does not seem to have any effect to the tested receivers.
+        
+        try: syscode = int(syscode)
+        except: raise ValueError("Invalid system code")
+        if syscode<0 or syscode>4444 or \
+           syscode>255 and syscode<1111:
+            raise ValueError("Invalid system code")
+        if syscode>=1111:
+            if min(str(syscode))<'1' or max(str(syscode))>'4':
+                raise ValueError("Invalid syscode")
+            syscode = sum([ (((syscode//10**i)%10-1)&0b11)<<(6-i*2) for i in range(4) ])
+        try: chan = {'1':0, '2':1, '3':2, '4':3, 'M':5, 'A':5}[str(chan).upper()[0]]
+        except: raise ValueError("Invalid channel")
+        on = int(bool(on))
+        cmd012 = chan<<4 | (1<<7)*int(on) | (1<<2)*int(not on) 
+        if chan in (1,2): cmd012 ^= 1<<7        
+        preamble = 0b011001
+        chk012 = (0b1001 + syscode + (syscode>>4) + cmd012 + (cmd012>>4)) & 0b1111
+        seq012 = preamble<<20 | syscode<<12 | cmd012<<4 | chk012
+
+        # 2nd packet type. Not used.                
+        ##cmd345 = chan<<4 | 0b1100 | (1<<7)*int(not chan in (1,2))  
+        ##chk345 = (0b1001 + syscode + (syscode>>4) + cmd345 + (cmd345>>4)) & 0b1111  
+        ##seq345 = preamble<<20 | syscode<<12 | cmd345<<4 | chk345  
+
+        seq = []
+        for i in range(26):
+            seq += [600,3400] if (seq012>>(25-i))&1 else [1300,3400]
+        seq[-1] += 30000
+
+        return seq
+        
+    def switch(self, addr, on, force=0):
+        """Turn addressed remote switches on/off. The address of a switch target consists of
+        2 numbers: The system code (4 digits 1-4, or number 0-255 alternatively) and a
+        receiver address (1-4 or M or A for master). Use with tuple (syscode,addres) as addr, or
+        addres only, in which case a previously stored syscode is used (default syscode = 0)."""
+        try: addr = (addr[0],addr[1])
+        except: addr = (self.addr[0],addr)
+        self.addr = addr
+        seq = self._sequence(addr, on)
+        self._send( seq, force )
+
+    def __setitem__(self, addr, on):
+        """Subscript set operator as shortcut for switch()."""
+        self.switch(addr, on)
+
+    def __getitem__(self, addr):
+        """Subscript get operator. Returns a switch device instance with the
+        correpsonding address."""
+        return self.__class__(self._dev, addr)
+
+    def on(self,on=1):
+        if self.addr==None: raise ValueError('Target address has not yet been set.')
+        self.switch(self.addr,on)
+        
+    def off(self):
+        if self.addr==None: raise ValueError('Target address has not yet been set.')
+        self.switch(self.addr,0)        
 
