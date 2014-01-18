@@ -79,9 +79,11 @@ int mbug_2110_set_tris( mbug_device dev, unsigned int tris )
 // 0:disable). ADC channels 0..7 are multiplexed with GPIO channels 3..10.
 int mbug_2110_enable_adc( mbug_device dev, unsigned int channels )
 {
-	// :TODO:
-	// Not yet implemented
-	return -1;
+	unsigned char out[8] = { 0xE8, 0x00, channels&0xFF, (channels>>8)&0xFF, 0};
+	if(mbug_write(dev, out, 4) < 4) {
+		return -1;
+	}
+	return 0;
 }
 
 //------------------------------------------------------------------------------
