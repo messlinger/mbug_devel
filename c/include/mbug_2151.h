@@ -55,7 +55,7 @@ const mbug_device_list  mbug_2151_list( void );
  */
 mbug_device mbug_2151_open( int serial_num );
 
-/** Open a device specified by it's id string (equals the 
+/** Open a device specified by it's id string (equals the
  *  usb serial string as returned by mbug_2820_list )
  */
 mbug_device mbug_2151_open_str( const char *id );
@@ -110,9 +110,9 @@ int mbug_2151_get_clock_div( mbug_device dev );
  */
 double mbug_2151_set_bitrate( mbug_device dev, double freq );
 
-/** Set the base interval (via clock div). Returns the actually set value.
+/** Set the timebase (via clock div). Returns the actually set value.
  */
-double mbug_2151_set_interval( mbug_device dev, double interval );
+double mbug_2151_set_timebase( mbug_device dev, double interval );
 
 /** Start transmission.
  */
@@ -139,6 +139,28 @@ int mbug_2151_reset( mbug_device dev );
 /** Get busy state. True if transmission is in progress
  */
 int mbug_2151_get_busy( mbug_device dev );
+
+/** Convert a string like "14D" to a numerical address for AB440S targets.
+ */
+int mbug_2151_ab440s_str_to_addr(const char *str);
+
+/** Toggles an AB440S target using a numerical address
+ */
+int mbug_2151_ab440s_switch_addr(mbug_device dev, int addr, int state);
+
+/** Toggles an AB440S target using a string address
+ */
+int mbug_2151_ab440s_switch_str(mbug_device dev, const char *addr, int state);
+
+/** Sends a command (MBUG_2151_DMV7008_{ON,OFF,DEC,INC}) to a DMV7008 target
+ * using a 12-bit syscode and channel in 0-4
+ */
+int mbug_2151_dmv7008_cmd_addr(mbug_device dev, int syscode, int channel, int cmd);
+
+/** Sends a command (MBUG_2151_DMV7008_{ON,OFF,DEC,INC}) to a DMV7008 target
+ * using a string "syscode:channel"
+ */
+int mbug_2151_dmv7008_cmd_str(mbug_device dev, const char *addr, int cmd);
 
 //------------------------------------------------------------------------------
 #ifdef __cplusplus

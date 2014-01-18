@@ -132,7 +132,7 @@ def _repeat( func, *args ):
         try: 
             res = func( *args )
             if res!= None and res>=0: break
-        except libusb0.LibusbError:
+        except usb.LibusbError:
             if i==nrep-1: raise
     return res
 
