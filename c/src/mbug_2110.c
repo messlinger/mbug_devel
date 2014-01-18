@@ -127,3 +127,35 @@ int mbug_2110_set_pwm( mbug_device dev, int duty )
 }
 
 //------------------------------------------------------------------------------
+// Configure and enable the serial port. This will cancel any pending
+// serial I/O and enable transmit and receive. The allowed baudrate range
+// is 50 .. 256k.
+int mbug_2110_uart_config(mbug_device dev, int baudrate, mbug_2110_uart_parity_t parity) {
+	unsigned char out[8] = { 0xEC,
+							 (baudrate >>  0)&0xFF,
+							 (baudrate >>  8)&0xFF,
+							 (baudrate >> 16)&0xFF,
+							 (baudrate >> 24)&0xFF,
+							 parity };
+	if(baudrate < 50 || baudrate > 256000) {
+		return -1;
+	}
+	if(parity < 0 || parity > 4) {
+		return -1;
+	}
+	if(mbug_write(dev, out, 6) < 6) {
+		return -1;
+	}
+	return 0;
+}
+
+//------------------------------------------------------------------------------
+// Disable serial port. This will cancel any active transfer. Data can
+// still be written to the transmit queue and read from the receive queue,
+// however.
+int mbug_2110_uart_disable(mbug_device dev) {
+	// TODO
+	return -1;
+}
+
+//------------------------------------------------------------------------------

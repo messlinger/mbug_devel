@@ -30,6 +30,14 @@
 
 #include "mbug.h"
 
+typedef enum mbug_2110_uart_parity {
+	MBUG_2110_UART_PARITY_NONE  = 0,
+	MBUG_2110_UART_PARITY_SET   = 1,
+	MBUG_2110_UART_PARITY_CLEAR = 2,
+	MBUG_2110_UART_PARITY_ODD   = 3,
+	MBUG_2110_UART_PARITY_EVEN  = 4
+} mbug_2110_uart_parity_t;
+
 //------------------------------------------------------------------------------
 
 
