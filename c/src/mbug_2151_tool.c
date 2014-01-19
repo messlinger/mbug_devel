@@ -488,7 +488,7 @@ void parse_options( int argc, char* argv[] )
 	char *ap;
 	for (ap = tokenize(&st, argv+1, "-/"); ap; ap = tokenize(&st, NULL, "-/"))
 	{
-		if (str_in( ap, "l", "list", 0 ))
+		if (str_in( ap, "l", "ls", "list", 0 ))
 			action = List;
 		else if (str_in( ap, "h", "help", 0))
 			action = Help;
