@@ -39,7 +39,7 @@ void parse_options( int argc, char* argv[] )
 		while ( *ap=='-' || *ap=='/' )
 			ap++;
 
-		if (str_in( ap, "l", "list", 0 ))
+		if (str_in( ap, "l", "ls", "list", 0 ))
 			action = List;
 		else if (str_in(ap, "h", "help", 0))
 			action = Help;

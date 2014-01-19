@@ -31,7 +31,7 @@ const char* usage =
 "    rd            Temperatures <= -274 (physically not possible)              \n"
 "    read          indicate sensor errors.                                     \n"
 "                                                                              \n"
-"    d=<id>        Select device with specified serial number or id string (as \n"  
+"    d=<id>        Select device with specified serial number or id string (as \n"
 "    dev=          returned by the list command). If no device is specified,   \n"
 "    device=       the first available device is used.                         \n"
 "                                                                              \n"
@@ -70,7 +70,7 @@ void errorf( const char *format, ... )
 }
 
 /** Compare the first string against a list of other strings, return 1 for match.
- *  The list of strings must be terminated by a null pointer or an empty string. 
+ *  The list of strings must be terminated by a null pointer or an empty string.
  */
 int str_in( const char* str, ... )
 {
@@ -125,7 +125,7 @@ void parse_channel_list ( char* str )
 	const char* s = str;
 	if (str == 0) errorf( "#### Invalid channel list: %s", s );
 	s += strspn( str, "01234567," );
-	if (*s != 0) 
+	if (*s != 0)
 		errorf( "#### Invalid entry in channel list: %s", s );
 	while (i<maxchan) {
 		channels[i] = str_to_uint(str);
@@ -154,14 +154,14 @@ void parse_format( char* str )
  *  First call: arg_tok( argv, 0 )  sets the arg vector to use for subsequent calls, returns nothing.
  *  Further calls: arg_tok( 0, ":=" )  returns tokens separated by one of separators ':' or '=' (like
  *      strtok() _OR_ separated by a whitespace (ie. the next argument if necessary).
- *  This allows the specification of command line parameters in the forms param=value or param value. 
+ *  This allows the specification of command line parameters in the forms param=value or param value.
  */
 char* arg_tok( char**argv, const char* sep )
 {
 	static char *a = 0, **av = &a;
 	if (argv) return av = argv, a = 0;
 	if (a) if (a = strtok( 0, sep )) return a;
-	return *av ? a = strtok( *av++, sep ) : 0;  // Remember: Standard requires argv[argc]==0 
+	return *av ? a = strtok( *av++, sep ) : 0;  // Remember: Standard requires argv[argc]==0
 }
 
 /** Parse the argv for command line parameters. */
@@ -172,7 +172,7 @@ void parse_options( int argc, char* argv[] )
 	while (cmd = arg_tok(0,":="))
 	{
 		cmd += strspn( cmd, "-/" );
-		if (str_in( cmd, "l", "list", 0 ))
+		if (str_in( cmd, "l", "ls", "list", 0 ))
 			action = List;
 		else if (str_in( cmd, "r", "rd", "read", 0 ))
 			action = Read;
@@ -184,7 +184,7 @@ void parse_options( int argc, char* argv[] )
 			parse_channel_list( arg_tok(0,"") );
 		else if (str_in( cmd, "f", "fmt", "format", 0 ))
 			parse_format( arg_tok(0,"") );
-		else 
+		else
 			errorf( "#### Unknown command: %s", cmd );
 	}
 }
@@ -226,15 +226,15 @@ int main( int argc, char* argv[] )
 	{
 		if (format==Raw)
 			mbug_2818_read_raw( thermometer, raw, 8 );
-		else 
+		else
 			mbug_2818_read_all( thermometer, tem, 8);
 
 		if (format==Fahrenheit)
 			for (i=0; i<8; i++)
 				tem[i] = tem[i] * 9./5 + 32.;
-		else if (format==Kelvin) 
+		else if (format==Kelvin)
 			for (i=0; i<8; i++)
-				if (tem[i] >= -273.15) 
+				if (tem[i] >= -273.15)
 					tem[i] += 273.15;
 
 		if (channels[0]<0)
@@ -245,11 +245,11 @@ int main( int argc, char* argv[] )
 		}
 		for (i=0; channels[i]>=0 ;i++)
 		{
-			if (channels[i] > 7) 
+			if (channels[i] > 7)
 				channels[i] = 0;
-			if (format==Raw) 
+			if (format==Raw)
 				printf( "%d", raw[channels[i]] );
-			else  
+			else
 				printf( "%.2f", tem[channels[i]] );
 			printf( (channels[i+1]<0) ? "\n" : "," );
 		}

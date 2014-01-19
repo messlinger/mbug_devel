@@ -48,7 +48,7 @@ void errorf( const char *format, ... )
 }
 
 /** Compare the first string against a list of other strings, return 1 for match.
- *  The list of strings must be terminated by a null pointer or an empty string. 
+ *  The list of strings must be terminated by a null pointer or an empty string.
  */
 int str_in( const char* str, ... )
 {
@@ -76,7 +76,7 @@ int strncmp_upper( const char *str1, const char *str2, size_t n )
 }
 
 /** Convert string to unsigned integer. No trailing unconvertable characters are allowed.
- *  Returns -1 in cae of a conversion error. 
+ *  Returns -1 in cae of a conversion error.
  */
 long str_to_uint( char* str )
 {
@@ -102,14 +102,14 @@ void parse_type( char* str )
  *  First call: arg_tok( argv, 0 )  sets the arg vector to use for subsequent calls, returns nothing.
  *  Further calls: arg_tok( 0, ":=" )  returns tokens separated by one of separators ':' or '=' (like
  *      strtok() _OR_ separated by a whitespace (ie. the next argument if necessary).
- *  This allows the specification of command line parameters in the forms param=value or param value. 
+ *  This allows the specification of command line parameters in the forms param=value or param value.
  */
 char* arg_tok( char**argv, const char* sep )
 {
 	static char *a = 0, **av = &a;
 	if (argv) return av = argv, a = 0;
 	if (a) if (a = strtok( 0, sep )) return a;
-	return *av ? a = strtok( *av++, sep ) : 0;  // Remember: Standard requires argv[argc]==0 
+	return *av ? a = strtok( *av++, sep ) : 0;  // Remember: Standard requires argv[argc]==0
 }
 
 /** Parse the argv for command line parameters. */
@@ -120,7 +120,7 @@ void parse_options( int argc, char* argv[] )
 	while (cmd = arg_tok(0,":="))
 	{
 		cmd += strspn( cmd, "-/" );
-		if (str_in( cmd, "l", "list", 0 ))
+		if (str_in( cmd, "l", "ls", "list", 0 ))
 			action = List;
 		else if (str_in( cmd, "h", "help", 0 ))
 			action = Help;
@@ -136,7 +136,7 @@ void parse_options( int argc, char* argv[] )
 int main( int argc, char* argv[] )
 {
 	parse_options( argc, argv );
-	
+
 	if (action==List)
 		{
 			// List all attached devices
