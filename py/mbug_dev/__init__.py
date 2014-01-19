@@ -22,13 +22,13 @@ __all__ = [
 #-----------------------------------------------------------------
 
 def mbug_open(type, serial=None):
-    """Open and returns an MBUG device with specified serial number and type.
-       The serial number can be passed as string or integer. It is enough to 
-       specifiy the significant ending of the serial number. If the serial 
+    """Open and returns an MBUG device with specified id/serial number and type.
+       The id/serial number can be passed as string or integer. It is enough to 
+       specifiy the significant ending of the serial number. If no id/serial 
        number is not specified, return the first device found.
-       The device can also be specified as string 'MBUG-TTTT-SSSSSS' with
-       T=type, S=serial, which is the format of the mbug's USB iSerialNumber
-       string and is also returned by mbug.list() in this form.
+       The device can also be specified by the id string alone, which contains 
+       device type and serial number: 'MBUG-TTTT-SSSSSS', T=type and S=serial, 
+       and is returnd by mbug.list() in this form.
        The function returns a device class specific to the corresponding 
        device type.
     """
@@ -40,7 +40,7 @@ def mbug_open(type, serial=None):
             type = int(st[1])
             serial = int(st[2])
         except:
-            raise Exception('Invalid device specification.')
+            raise Exception('Invalid device id.')
     if not type in mbug_types:
         raise Exception("Invalid device type.")
     cls = eval("mbug_"+str(type))

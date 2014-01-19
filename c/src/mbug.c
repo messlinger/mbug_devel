@@ -18,13 +18,15 @@
 
 //-----------------------------------------------------------------------------------------
 
-#define VID	 0x04D8
-#define PID	 0xFBC3
+#define VID	 0x04D8	  // Vendor id (Microchip)
+#define PID	 0xFBC3	  // Product id (mbug subvendor license)
 
 #define MBUG_MAX_DEVICES		255
-#define MBUG_MAX_SERIAL_LEN		32
+#define MBUG_MAX_ID_LEN		    32
 
 #define MBUG_TIMEOUT			5000 // (ms)
+
+#define MBUG_IGNORE_STR_ERR     1
 
 //-----------------------------------------------------------------------------------------
 
@@ -35,7 +37,7 @@ struct mbug_device_struct {
 	struct usb_device* usb_device;
 	struct usb_dev_handle* usb_dev_handle;
 	int device_type;
-	char serial[MBUG_MAX_SERIAL_LEN+1];
+	char id[MBUG_MAX_ID_LEN+1];
 	int timeout;
 	int ep_out, ep_in;
 	int size_out, size_in;
@@ -62,17 +64,17 @@ unsigned short _bin(unsigned short bcd)
 const mbug_device_list mbug_get_device_list(unsigned int device_type)
 {
 	static char* device_list[MBUG_MAX_DEVICES+1];
-	static char serial_numbers[MBUG_MAX_DEVICES+1][MBUG_MAX_SERIAL_LEN+1];
+	static char device_ids[MBUG_MAX_DEVICES+1][MBUG_MAX_ID_LEN+1];
 
 	struct usb_bus* bus = 0;
 	usb_dev_handle* handle = 0;
 	int idev = 0;
-	char serial_str[MBUG_MAX_SERIAL_LEN] = "";
+	char id_str[MBUG_MAX_ID_LEN] = "";
 	int ret = 0;
 	int i;
 	
 	memset( (void*)device_list, 0, sizeof(device_list) );
-	memset( serial_numbers, 0, sizeof(serial_numbers) );
+	memset( device_ids, 0, sizeof(device_ids) );
 
 	usb_init();
     usb_find_busses();
@@ -104,19 +106,24 @@ const mbug_device_list mbug_get_device_list(unsigned int device_type)
 
 			// Read the iSerialNumber string
 			ret = usb_get_string_simple( handle, dev->descriptor.iSerialNumber,
-				                             serial_str, sizeof(serial_str)  );
+				                             id_str, sizeof(id_str)  );
 			// :XXX:
 			// Low speed mbugs sometimes give errors when querying string descriptors:
 			// -5 sending control message failed. This only happens with some USB hubs.
 			// Workaround: Try several times
 			for (i=0; ret<0 && i<50; i++)
 				ret = usb_get_string_simple( handle, dev->descriptor.iSerialNumber,
-				                             serial_str, sizeof(serial_str)  );
-			if (ret<0) goto close_and_continue;
+				                             id_str, sizeof(id_str)  );
+			#if MBUG_IGNORE_STR_ERR
+				if (ret<0)
+					strncpy(id_str, "(Unidentified device)", MBUG_MAX_ID_LEN);
+			#else
+				if (ret<0) goto close_and_continue;
+			#endif
 
 			// Match! Add device to list.
-			strncpy( serial_numbers[idev], serial_str, MBUG_MAX_SERIAL_LEN );
-			device_list[idev] = serial_numbers[idev];
+			strncpy( device_ids[idev], id_str, MBUG_MAX_ID_LEN );
+			device_list[idev] = device_ids[idev];
 			if (++idev>=MBUG_MAX_DEVICES) break;
 
 		close_and_continue:
@@ -129,13 +136,13 @@ const mbug_device_list mbug_get_device_list(unsigned int device_type)
 }
 
 //-----------------------------------------------------------------------------------------
-// Open by type and serial number. serial=0 will open the first available device.
+// Open by type and serial number. serial_num=0 will open the first available device.
 mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 {
 	struct usb_bus* bus =0 ;
 	struct usb_device *dev = 0;
 	usb_dev_handle* handle = 0;
-	char serial_str[MBUG_MAX_SERIAL_LEN] = "";
+	char id_str[MBUG_MAX_ID_LEN] = "";
 	int ret = 0;
 	int nepts = 0;
 	int i = 0;
@@ -143,7 +150,7 @@ mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 
 	usb_init();
 	usb_find_busses();
-    	usb_find_devices();
+    usb_find_devices();
 
 	// Iterate through all available devices
 	for (bus = usb_get_busses(); bus; bus = bus->next)
@@ -170,20 +177,27 @@ mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 
 			// Read the iSerialNumber string
 			ret = usb_get_string_simple( handle, dev->descriptor.iSerialNumber,
-				                             serial_str, sizeof(serial_str)  );
+				                             id_str, sizeof(id_str)  );
 			// :XXX:
 			// Low speed mbugs sometimes give errors when querying string descriptors:
 			// -5 sending control message failed. This only happens with some USB hubs.
 			// Workaround: Try several times
 			for (i=0; ret<0 && i<50; i++)
 				ret = usb_get_string_simple( handle, dev->descriptor.iSerialNumber,
-				                             serial_str, sizeof(serial_str)  );
-			if (ret<0) goto close_and_continue;
-
-			// Compare serial number.
-			if (serial_num != 0 &&
-				serial_num != atoi(serial_str+strlen(serial_str)-6) )
-				goto close_and_continue;
+				                             id_str, sizeof(id_str)  );
+			#if MBUG_IGNORE_STR_ERR
+				if (ret<0)  // Could not identify the device
+					if(serial_num==0)  // If the user specified no serial number, accept it even though
+						strncpy(id_str, "(Unidentified device)", MBUG_MAX_ID_LEN);
+					else goto close_and_continue;
+			#else
+				if (ret<0) goto close_and_continue;
+				
+				// Compare id string.
+				if (serial_num != 0 &&
+					serial_num != atoi(id_str+strlen(id_str)-6) )
+					goto close_and_continue;
+			#endif
 
 			// Everything matches, so this is our device.
 			// But we have to initialize it first.
@@ -212,7 +226,7 @@ mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 			mbug_dev->usb_device = dev;
 			mbug_dev->usb_dev_handle = handle;
 			mbug_dev->device_type = _bin(device_type);
-			strncpy( mbug_dev->serial, serial_str, sizeof(mbug_dev->serial) );
+			strncpy( mbug_dev->id, id_str, sizeof(mbug_dev->id) );
 			mbug_dev->timeout = MBUG_TIMEOUT;
 			mbug_dev->aux = 0;
 			// Parse endpoints
@@ -254,14 +268,14 @@ mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 
 //-----------------------------------------------------------------------------------------
 // Open by id string ("MBUG-TTTT-SSSSSS"). The leading "MBUG-" may be omitted.
-mbug_device mbug_open_str( const char* id )
+mbug_device mbug_open_str( const char* id_str )
 {
 	unsigned int device_type = 0;
 	unsigned long serial_num = 0;
-	device_type = mbug_type_from_id( id );
+	device_type = mbug_type_from_id( id_str );
 	if (device_type==0)
 		return NULL;
-	serial_num = mbug_serial_from_id( id );
+	serial_num = mbug_serial_from_id( id_str );
 	if (serial_num < 0)
 		return NULL;
 	return mbug_open_int( device_type, serial_num );

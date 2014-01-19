@@ -1,4 +1,5 @@
 
+_IGNORE_STR_ERR = 1
 
 #-----------------------------------------------------------------
 from threading import Lock as _Lock
@@ -31,10 +32,10 @@ class mbug(object):
     """ Represents a generic MBUG device """
     
     def __init__(self, type=None, serial=None):
-        """Open an MBGUG device with specified serial number and type.
-           The serial number can be passed as string or integer.
-           It is enough to specifiy the significant ending of the serial number.
-           If the serial number is not specified, return the first device found.
+        """Open an MBGUG device with specified id or serial number and type.
+           The id/serial number can be passed as string or integer.
+           It is enough to specifiy the significant ending of the id/serial number.
+           If no id/serial number is not specified, return the first device found.
         """
         self._handle = None
         self._io__Lock = _Lock()
@@ -52,19 +53,19 @@ class mbug(object):
             if desc.idVendor==0x04D8 \
                and desc.idProduct==0xFBC3 \
                and (type==None or desc.bcdDevice==_bcd(type)) \
-               and (serial==None or desc.iSerialNumber!=0):
+               and (serial in (None,0,"") or desc.iSerialNumber!=0):
                 with self._io__Lock:
                     handle = usb.open(dev)  # Need to open the device to query string descriptors
                     try:    
                         ## s = usb.get_string( handle, desc.iSerialNumber )
-                        s = _repeat( usb.get_string, handle, desc.iSerialNumber )    
-                        if (serial==None or s.endswith( str(serial) )):
+                        s = _repeat( usb.get_string, handle, desc.iSerialNumber )
+                        if (serial in (None,0,"") or s.endswith( str(serial) )):
                             ##usb.set_configuration( handle, 1 )
                             _repeat( usb.set_configuration, handle, 1 ) 
                             ##usb.claim_interface( handle, 0 )
                             _repeat( usb.claim_interface, handle, 0 )
                             self._handle = handle
-                            self._serial = s
+                            self._id = s
                             self._type = _bin(desc.bcdDevice)
                             nepts = dev.config[0].interface[0].altsetting[0].bNumEndpoints
                             for i in range(nepts):
@@ -85,13 +86,15 @@ class mbug(object):
         if self._handle != None:
             usb.close( self._handle )
             self._handle = None
-            self._serial = ''
-            self._type = 0
+            self._id = None
+            self._type = None
             self._ep_in, self._size_in = 0, 0
             self._ep_out, self._size_out = 0, 0
 
+    def id(self):
+        return self._id
     def serial(self):
-        return self._serial
+        return int(self._id.rsplit('-')[-1])
     def type(self):
         return self._type
 
@@ -132,7 +135,7 @@ def _repeat( func, *args ):
         try: 
             res = func( *args )
             if res!= None and res>=0: break
-        except libusb0.LibusbError:
+        except usb.LibusbError:
             if i==nrep-1: raise
     return res
 
