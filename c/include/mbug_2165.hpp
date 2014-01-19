@@ -5,7 +5,7 @@
 //------------------------------------------------------------------------------
 
 /** MBUG Library
-	  Class wrapper for 
+	  Class wrapper for
 	  MBUG-2165 IR Transmitter
 
       Stephan Messlinger
@@ -45,7 +45,7 @@ class mbug_2165
 			{
 				close();
 			}
-		
+
 		void close( void )
 			{
 				mbug_2165_close(dev);
@@ -63,7 +63,7 @@ class mbug_2165
 				// Unsigned short data buffer indicates 16-bit timed mode
 				// NOTE: We may pass a pointer to the first sequence element, since vector elements
 				//       are guaranteed to be stored contiguously in memory.
-				int ret = mbug_2165_set_sequence( dev, (unsigned char*)&sequence[0], 
+				int ret = mbug_2165_set_sequence( dev, (unsigned char*)&sequence[0],
 					                              2*sequence.size(), TX_MODE_TIMED_16 );
 				if (ret<0) throw mbug::error("mbug_2165: Error in set_sequence.");
 			}
@@ -73,7 +73,7 @@ class mbug_2165
 				// NOTE: We may pass a pointer to the first sequence element, since vector elements
 				//       are guaranteed to be stored contiguously in memory.
 				int ret = mbug_2165_set_sequence( dev, &sequence[0], sequence.size(), TX_MODE_BITSTREAM );
-				if (ret<0) throw mbug::error("mbug_2165: Error in set_sequence.");			
+				if (ret<0) throw mbug::error("mbug_2165: Error in set_sequence.");
 			}
 
 		void set_seq_times_8bit( std::vector<unsigned char> sequence )
@@ -88,11 +88,11 @@ class mbug_2165
 			{
 				// NOTE: We may pass a pointer to the first sequence element, since vector elements
 				//       are guaranteed to be stored contiguously in memory.
-				int ret = mbug_2165_set_sequence( dev, (unsigned char*)&sequence[0], 
+				int ret = mbug_2165_set_sequence( dev, (unsigned char*)&sequence[0],
 					                              2*sequence.size(), TX_MODE_TIMED_16 );
 				if (ret<0) throw mbug::error("mbug_2165: Error in set_sequence.");
 			}
-		
+
 		int get_seq_length( void )
 			{
 				int ret = mbug_2165_get_seq_length( dev );
@@ -107,7 +107,7 @@ class mbug_2165
 			}
 
 		int get_iterations( void )
-			{		
+			{
 				int ret = mbug_2165_get_iterations( dev );
 				if (ret<0) throw mbug::error("mbug_2165: Error in get_iterations.");
 				return ret;
@@ -143,7 +143,7 @@ class mbug_2165
 		double set_timebase( double interval )
 			{
 				double ret = mbug_2165_set_timebase( dev, interval );
-				if (ret<0.) throw mbug::error("mbug_2165: Error in set_interval.");
+				if (ret<0.) throw mbug::error("mbug_2165: Error in set_timebase.");
 				return ret;
 			}
 
@@ -171,7 +171,7 @@ class mbug_2165
 				int ret = mbug_2165_start( dev );
 				if (ret<0) throw mbug::error("mbug_2165: Error in start.");
 			}
-		
+
 		void stop( bool force=0 )
 			{
 				int ret = mbug_2165_stop( dev, force );

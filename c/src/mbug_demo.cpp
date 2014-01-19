@@ -120,7 +120,7 @@ int main(void)
 					mbug::mbug_2151 dev;
 
 					dev.reset();
-					dev.set_interval( 10e-6 );	// Interval unit: 10 us
+					dev.set_timebase( 10e-6 );	// Interval unit: 10 us
 					dev.set_iterations( 3 );
 					unsigned char seq_a[] = {1,2,3,4,5,6,7,8};
 					dev.set_sequence( seq_a, sizeof(seq_a), TX_MODE_TIMED_8 );

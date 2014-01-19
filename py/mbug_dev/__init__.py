@@ -40,7 +40,7 @@ def mbug_open(type, serial=None):
             type = int(st[1])
             serial = int(st[2])
         except:
-            raise Exception('Invalid device specification.')
+            raise Exception('Invalid device id.')
     if not type in mbug_types:
         raise Exception("Invalid device type.")
     cls = eval("mbug_"+str(type))

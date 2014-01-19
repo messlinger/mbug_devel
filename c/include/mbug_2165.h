@@ -28,7 +28,7 @@
 	mbug_2165_set_clock_div()			- Set the clock divider (clock = base_clock/div)
 	mbug_2165_get_clock_div()			- Get the clock divider
     mbug_2165_set_bitrate()				- Set bit rate (via clock div)
-    mbug_2165_set_tau()					- Set the timebase (via claock div)
+    mbug_2165_set_timebase()					- Set the timebase (via claock div)
 	mbug_2165_get_mod_base_clock()		- Get the modulation base clock
 	mbug_2165_set_mod_clock_div()		- Set the modulation clock divider
 	mbug_2165_get_mod_clock_div()		- Get the modulation clock divider
@@ -61,7 +61,7 @@ const mbug_device_list  mbug_2165_list( void );
  */
 mbug_device mbug_2165_open( int serial_num );
 
-/** Open a device specified by it's id string (equals the 
+/** Open a device specified by it's id string (equals the
  *  usb serial string as returned by mbug_2820_list )
  */
 mbug_device mbug_2165_open_str( const char *id );

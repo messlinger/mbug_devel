@@ -5,7 +5,7 @@
 //------------------------------------------------------------------------------
 
 /** MBUG Library
-	  Class wrapper for 
+	  Class wrapper for
 	  MBUG-2165 433 MHz Transmitter
 
       Stephan Messlinger
@@ -40,12 +40,12 @@ class mbug_2151
 				dev = mbug_2151_open_str(id);
 				if (!dev) throw mbug::error("mbug_2151: Error opening device.");
 			}
-		
+
 		~mbug_2151()
 			{
 				close();
 			}
-		
+
 		void close( void )
 			{
 				mbug_2151_close(dev);
@@ -63,7 +63,7 @@ class mbug_2151
 				// Unsigned short data buffer indicates 16-bit timed mode
 				// NOTE: We may pass a pointer to the first sequence element, since vector elements
 				//       are guaranteed to be stored contiguously in memory.
-				int ret = mbug_2151_set_sequence( dev, (unsigned char*)&sequence[0], 
+				int ret = mbug_2151_set_sequence( dev, (unsigned char*)&sequence[0],
 					                              2*sequence.size(), TX_MODE_TIMED_16 );
 				if (ret<0) throw mbug::error("mbug_2151: Error in set_sequence.");
 			}
@@ -73,7 +73,7 @@ class mbug_2151
 				// NOTE: We may pass a pointer to the first sequence element, since vector elements
 				//       are guaranteed to be stored contiguously in memory.
 				int ret = mbug_2151_set_sequence( dev, &sequence[0], sequence.size(), TX_MODE_BITSTREAM );
-				if (ret<0) throw mbug::error("mbug_2151: Error in set_sequence.");			
+				if (ret<0) throw mbug::error("mbug_2151: Error in set_sequence.");
 			}
 
 		void set_seq_times_8bit( std::vector<unsigned char> sequence )
@@ -88,11 +88,11 @@ class mbug_2151
 			{
 				// NOTE: We may pass a pointer to the first sequence element, since vector elements
 				//       are guaranteed to be stored contiguously in memory.
-				int ret = mbug_2151_set_sequence( dev, (unsigned char*)&sequence[0], 
+				int ret = mbug_2151_set_sequence( dev, (unsigned char*)&sequence[0],
 					                              2*sequence.size(), TX_MODE_TIMED_16 );
 				if (ret<0) throw mbug::error("mbug_2151: Error in set_sequence.");
 			}
-		
+
 		int get_seq_length( void )
 			{
 				int ret = mbug_2151_get_seq_length( dev );
@@ -107,7 +107,7 @@ class mbug_2151
 			}
 
 		int get_iterations( void )
-			{		
+			{
 				int ret = mbug_2151_get_iterations( dev );
 				if (ret<0) throw mbug::error("mbug_2151: Error in get_iterations.");
 				return ret;
@@ -140,10 +140,10 @@ class mbug_2151
 				return ret;
 			}
 
-		double set_interval( double interval )
+		double set_timebase( double interval )
 			{
-				double ret = mbug_2151_set_interval( dev, interval );
-				if (ret<0.) throw mbug::error("mbug_2151: Error in set_interval.");
+				double ret = mbug_2151_set_timebase( dev, interval );
+				if (ret<0.) throw mbug::error("mbug_2151: Error in set_timebase.");
 				return ret;
 			}
 
@@ -152,7 +152,7 @@ class mbug_2151
 				int ret = mbug_2151_start( dev );
 				if (ret<0) throw mbug::error("mbug_2151: Error in start.");
 			}
-		
+
 		void stop( bool force=0 )
 			{
 				int ret = mbug_2151_stop( dev, force );

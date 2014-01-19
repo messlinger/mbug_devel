@@ -131,16 +131,27 @@ class mbug_2165(mbug):
         return
 
     def set_bitrate(self, freq):
-        """ Set the bit rate (via clock div)."""
+        """ Set the transmission rate (in Hz, via clock div). Minimum rate is 61sec.
+        Maximum rate is 400kHz for bitstream mode, 4Mhz for timed modes.
+        Returns the actually set bitrate."""
         if freq<=0: raise ValueError('Invalid bitrate.')
-        div = round(self._base_clock/freq)
+        div = round(1.*self._base_clock/freq)
+        if div>2**16-1: div=2**16-1;
+        rfreq = self._base_clock/div
+        if abs(1.*rfreq/freq-1.)>0.01:  # Deviation > 1%
+            print "Warning. Set bitrate to %.1e."%(rfreq)
         self.set_clock_div(div)
+        return rfreq
 
-    def set_timebase(self, tau):
-        """ Set the timebase (via clock div)."""
-        if tau<=0: raise ValueError('Invalid timebase')
-        div = round(self._base_clock*tau)
+    def set_timebase(self, interval):
+        """ Set the transmission base interval (in seconds, via clock div).
+        Minimum interval is 2.5us for bitstream mode, 0.25us for timed modes.
+        Maximum base interval is 16.38375ms. Resolution is 0.25us.
+        Returns the actually set interval."""
+        div = round(1.*self._base_clock*interval)
+        if div>2**16-1: div=2**16-1;
         self.set_clock_div(div)
+        return int(round(1.0*div/self._base_clock))
         
     def set_mod_clock_div(self, div):
         """ Set the modulation clock divider. freq = mod_base_clock/div.
@@ -156,10 +167,10 @@ class mbug_2165(mbug):
     def set_mod_freq(self, freq):
         """ Set the modulation frequency (via modulation clock div).
         Set freq=0 to turn off modulation."""
-        if freq==0:
-            div = 0
+        if freq<0: raise ValueError('Invalid modulation frequency.')
+        if freq<=0: div = 0
         else:
-            div = round(self._mod_base_clock/freq)
+            div = round(1.0*self._mod_base_clock/freq)
             if div<16: div=16
             if div>4096: div=4096
             rfreq = self._mod_base_clock/div
@@ -167,6 +178,7 @@ class mbug_2165(mbug):
             if abs(rd)>0.01:
                 print "Warning. Set modulation frequency to %.1e."%(rfreq)
         self.set_mod_clock_div(div)
+        return rfreq
 
     def start(self):
         """ Start transmission. """
