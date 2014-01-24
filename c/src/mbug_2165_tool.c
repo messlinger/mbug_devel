@@ -1,21 +1,14 @@
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <ctype.h>
-#include <errno.h>
-
 #include "mbug_2165.h"
+#include "mbug_utils.h"
 
 //----------------------------------------------------------------------------------
 
 const char* usage =
 "                                                                              \n"
-"MBUG-2151 command line tool                                                   \n"
+"MBUG-2165 command line tool                                                   \n"
 "                                                                              \n"
-"Syntax:   mbug_2151  cmd, cmd2, ...                                           \n"
+"Syntax:   mbug_2165  cmd, cmd2, ...                                           \n"
 "                                                                              \n"
 "    For convenience, most commands have multiple abbrevations.  Commands can  \n"
 "    be prepended by '-' (unix option style),  '/' (windows option style),     \n"
@@ -90,83 +83,19 @@ int force = 0;				// Force stop ungracefully
 
 //---------------------------------------------------------------
 
-void errorf( const char *format, ... )
-{
-   va_list args;
-   va_start( args, format );
-   vfprintf( stderr, format, args );
-   va_end( args );
-   exit(1);
-}
-
-int char_in( char c, const char* set )
-{
-	while (*set != 0)
-		if (c == *set++) return 1;
-	return 0;
-}
-
-int str_in( const char* str, ... )
-{
-	va_list args;
-	int match = 0;
-	va_start(args, str);
-	while(1) {
-		const char *next = va_arg(args, const char*);
-		if (next==0 || *next==0) break;
-		if (match = !strcmp(str,next)) break;
-	}
-	va_end(args);
-	return match;
-}
-
-char *str_toupper( char *str )
-{
-	char *p = str;
-	while (*p) {
-		*p = toupper(*p);
-		p++;
-	}
-	return str;
-}
-
-long str_to_int( char* str )
-{
-	char *endp = 0;
-	long val = -1;
-	if (str==0 || *str=='\0') return -1;
-	errno = 0;
-	val = strtoul(str, &endp, 10 );
-	if (errno || *endp!='\0') return -1;
-	return val;
-}
-
-double str_to_float( char* str )
-{
-	char *endp = 0;
-	double val = -1;
-	if (str==0 || *str=='\0') return -1;
-	errno = 0;
-	val = strtod(str, &endp );
-	if (errno || *endp!='\0') return -1;
-	return val;
-}
-
 void parse_device_id( char* str )
 {
-	str_toupper( str );
-	if (strncmp(str,"MBUG-2165",9) == 0)
+	if (strncmp_upper(str,"MBUG-2165",9) == 0)
 		device_serial = mbug_serial_from_id(str);
-	else device_serial = str_to_int(str);
+	else device_serial = str_to_uint(str);
 	if (device_serial < 0) errorf( "#### Invalid device id: %s", str );
 }
 
 void parse_iterations( char* str )
 {
-	str_toupper( str );
-	if (strcmp(str,"INF") == 0)
+	if (strcmp_upper(str,"INF") == 0)
 		iterations = 0;
-	else if ((iterations = str_to_int( str )) < 0)
+	else if ((iterations = str_to_uint( str )) < 0)
 		errorf( "#### Invalid iterations: %s", str );
 }
 

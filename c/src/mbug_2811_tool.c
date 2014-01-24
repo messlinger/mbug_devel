@@ -1,13 +1,6 @@
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <ctype.h>
-#include <errno.h>
-
 #include "mbug_2811.h"
+#include "mbug_utils.h"
 
 //-------------------------------------------------------------------------------
 
@@ -53,57 +46,6 @@ enum Format { Celsius, Fahrenheit, Kelvin, Raw } format = Celsius;
 
 //---------------------------------------------------------------
 
-/** Print a formatted error message (printf format) and exit. */
-void errorf( const char *format, ... )
-{
-   va_list args;
-   va_start( args, format );
-   vfprintf( stderr, format, args );
-   va_end( args );
-   exit(1);
-}
-
-/** Compare the first string against a list of other strings, return 1 for match.
- *  The list of strings must be terminated by a null pointer or an empty string.
- */
-int str_in( const char* str, ... )
-{
-	va_list args;
-	int match = 0;
-	va_start(args, str);
-	while(1) {
-		const char *next = va_arg(args, const char*);
-		if (next==0 || *next==0) break;
-		if (match = !strcmp(str,next)) break;
-	}
-	va_end(args);
-	return match;
-}
-
-/** strncmp independent of character case. */
-int strncmp_upper( const char *str1, const char *str2, size_t n )
-{
-	int left, right;
-	while (n-- && (left=toupper(*str1)) && (right=toupper(*str2))) {
-		if (left==right) str1++, str2++;
-		else return left-right;
-	}
-	return 0;
-}
-
-/** Convert string to unsigned integer. No trailing unconvertable characters are allowed.
- *  Returns -1 in cae of a conversion error. */
-long str_to_uint( char* str )
-{
-	char *endp = 0;
-	long val = -1;
-	if (str==0 || *str=='\0') return -1;
-	errno = 0;
-	val = strtoul(str, &endp, 10 );
-	if (errno || *endp!='\0') return -1;
-	return val;
-}
-
 /** Extract device serial. */
 void parse_device_id( char* str )
 {
@@ -126,19 +68,6 @@ void parse_format( char* str )
 	else errorf( "#### Invalid format: %s", str );
 }
 
-/** Tokenize command line parameters.
- *  First call: arg_tok( argv, 0 )  sets the arg vector to use for subsequent calls, returns nothing.
- *  Further calls: arg_tok( 0, ":=" )  returns tokens separated by one of separators ':' or '=' (like
- *      strtok() _OR_ separated by a whitespace (ie. the next argument if necessary).
- *  This allows the specification of command line parameters in the forms param=value or param value.
- */
-char* arg_tok( char**argv, const char* sep )
-{
-	static char *a = 0, **av = &a;
-	if (argv) return av = argv, a = 0;
-	if (a) if (a = strtok( 0, sep )) return a;
-	return *av ? a = strtok( *av++, sep ) : 0;  // Remember: Standard requires argv[argc]==0
-}
 
 /** Parse the argv for command line parameters. */
 void parse_options( int argc, char* argv[] )

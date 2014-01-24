@@ -39,7 +39,7 @@ struct mbug_device_struct {
 	int timeout;
 	int ep_out, ep_in;
 	int size_out, size_in;
-	void* aux;	// Auxiliary data, managed by device specific libraries 
+	void* aux;	// Auxiliary data, managed by device specific libraries
 };
 
 
@@ -48,7 +48,7 @@ struct mbug_device_struct {
 // Intended for usage with bcd format descriptor fields.
 unsigned short _bcd(unsigned short bin)
 {
-    return ((bin/1)%10)*(1<<0) + ((bin/10)%10)*(1<<4) 
+    return ((bin/1)%10)*(1<<0) + ((bin/10)%10)*(1<<4)
 		+ ((bin/100)%10)*(1<<8) + ((bin/1000)%10)*(1<<12);
 }
 unsigned short _bin(unsigned short bcd)
@@ -70,7 +70,7 @@ const mbug_device_list mbug_get_device_list(unsigned int device_type)
 	char serial_str[MBUG_MAX_SERIAL_LEN] = "";
 	int ret = 0;
 	int i;
-	
+
 	memset( (void*)device_list, 0, sizeof(device_list) );
 	memset( serial_numbers, 0, sizeof(serial_numbers) );
 
@@ -139,7 +139,7 @@ mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 	int ret = 0;
 	int nepts = 0;
 	int i = 0;
-	mbug_device_struct* mbug_dev = 0; 
+	mbug_device_struct* mbug_dev = 0;
 
 	usb_init();
 	usb_find_busses();
@@ -148,7 +148,7 @@ mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 	// Iterate through all available devices
 	for (bus = usb_get_busses(); bus; bus = bus->next)
 	{
-		
+
         for (dev = bus->devices; dev; dev = dev->next)
 		{
 			//  VID:PID match?
@@ -207,7 +207,7 @@ mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 			// we consider the device as opened.
 
 			// Create mbug device struct and copy some data for later use
-			mbug_dev = (mbug_device_struct*) 
+			mbug_dev = (mbug_device_struct*)
 							calloc(1,sizeof(mbug_device_struct));
 			mbug_dev->usb_device = dev;
 			mbug_dev->usb_dev_handle = handle;
@@ -223,12 +223,12 @@ mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 							endpoint[i].bEndpointAddress;
                 int size = dev->config[0].interface[0].altsetting[0].\
 							endpoint[i].wMaxPacketSize;
-				if (ep&0x80) 
+				if (ep&0x80)
 				{
 					mbug_dev->ep_in = ep;
 					mbug_dev->size_in = size;
-				} 
-				else 
+				}
+				else
 				{
 					mbug_dev->ep_out = ep;
 					mbug_dev->size_out = size;
@@ -269,12 +269,12 @@ mbug_device mbug_open_str( const char* id )
 
 //-----------------------------------------------------------------------------------------
 // Extract the device type from a given id string
-// Return value < 0 indiates an invalid id 
+// Return value < 0 indiates an invalid id
 int mbug_type_from_id( const char *id )
 {
 	unsigned int device_type = 0;
 	char *endp = 0;
-	if (!strncmp( id, "MBUG-", 5 ))
+	if (!strncmp( id, "MBUG-", 5 ) || !strncmp( id, "mbug-", 5 ))
 		id += 5;
 	if (strlen(id)!=11 || id[4]!='-')
 		return -1;
@@ -285,12 +285,12 @@ int mbug_type_from_id( const char *id )
 }
 
 // Extract the serial number from a given id string
-// Return value < 0 indiates an invalid id 
+// Return value < 0 indiates an invalid id
 long mbug_serial_from_id( const char *id )
 {
 	unsigned long serial_num = 0;
 	char *endp = 0;
-	if (!strncmp( id, "MBUG-", 5 ))
+	if (!strncmp( id, "MBUG-", 5 ) || !strncmp( id, "mbug-", 5 ))
 		id += 5;
 	if (strlen(id)!=11 || id[4]!='-')
 		return -1;
@@ -319,11 +319,11 @@ int mbug_read( mbug_device dev, void* data, int size )
 {
 	int ret = 0;
 	char data_in[64] = {0};		// (maximum packet size for full speed interrupt/bulk endpoints)
-	
+
 	if (dev==0) return -1;
-	if (size > dev->size_in) 
+	if (size > dev->size_in)
 		size = dev->size_in;
-	
+
 	ret = usb_interrupt_read(
 		dev->usb_dev_handle,
 		dev->ep_in,
@@ -332,7 +332,7 @@ int mbug_read( mbug_device dev, void* data, int size )
 		dev->timeout);
 
 	if (ret<0) return -1;
-	
+
 	memcpy( data, data_in, size );
 	return ret;
 }
@@ -345,11 +345,11 @@ int mbug_write( mbug_device dev, const void* data, int size )
 	char data_out[64] = {0};
 
 	if (dev==0) return -1;
-	if (size > dev->size_out) 
+	if (size > dev->size_out)
 		size = dev->size_out;
 
 	memcpy(data_out, data, size);
-	
+
 	ret = usb_interrupt_write(
 		dev->usb_dev_handle,
 		dev->ep_out,

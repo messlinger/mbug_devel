@@ -162,6 +162,10 @@ int mbug_2151_dmv7008_cmd_addr(mbug_device dev, int syscode, int channel, int cm
  */
 int mbug_2151_dmv7008_cmd_str(mbug_device dev, const char *addr, int cmd);
 
+int mbug_2151_rs200_cmd_addr(mbug_device dev, int syscode, int channel, int cmd);
+int mbug_2151_rs200_cmd_str(mbug_device dev, char *addr, int cmd);
+
+
 //------------------------------------------------------------------------------
 #ifdef __cplusplus
   }

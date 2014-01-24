@@ -1,11 +1,6 @@
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <errno.h>
-
 #include "mbug_2110.h"
+#include "mbug_utils.h"
 
 //---------------------------------------------------------------
 
@@ -16,19 +11,6 @@ enum Action { Help, List, ReadGPIO, WriteGPIO, SetTRIS,
 
 //---------------------------------------------------------------
 
-int str_in( const char* str, ... )
-{
-	va_list args;
-	int match = 0;
-	va_start(args, str);
-	while(1) {
-		const char* next = va_arg(args, const char*);
-		if (next==0 || strlen(next)==0 || (match=!strncmp( str,next,strlen(next)) ))
-			break;
-	}
-	va_end(args);
-	return match;
-}
 
 void parse_options( int argc, char* argv[] )
 {

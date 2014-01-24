@@ -10,7 +10,6 @@
 /** MBUG Library
 
      Stephan Messlinger
-     Last change: 2011-10-13
 
   Very thin layer above libusb-0 to provide a slightly more convenient interface.
 

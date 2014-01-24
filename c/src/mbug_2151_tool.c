@@ -4,23 +4,15 @@
 /*
 	MBUG-2151 command line tool
 
-		Mostly identical to mbug_2151_tool.c, but without support for carrier
+		Mostly identical to mbug_2165_tool.c, but without support for carrier
 		modulation.  Any changes in this file should also be applied in
-		mbug_2151_tool.c.
+		mbug_2165_tool.c.
 
 */
 
 //=================================================================================
 
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-//#include <strings.h>
-#include <ctype.h>
-#include <errno.h>
 #include <time.h>
 #ifdef _WIN32
   #include <windows.h>
@@ -28,6 +20,7 @@
 
 #include "mbug_2151.h"
 #include "mbug_2151_targets.h"
+#include "mbug_utils.h"
 
 //----------------------------------------------------------------------------------
 
@@ -107,67 +100,6 @@ int force = 0;				// Force stop ungracefully
 
 //---------------------------------------------------------------
 
-void errorf( const char *format, ... )
-{
-   va_list args;
-   va_start( args, format );
-   vfprintf( stderr, format, args );
-   va_end( args );
-   exit(1);
-}
-
-int char_in( char c, const char* set )
-{
-	while (*set != 0)
-		if (c == *set++) return 1;
-	return 0;
-}
-
-int str_in( const char* str, ... )
-{
-	va_list args;
-	int match = 0;
-	va_start(args, str);
-	while(1) {
-		const char *next = va_arg(args, const char*);
-		if (next==0 || *next==0) break;
-		if (match = !strcmp(str,next)) break;
-	}
-	va_end(args);
-	return match;
-}
-
-char *str_toupper( char *str )
-{
-	char *p = str;
-	while (*p) {
-		*p = toupper(*p);
-		p++;
-	}
-	return str;
-}
-
-long str_to_int( char* str )
-{
-	char *endp = 0;
-	long val = -1;
-	if (str==0 || *str=='\0') return -1;
-	errno = 0;
-	val = strtoul(str, &endp, 10 );
-	if (errno || *endp!='\0') return -1;
-	return val;
-}
-
-double str_to_float( char* str )
-{
-	char *endp = 0;
-	double val = -1;
-	if (str==0 || *str=='\0') return -1;
-	errno = 0;
-	val = strtod(str, &endp );
-	if (errno || *endp!='\0') return -1;
-	return val;
-}
 
 char *tokenize(tokenize_state_t *state, char *argv[], const char *sep)
 {
@@ -203,19 +135,17 @@ char *tokenize(tokenize_state_t *state, char *argv[], const char *sep)
 
 void parse_device_id( char* str )
 {
-	str_toupper( str );
-	if (strncmp(str,"MBUG-2151",9) == 0)
+	if (strncmp_upper(str,"MBUG-2151",9) == 0)
 		device_serial = mbug_serial_from_id(str);
-	else device_serial = str_to_int(str);
+	else device_serial = str_to_uint(str);
 	if (device_serial < 0) errorf( "#### Invalid device id: %s", str );
 }
 
 void parse_iterations( char* str )
 {
-	str_toupper( str );
-	if (strcmp(str,"INF") == 0)
+	if (strcmp_upper(str,"INF") == 0)
 		iterations = 0;
-	else if ((iterations = str_to_int( str )) < 0)
+	else if ((iterations = str_to_uint( str )) < 0)
 		errorf( "#### Invalid iterations: %s", str );
 }
 
@@ -468,7 +398,7 @@ target_parse_func_type *get_target_parse_function(char *target)
 {
 	int i;
 	for(i = 0; i < NUM_MBUG_2151_TARGETS; i++) {
-		if(!strcmp(str_toupper(target), mbug_2151_targets[i].name)) {
+		if( !strcmp_upper(target, mbug_2151_targets[i].name) ) {
 			return mbug_2151_targets[i].parse_function;
 		}
 	}

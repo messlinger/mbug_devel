@@ -42,6 +42,8 @@
 
 //------------------------------------------------------------------------------
 
+#include "stddef.h"
+
 #include "mbug.h"
 
 // Transmission modes (use in set_sequence)
