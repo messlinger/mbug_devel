@@ -1,6 +1,6 @@
 
 //-----------------------------------------------------------------------
-// Common utility functions for mbug vommand line tools 
+// Common utility functions for mbug vommand line tools
 //-----------------------------------------------------------------------
 
 #include <stdlib.h>
@@ -56,26 +56,26 @@ static int str_in( const char* str, ... )
 static int strcmp_upper( const char *s1, const char *s2 )
 {
 	unsigned int c1, c2;
-	while ( (c1=toupper(*s1)) && (c2=toupper(*s2)) && c1==c2 )
+	while ( (c1=toupper(*s1) , c2=toupper(*s2)) && c1==c2 )
 		s1++, s2++;
 	return c1-c2;
 }
 
 
-/** strncmp independent of character case (similar to the strcmpcase function which 
+/** strncmp independent of character case (similar to the strcmpcase function which
   * is not available on msvc)
   */
 static int strncmp_upper( const char *s1, const char *s2, size_t n )
 {
 	unsigned int c1, c2;
-	while (n-- && (c1=toupper(*s1)) && (c2=toupper(*s2)) && c1==c2)
+	while (n-- && (c1=toupper(*s1) , c2=toupper(*s2)) && c1==c2)
 		s1++, s2++;
 	return c1-c2;
 }
 
 
-/** Convert string to unsigned integer (returned as signed long). In contrast to 
-  * the atoi funtion, no trailing unconvertable characters are allowed. 
+/** Convert string to unsigned integer (returned as signed long). In contrast to
+  * the atoi funtion, no trailing unconvertable characters are allowed.
   * Return -1 in case of a conversion error.
   */
 static long str_to_uint( const char* str )
@@ -90,8 +90,8 @@ static long str_to_uint( const char* str )
 }
 
 
-/** Convert string to positive float. In contrast to the atof funtion, no trailing 
-  * unconvertable characters are allowed. 
+/** Convert string to positive float. In contrast to the atof funtion, no trailing
+  * unconvertable characters are allowed.
   * TODO: Return NAN/INF/etc. in case of a conversion error.
   */
 static double str_to_float( char* str )
