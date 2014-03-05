@@ -36,6 +36,16 @@ class mbug_2820(mbug):
             raise Exception('MBUG-2120 Device Error (Data: %s,%s)'%(s1,s2))
         if T<=-274 or rH<0: raise Exception('MBUG-2120 Sensor Error')
         return T, rH
+
+    def set_mode(self, mode):
+        """Set acquisition mode:
+        'inst', 0: Instantateous. Return last valid maeasurement if not read before, else block.
+        'last', 1: Always return last valid measurement, never blocks.
+        'next', 2: Block until next measurement arrives."""
+        if isinstance(mode, str): mode=mode.upper()
+        try: mode = {0:0, 1:1, 2:2, 'INST':0, 'LAST':1, 'NEXT':2}[mode]
+        except KeyError: raise ValueError("Invalid mode: "+str(mode))
+        self._write((0xF0, mode))
     
 #==========================================================================
 def mbug_2820_test():
