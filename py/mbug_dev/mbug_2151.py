@@ -204,6 +204,8 @@ class mbug_2151(mbug):
             return mbug_2151_target.IKT201(dev=self._dev, addr=addr)
         def RS200(self, addr=None):
             return mbug_2151_target.RS200(dev=self._dev, addr=addr)
+        def LUC308554(self, addr=None):
+            return mbug_2151_target.LUC308554(dev=self._dev, addr=addr)
         
     target = target()   # Make this an instance 
 

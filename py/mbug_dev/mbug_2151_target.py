@@ -109,7 +109,85 @@ class AB440S(mbug_2151_target):
     def off(self):
         if self.addr==None: raise ValueError('Target address has not yet been set.')
         self.switch(self.addr,0)        
+
+#---------------------------------------------------------------------------
+
+class LUC308554(mbug_2151_target):
+    """LUC Art.Nr. 308554 remote controlled power switches. This device class represents a bunch
+    of addressable switches or a single switch (if instantiated with given address)."""
+
+    # Transmission parameters
+    _timebase = 182e-6
+    _iterations = 10
+    _timeout = 2
+    _addr = None
+
+    def __init__(self, dev, addr=None):
+        mbug_2151_target.__init__(self, dev)
+        self.addr = addr
+
+    def _addr_sequence(self, (syscode, addr), on):
+        # The 7-bit system code is fixed internally via solder pads at a the address
+        # pins of the HS-2262 encoder.  For the ease of use, we treat a closed
+        # solder pad as 1, an open solder pad as 0 and pin 1 as the leftmost bit.
+        # Therfore, the syscode can be read from the solder pads as binary number
+        # from left to right.
+        # However, since there are only 128 possible systemcodes, finding the code
+        # by brute force takes less than a minute, so there is no need to open
+        # the housing.
+        # The 3 receivers per system are addressed by special codes on the A7,D1-D0
+        # bits, that result from the electrical wiring of the buttons.
+        #
+        syscode = int(syscode)
+        if syscode<0 or syscode>127: raise ValueError("Invalid system code")
+        addr = int(addr)
+        if addr<1 or addr>3: raise ValueError("Invalid switch address")
+        seq = bin((1<<7)|syscode)[-7:]
+        seq = seq.replace('0','f').replace('1','0')
+        seq += {1:'f01', 2:'f10', 3:'100'}[addr]
+        seq += '01' if on else '10'
+
+        # Convert PT2262 to byte sequence
+        tok = {'0': 0b00010001, '1': 0b01110111, 'f': 0b01110001, 'x': 0b00010111 }
+        bytes = bytearray( [tok.get(c,tok['x']) for c in seq] )
+        bytes[12:16] = (0x01, 0x00, 0x00, 0x00)
+        return bytes
+
+    def switch(self, addr, on, force=0):
+        """Turn addressed remote switch on/off. The address of a switch target consists of
+        2 numbers: The 7 bit system code and the receiver address (1-3).
+        Use with tuple (syscode,addr) as addr, or integer addr only, in which case a
+        previously stored syscode is used (default syscode = 0). System codes are hard coded
+        into a specific transmitter. If you do not know your syscode, try out all values 0..127,
+        which takes less than a minute.
+        """
+        try: addr = (addr[0],addr[1])
+        except: addr = (self.addr[0],addr)
+        self.addr = addr
+        seq = self._addr_sequence(addr, on)
+        self._send( seq, force )
+    
+    def __setitem__(self, addr, on):
+        """Subscript set operator as shortcut for switch().
+        Use with tuple (syscode,addr) as addr, or integer addr only, in which case a
+        previously stored syscode is used (default syscode = 0)."""
+        self.switch(addr, on)
+
+    def __getitem__(self, addr):
+        """Subscript get operator. Returns a switch device instance with the
+        corresponding address. Use with tuple (syscode,addr) as index, or addr
+        only, in which case a previously stored syscode is used (default
+        syscode = 0)."""
+        return self.__class__(self._dev, addr)
+
+    def on(self,on=1):
+        if self.addr==None: raise ValueError('Target address has not yet been set.')
+        self.switch(self.addr,on)
         
+    def off(self):
+        if self.addr==None: raise ValueError('Target address has not yet been set.')
+        self.switch(self.addr,0)      
+
 #-----------------------------------------------------------------------
 
 class HE302EU(mbug_2151_target):
