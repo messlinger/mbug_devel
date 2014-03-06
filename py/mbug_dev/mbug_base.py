@@ -63,6 +63,7 @@ class mbug(object):
                             _repeat( usb.set_configuration, handle, 1 ) 
                             ##usb.claim_interface( handle, 0 )
                             _repeat( usb.claim_interface, handle, 0 )
+                            set_altinterface(handle, 0) # This should (Re)init the interface
                             self._handle = handle
                             self._serial = s
                             self._type = _bin(desc.bcdDevice)
