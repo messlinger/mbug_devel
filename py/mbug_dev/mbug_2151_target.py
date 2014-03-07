@@ -317,15 +317,15 @@ class DMV7008(mbug_2151_target):
     Dimmer function not implemented yet."""
 
     # Transmission parameters
-    _timebase = 240e-6  # 1.92ms / 8
+    _timebase = 120e-6  # 1.92ms / 16
     _iterations = 4
     _timeout = 2
-    addr = None
+    syscode, addr = None, None
 
     def __init__(self, dev, addr=None):
         mbug_2151_target.__init__(self, dev)
-        self.syscode = 0
-        self.addr = addr
+        try: self.syscode, self.addr = addr[0], addr[1]
+        except: self.syscode, self.addr = 0, None
 
     def _addr_sequence(self, (syscode, addr), cmd):
         # Addresses consist of a 12 bit system code + 8 bits addr/cmd code.
@@ -341,13 +341,12 @@ class DMV7008(mbug_2151_target):
         # an 8 bit code (that looks like arbitrarily chosen to me). 
         
         syscode = int(syscode)&0xfff
-        addr = int(addr)
         if addr in ('m','M','master','all'): addr=0
         if not addr in (0,1,2,3,4): raise ValueError('Invalid address.')
         if cmd in ('hell','dimmen'): cmd={'hell':2, 'dimmen':3}[cmd]
         if not cmd in (0,1,2,3): raise ValueError('Invalid command.')
 
-        seq_addr_cmd = { ## 0:off, 1:on, 2:hell, 3:dimmen
+        bits_addr_cmd = { ## 0:off, 1:on, 2:hell, 3:dimmen
             0: {0: 0b11100001, 1: 0b11110000, 2: 0b11101011, 3: 0b11111010},  # master (all receivers) 
             1: {0: 0b00000000, 1: 0b00010001, 2: 0b00001010, 3: 0b00011011},  # channel 1
             2: {0: 0b10000010, 1: 0b10010011, 2: 0b10001000, 3: 0b10011001},  #         2
@@ -355,12 +354,15 @@ class DMV7008(mbug_2151_target):
             4: {0: 0b11000011, 1: 0b11010010, 2: 0b11001001, 3: 0b11011000},  #         4
         }
 
-        seq =  (1<<20) + (syscode<<8) + seq_addr_cmd[addr][cmd]  # start bit, syscode, chan/cmd
+        bits =  (1<<20) + (syscode<<8) + bits_addr_cmd[addr][cmd]  # start bit, syscode, chan/cmd
 
-        pulse = (0b11111100, 0b11000000)  # Data bit 0/1 pulses (approximate, real device uses 1/3 pulse width)
-        seq = [ pulse[(seq>>i)&1] for i in range(21)]
+        pulse = [[0b11111111, 0b11100000], [0b11111000, 0b00000000]] # Approximate 1/3 pulse width
+
+        seq = []
+        for i in range(21):
+            seq += pulse[(bits>>i)&1]
         seq.reverse()
-        seq += [0]*(59-len(seq))   # Repetition rate: 112.8 ms = 59 pulse periods
+        seq += [0]*(118-len(seq))   # Repetition rate: 112.8 ms = 59 pulse periods
         
         return seq
         
@@ -370,10 +372,13 @@ class DMV7008(mbug_2151_target):
         2 numbers: The 12 bit system code and the receiver address (0-4, 0=all).
         Use with tuple (syscode,addr) as addr, or integer addr only, in which case a
         previously stored syscode is used (default syscode = 0)."""
-        try: addr = (addr[0],addr[1])
-        except: addr = (self.addr[0],addr)
-        self.addr = addr
-        seq = self._addr_sequence(addr, on)
+        try:
+            syscode, addr = addr[0], addr[1]
+            self.syscode, self.addr = syscode, addr
+        except:
+            syscode = self.syscode
+            self.addr = addr
+        seq = self._addr_sequence((syscode,addr), on)
         self._send( seq, force )
         
     def dim(self, addr, level, force=0):
@@ -382,9 +387,9 @@ class DMV7008(mbug_2151_target):
         Use with tuple (syscode,addr) as addr, or integer addr only, in which case a
         previously stored syscode is used (default syscode = 0).
         if abs=0 (default), level gives the dim steps relative (positive or negative)
-        to the currently set level. For the devices I have investigated, the maximum
-        dim level is 50. Note, that the dimming is not completely reliable, since
-        the receivers sometimes drop single commands."""
+        to the currently set level. For the DMV-7008, the maximum dim level is 50.
+        For the FiF 4280, the maximum dim level is about 150. Note, that dimming is
+        not completely reliable, since the receivers sometimes drop single commands."""
         try: addr = (addr[0],addr[1])
         except: addr = (self.addr[0],addr)
         level = int(level)
@@ -393,18 +398,18 @@ class DMV7008(mbug_2151_target):
 
         # Wait for device to become ready
         if not force:
-            self._dev.wait_busy(self._timeout)
+            self._wait_busy(self._timeout)
             
         # Resend transmission parameters, since a different target
         # may have been used in the meantime
-        self._dev.set_bitrate(self._bitrate)
+        self._dev.set_timebase(self._timebase)
         self._dev.set_iterations(1)
         seq = self._addr_sequence(addr, cmd)        
-        self._dev.set_sequence(seq)
+        self._dev.set_sequence(seq, self._seq_type)
         for i in range(steps):
-            self.wait_busy(self._timeout)
+            self._wait_busy()
             _time.sleep(0.02)
-            self._dev.enable()        
+            self._dev.start()        
 
     def __setitem__(self, addr, on):
         """Subscript set operator as shortcut for switch().
