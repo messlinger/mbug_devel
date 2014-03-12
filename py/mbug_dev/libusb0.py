@@ -629,7 +629,7 @@ def bulk_write(hdev, endp, data, size=None, timeout=_timeout):
 #---------------------------------------------------------------    
 def bulk_read(hdev, endp, data, size=None, timeout=_timeout):
     _data, _size = _prepare_data_buffer(data,size)
-    ret = usb_bulk_read(hdev, endp, data, size, timeout)
+    ret = usb_bulk_read(hdev, endp, _data, _size, timeout)
     if _data != data:           # Used intermediate buffer?
         data[0:ret] = _data[0:ret]    # Then copy data back to user buffer.
     return ret
@@ -640,16 +640,16 @@ def interrupt_write(hdev, endp, data, size=None, timeout=_timeout):
 #---------------------------------------------------------------    
 def interrupt_read(hdev, endp, data, size=None, timeout=_timeout):
     _data, _size = _prepare_data_buffer(data, size)
-    ret = usb_interrupt_read(hdev, endp, data, size, timeout)
+    ret = usb_interrupt_read(hdev, endp, _data, _size, timeout)
     if _data != data:           # Used intermediate buffer?
         data[0:ret] = _data[0:ret]    # Then copy data back to user buffer.
     return ret
 #---------------------------------------------------------------    
-def control_msg( hdev, requesttype, request, value, index, data,
+def control_msg( hdev, requesttype, request, value, index, data=[],
                  size=None, timeout=_timeout):
     _data, _size = _prepare_data_buffer(data, size)
     ret = usb_control_msg( hdev, requesttype, request, value, index,
-                           data, size, timeout)
+                           _data, _size, timeout)
     if (requesttype & USB_ENDPOINT_IN) \
        and (_data!=data):        # Used intermediate buffer for input request?
         data[0:ret] = _data[0:ret]  # Must copy data to user buffer
@@ -663,6 +663,13 @@ def get_configuration( hdev ):
     usb_control_msg( hdev, USB_ENDPOINT_IN, USB_REQ_GET_CONFIGURATION, 
                      0, 0, byref(conf), 1, _timeout ) 
     return conf.value
+#---------------------------------------------------------------
+# Get active altinterface (not provided by libusb)
+def get_altinterface( hdev ): 
+    aif = c_byte()
+    usb_control_msg( hdev, USB_ENDPOINT_IN, USB_REQ_GET_INTERFACE, 
+                     0, 0, byref(aif), 1, _timeout ) 
+    return aif.value
 #---------------------------------------------------------------
 # Claim interface
 claim_interface = usb_claim_interface
