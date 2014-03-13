@@ -357,14 +357,16 @@ int mbug_2151_ab440s_switch_str( mbug_device dev, const char *addr, int state ) 
 
 int mbug_2151_dmv7008_cmd_addr(mbug_device dev, int syscode, int channel, int cmd) {
 	int i;
-	char seq[59];
+	unsigned char seq[118] = {0};
 	int bits;
+	int iter = 4;
 	const unsigned char cmdbits[5][4] = {
-		{ 0xE1, 0xF0, 0xEB, 0xFA },
-		{ 0x00, 0x11, 0x0A, 0x1B },
-		{ 0x82, 0x93, 0x88, 0x99 },
-		{ 0x41, 0x50, 0x4B, 0x5A },
-		{ 0xC3, 0xD2, 0xC9, 0xD8 }
+		//ON    OFF   INC   DEC  
+		{ 0xE1, 0xF0, 0xEB, 0xFA }, // CH 1
+		{ 0x00, 0x11, 0x0A, 0x1B }, // CH 2
+		{ 0x82, 0x93, 0x88, 0x99 }, // CH 3
+		{ 0x41, 0x50, 0x4B, 0x5A }, // CH 4
+		{ 0xC3, 0xD2, 0xC9, 0xD8 }  // ALL
 	};
 
 	syscode = syscode & 0xFFF;
@@ -375,21 +377,24 @@ int mbug_2151_dmv7008_cmd_addr(mbug_device dev, int syscode, int channel, int cm
 	bits = (1 << 20) | (syscode << 8) | (cmdbits[channel][cmd] << 0);
 
 	for(i = 0; i < 21; i++) {
-		seq[i] = ((bits >> (20-i)) & 1) ? 0xC0 : 0xFC;
-	}
-	for( ; i < 59; i++) {
-		seq[i] = 0;
+		if ((bits >> (20-i)) & 1) {              // Approximate 1/3 pulse width
+			seq[2*i] = 0x00; seq[2*i+1] = 0xF8;  // 0b1111100000000000
+		} else {
+			seq[2*i] = 0xE0; seq[2*i+1] = 0xFF;  // 0b1111111111100000
+		}		
 	}
 
-	if(mbug_2151_set_bitrate(dev, 4167) == -1) {
+	if(mbug_2151_set_bitrate(dev, 8333) == -1) {
 		return -1;
 	}
 
-	if(mbug_2151_set_iterations(dev, 4) == -1) {
+	if (cmd==2 | cmd==3) // :TODO: Use command definitions from mbug_2151_targets.h
+		iter = 1;
+	if(mbug_2151_set_iterations(dev, iter) == -1) {
 		return -1;
 	}
 
-	if(mbug_2151_set_sequence(dev, seq, 59, TX_MODE_BITSTREAM) == -1) {
+	if(mbug_2151_set_sequence(dev, seq, 118, TX_MODE_BITSTREAM) == -1) {
 		return -1;
 	}
 

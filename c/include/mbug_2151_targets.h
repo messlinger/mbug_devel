@@ -22,15 +22,15 @@ void parse_target_dmv7008(tokenize_state_t *state);
 void parse_target_ikt201(tokenize_state_t *state);
 void parse_target_rs200(tokenize_state_t *state);
 
-struct {
+struct { 
 	char *name;
 	target_parse_func_type *parse_function; 
 } mbug_2151_targets[] = {
-	{ "AB440S",  parse_target_ab440s },
-	{ "HE302EU", parse_target_he302eu },
-	{ "DMV7008", parse_target_dmv7008 },
-	{ "GT7008",  parse_target_dmv7008 },
-	{ "FIF4280", parse_target_dmv7008 },
+	{ "AB440S",  parse_target_ab440s },  //:TODO: This initialisation 
+	{ "HE302EU", parse_target_he302eu }, //   should be moved to the unit where
+	{ "DMV7008", parse_target_dmv7008 }, //   the targeted functions are defined.
+	{ "GT7008",  parse_target_dmv7008 }, //   Else, this header file cannot be 
+	{ "FIF4280", parse_target_dmv7008 }, //   included by other files.
 	{ "IKT201",  parse_target_ikt201  },
 	{ "RS200",   parse_target_rs200   },
 };
