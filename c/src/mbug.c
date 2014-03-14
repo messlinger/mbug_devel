@@ -1,6 +1,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <limits.h>
 
 #ifdef _WIN32
@@ -42,8 +43,35 @@ struct mbug_device_struct {
 	void* aux;	// Auxiliary data, managed by device specific libraries
 };
 
+//-------------------------------------------------------------------------------------------
+// Helper functions. Libusb-0 does not provide those special device requests.
+int get_configuration( usb_dev_handle *handle )
+{
+	unsigned char conf;
+	int ret = usb_control_msg( handle, USB_ENDPOINT_IN | USB_RECIP_DEVICE,
+				   USB_REQ_GET_CONFIGURATION,
+				   0, 0, &conf, 1, MBUG_TIMEOUT );
+	if (ret<0) return ret;
+	else return conf;
+}
 
-//----------------------------------------------------------------------
+int get_altinterface( usb_dev_handle *handle, unsigned char interface )
+{
+	unsigned char alt;
+	int ret = usb_control_msg( handle, USB_ENDPOINT_IN | USB_RECIP_INTERFACE,
+				   USB_REQ_GET_INTERFACE ,
+				   0, interface, &alt, 1, MBUG_TIMEOUT );
+	if (ret<0) return ret;
+	else return alt;
+}
+
+int set_feature_endpoint_halt( usb_dev_handle * handle, unsigned int ep )
+{
+	return usb_control_msg( handle, USB_RECIP_DEVICE, USB_REQ_SET_FEATURE,
+				0, ep, 0, 0, MBUG_TIMEOUT );
+}
+
+//--------------------------------------------------------------------------------------------
 // Helper functions. Convert integer to 4 digit bcd format and vice versa.
 // Intended for usage with bcd format descriptor fields.
 unsigned short _bcd(unsigned short bin)
@@ -196,6 +224,14 @@ mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 			#endif
 
 			// Set device to configuration 1
+			// :XXX: Some hardware/drivers mess up the data toggle sync if the configuration
+			//    is not actually changed here (compare USB 2.0 spec. 9.1.1.5 (p.243), 9.4.5 (p. 256)).
+			//    Eg. xHCI on linux does not work correctly, EHCI does.
+			// Workaround:
+			//    Set device to configuration 0 (ie. to unconfigured state)
+			//    and back t0 configuration 1 immediately.
+			ret = usb_set_configuration( handle, 0 );
+			if (ret<0) goto close_and_continue;
 			ret = usb_set_configuration( handle, 1 );
 			if (ret<0) goto close_and_continue;
 
@@ -203,8 +239,7 @@ mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 			ret = usb_claim_interface( handle, 0 );
 			if (ret<0) goto close_and_continue;
 
-			// Everything seems fine so far, so
-			// we consider the device as opened.
+			// Everything seems fine so far, so we consider the device as opened.
 
 			// Create mbug device struct and copy some data for later use
 			mbug_dev = (mbug_device_struct*)
@@ -223,16 +258,15 @@ mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 							endpoint[i].bEndpointAddress;
                 int size = dev->config[0].interface[0].altsetting[0].\
 							endpoint[i].wMaxPacketSize;
-				if (ep&0x80)
-				{
+				if (ep&0x80) {
 					mbug_dev->ep_in = ep;
 					mbug_dev->size_in = size;
-				}
-				else
-				{
+				} else {
 					mbug_dev->ep_out = ep;
 					mbug_dev->size_out = size;
 				}
+				ret = usb_clear_halt( handle, ep );
+				if (ret<0) goto close_and_continue;
 			}
 
 			// Make shure all endpoints are properly recognized

@@ -60,10 +60,9 @@ class mbug(object):
                         s = _repeat( usb.get_string, handle, desc.iSerialNumber )    
                         if (serial==None or s.endswith( str(serial) )):
                             ##usb.set_configuration( handle, 1 )
+                            _repeat( usb.set_configuration, handle, 0 )  # Workaround for xHCI bug
                             _repeat( usb.set_configuration, handle, 1 ) 
-                            ##usb.claim_interface( handle, 0 )
                             _repeat( usb.claim_interface, handle, 0 )
-                            ##usb.set_altinterface(handle, 0) # This should (Re)init the interface
                             self._handle = handle
                             self._serial = s
                             self._type = _bin(desc.bcdDevice)
@@ -75,6 +74,7 @@ class mbug(object):
                                         endpoint[i].wMaxPacketSize
                                 if (ep&0x80): self._ep_in, self._size_in = ep, size
                                 else: self._ep_out, self._size_out = ep, size
+                                usb.clear_halt(handle, ep)
                             return
                     except:
                         usb.close(handle)
