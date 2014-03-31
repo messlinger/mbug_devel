@@ -22,8 +22,19 @@ class mbug_2818(mbug):
         self._write( (0xFB, 0xA0) )     # ASCII format, read
         raw = self._read()
         return [float(i.strip()) for i in raw.strip('\0').split(',')]
+        
+    read = read_ascii
 
-    read = read_ascii    
+    def set_mode(self, mode):
+        """Set the acquisition mode:
+        'inst': Use last measured value if not read before, else wait for next.
+        'last': Always use last valid value, never block.
+        'next': Always wait for next incoming value.
+        'sync': Trigger a new acquisition when reading."""
+        try: cmd = {'INST':0xF2, 'LAST':0xF3, 'NEXT':0xF4, 'SYNC':0xF5}[str(mode).upper()]
+        except KeyError: raise ValueError('Invalid mode')
+        self._write( (cmd,) )
+        return
 
     def set_dout(self, bits):
     	""" Set the digital output state. 
