@@ -229,7 +229,7 @@ mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 			//    Eg. xHCI on linux does not work correctly, EHCI does.
 			// Workaround:
 			//    Set device to configuration 0 (ie. to unconfigured state)
-			//    and back t0 configuration 1 immediately.
+			//    and back to configuration 1 immediately.
 			ret = usb_set_configuration( handle, 0 );
 			if (ret<0) goto close_and_continue;
 			ret = usb_set_configuration( handle, 1 );
@@ -269,7 +269,7 @@ mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 				if (ret<0) goto close_and_continue;
 			}
 
-			// Make shure all endpoints are properly recognized
+			// Make sure all endpoints are properly recognized
 			if (mbug_dev->ep_out==0 || mbug_dev->ep_in==0 ||
 				mbug_dev->size_out==0 || mbug_dev->size_in==0)
 				goto close_and_continue;

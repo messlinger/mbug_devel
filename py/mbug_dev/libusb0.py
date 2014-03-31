@@ -660,14 +660,16 @@ set_configuration = usb_set_configuration
 # Get active configuration (not provided by libusb)
 def get_configuration( hdev ): 
     conf = c_byte()
-    usb_control_msg( hdev, USB_ENDPOINT_IN, USB_REQ_GET_CONFIGURATION, 
+    usb_control_msg( hdev, USB_ENDPOINT_IN | USB_RECIP_DEVICE, 
+                     USB_REQ_GET_CONFIGURATION, 
                      0, 0, byref(conf), 1, _timeout ) 
     return conf.value
 #---------------------------------------------------------------
 # Get active altinterface (not provided by libusb)
 def get_altinterface( hdev ): 
     aif = c_byte()
-    usb_control_msg( hdev, USB_ENDPOINT_IN, USB_REQ_GET_INTERFACE, 
+    usb_control_msg( hdev, USB_ENDPOINT_IN | USB_RECIP_INTERFACE, 
+                     USB_REQ_GET_INTERFACE, 
                      0, 0, byref(aif), 1, _timeout ) 
     return aif.value
 #---------------------------------------------------------------
