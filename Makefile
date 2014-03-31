@@ -21,12 +21,14 @@ python: udev_rule
 	cp  99-mbug.rules  $(sysconfdir)/udev/rules.d
 
 udev_rule:
-	echo  SUBSYSTEM=="usb", ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="fbc3", MODE="0666" \
+	echo  SUBSYSTEM==\"usb\", ATTRS{idVendor}==\"04d8\", ATTRS{idProduct}==\"fbc3\", MODE=\"0666\" \
 	  > $(sysconfdir)/udev/rules.d/99-mbug.rules
+	udevadm control --reload-rules
 
 uninstall:
 	$(MAKE) -C  c/linux/  uninstall
 	rm  $(sysconfdir)/udev/rules.d/99-mbug.rules  
+	udevadm control --reload-rules
 	
 clean:  
 	$(MAKE) -C  c/linux/  clean
