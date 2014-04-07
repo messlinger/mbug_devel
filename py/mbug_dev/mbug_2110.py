@@ -1,5 +1,5 @@
 
-from mbug_base import *
+from .mbug_base import *
 
 #======================================================================
 class mbug_2110(mbug):
@@ -149,13 +149,13 @@ class mbug_2110(mbug):
 def mbug_2110_test():
     # Print device list
     devs = list_devices(2110)
-    print "Attached MBUG-2110 devices:"
-    print devs if devs!=[] else 'None'
+    print("Attached MBUG-2110 devices:")
+    print(devs if devs!=[] else 'None')
 
     # Open devices
     for ser in devs:
         try:
-            print "Device", ser
+            print("Device", ser)
             dev = mbug_2110(ser)
             d = mbug_2110()
             d.gpio_tris(0x000)
@@ -165,7 +165,7 @@ def mbug_2110_test():
             d._pwm_set(0.2)
             d.uart_config(19200)
             d.uart_send("12345")
-            print d.uart_recv()
+            print(d.uart_recv())
         finally:
             try: dev.close()
             except: pass

@@ -25,13 +25,13 @@ from os.path import isdir, isfile
 from shutil import copy
 
 def error(str):
-    print '####', str
-    raw_input()
+    print('####', str)
+    input()
     exit(-1)
 
 if sys.version_info[0] > 2:
-    error('Sorry, only Python versions < 3 are supported.')
-print 'Python version: ', sys.version
+    print('### Note: Python 3 support is still experimental.')
+print('Python version: ', sys.version)
  
 libpath = [p for p in sys.path if p.endswith('site-packages')] # Preferred location
 if not libpath:
@@ -48,14 +48,14 @@ if 'subdir' in dir() and subdir!='':
         files += ['__init__.py']
         
 if not isdir(destdir):
-    print 'Creating directory:', destdir
+    print('Creating directory:', destdir)
     mkdir(destdir)
     if not isdir(destdir):
         error('Error creating directory')
 
 for f in files:
     destf = destdir + sep + f
-    print 'Copying file:', f, 'to', destf
+    print('Copying file:', f, 'to', destf)
     copy(f, destf)
     if not isfile(destf):
         error('Error copying file')
@@ -64,5 +64,5 @@ for f in files:
         error('Error setting file permissions')
 
 if len(sys.argv)>1 and not '-q' in sys.argv[1]:
-    print 'Done. Press key to quit.'
-    raw_input()
+    print('Done. Press key to quit.')
+    input()

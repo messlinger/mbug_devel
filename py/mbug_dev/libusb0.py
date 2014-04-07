@@ -66,7 +66,7 @@ elif sys.platform=='linux2':
     LIBUSB_PATH_MAX = os.pathconf('/',4)+1 
     LIBUSB_HAS_GET_DRIVER_NP = 1
     LIBUSB_HAS_DETACH_KERNEL_DRIVER_NP = 1
-else: raise 'libusb0.py: Operating system not supported.'    
+else: raise RuntimeError('libusb0.py: Operating system not supported.')
 
 
 #================================================================
@@ -349,7 +349,7 @@ usb_get_string_simple = \
     _PROTOTYPE( int, usb_dev_handle_p, c_int, POINTER(c_char), c_size_t ) \
     ( ('usb_get_string_simple', _lib),
       ( (1, "dev"), (1, "index"), (1, "buf"), (1, "buflen")  ) )
-usb_get_string.__name__ = 'usb_get_string'
+usb_get_string.__name__ = 'usb_get_string_simple'
 usb_get_string.errcheck = _errcheck
 #---------------------------------------------------------------
 # descriptors.c
@@ -516,7 +516,7 @@ usb_get_busses = \
     _PROTOTYPE( POINTER(usb_bus) ) \
     ( ('usb_get_busses', _lib), None )
 usb_get_busses.__name__ = 'usb_get_busses'
-usb_get_busses.errcheck = _errcheck
+usb_get_busses.errcheck = _errcheck_ptr
 
 #---------------------------------------------------------------
 # int usb_get_driver_np(usb_dev_handle *dev, int interface, char *name, unsigned int namelen);
@@ -578,7 +578,7 @@ def get_string(hdev, index, langid=None):
         s = create_string_buffer(len)
         r = usb_get_string_simple(hdev, index, s, len)
         if r<=0: return None
-        if r<len: return s.value
+        if r<len: return s.value.decode()
         len *= 2
 # :TODO: 
 # Distinguish between unicode/simple version by presence of language id parameter

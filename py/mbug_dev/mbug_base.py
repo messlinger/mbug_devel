@@ -2,7 +2,7 @@
 
 #-----------------------------------------------------------------
 from threading import Lock as _Lock
-import libusb0 as usb
+from . import libusb0 as usb
 #-----------------------------------------------------------------
 
 def mbug_list(type=None):
@@ -57,7 +57,7 @@ class mbug(object):
                     handle = usb.open(dev)  # Need to open the device to query string descriptors
                     try:    
                         ## s = usb.get_string( handle, desc.iSerialNumber )
-                        s = _repeat( usb.get_string, handle, desc.iSerialNumber )    
+                        s = _repeat( usb.get_string, handle, desc.iSerialNumber )
                         if (serial==None or s.endswith( str(serial) )):
                             ##usb.set_configuration( handle, 1 )
                             _repeat( usb.set_configuration, handle, 0 )  # Workaround for xHCI bug
@@ -74,7 +74,6 @@ class mbug(object):
                                         endpoint[i].wMaxPacketSize
                                 if (ep&0x80): self._ep_in, self._size_in = ep, size
                                 else: self._ep_out, self._size_out = ep, size
-                                usb.clear_halt(handle, ep)
                             return
                     except:
                         usb.close(handle)
@@ -97,13 +96,14 @@ class mbug(object):
         return self._type
 
     def _write(self, data):
-        """ Write raw data to the device. Data should be list-like or a single integer.
-            Data is automatically cropped or filled to the required endpoint size.  """
+        """Write raw data to the device. Data should be list-like, a string (bytes or 
+        unicode) or a single integer. Data is automatically cropped or filled to the 
+        required endpoint size.  """
         if self._handle is None:
             raise Exception("Invalid device.")
         try: iter(data)      # Try to iterate.
-        except TypeError: 
-            data = (data,)  # Convert to tuple.
+        except TypeError: data = (data,)  # Convert to tuple.
+        if isinstance(data, str): data = data.encode()  # Convert str to bytes 
         with self._io__Lock:
             usb.interrupt_write( self._handle, self._ep_out, bytearray(data), self._size_out )
 
@@ -120,9 +120,9 @@ class mbug(object):
 # Helper function. Convert integer to 4 digit bcd format and vice versa.
 # Intended for usage with bcd format descriptor fields.
 def _bcd(bin):
-    return sum([ ((int(bin)/10**d)%10 )*(1<<4*d) for d in range(4)])
+    return sum([ ((int(bin)//10**d)%10 )*(1<<4*d) for d in range(4) ])
 def _bin(bcd):
-    return sum([ ((int(bcd)/16**d)%16 )*(10**d) for d in range(4)])
+    return sum([ ((int(bcd)//16**d)%16 )*(10**d) for d in range(4) ])
     
 #----------------------------------------------------------------------
 # Helper function. Try call to libusb function several times.
@@ -132,7 +132,7 @@ def _repeat( func, *args ):
     for i in range(nrep):
         try: 
             res = func( *args )
-            if res!= None and res>=0: break
+            if (isinstance(res,int) and res>=0) or res!=None: break 
         except usb.LibusbError:
             if i==nrep-1: raise
     return res
@@ -143,10 +143,10 @@ def _repeat( func, *args ):
 def mbug_test( typ=None ):
     if typ==None:
         devs = list_devices(None)
-        print "Attached devices:"
-        print devs if devs!=[] else "None"
+        print("Attached devices:")
+        print(devs if devs!=[] else "None")
     for t in mbug_types if typ==None else typ:
-        exec("import mbug_%.4d" % t)
+        exec("from . import mbug_%.4d" % t)
         exec("mbug_%.4d.mbug_%.4d_test()" % (t,t) )
 
 

@@ -265,8 +265,6 @@ mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 					mbug_dev->ep_out = ep;
 					mbug_dev->size_out = size;
 				}
-				ret = usb_clear_halt( handle, ep );
-				if (ret<0) goto close_and_continue;
 			}
 
 			// Make sure all endpoints are properly recognized

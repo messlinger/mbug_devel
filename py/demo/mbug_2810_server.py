@@ -1,21 +1,25 @@
+import sys
+py3 = sys.version_info[0] > 2
 #--------------------------------------------------------------------------------
 port = 80 ##8080
 datafile = 'temperature.dat'
 plotfile = 'temperature.png'
 webpage = 'temperature.html'
 #--------------------------------------------------------------------------------
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+if py3: from http.server import BaseHTTPRequestHandler, HTTPServer
+else: from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 BaseHTTPRequestHandler.wbufsize = -1
-import urlparse
+if py3: from urllib.parse import urlparse, parse_qs
+else: from urlparse import urlparse, parse_qs
 #--------------------------------------------------------------------------------
 class MyHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         scheme,netloc,path,params,query,fragment = urlparse.urlparse(self.path)
 
         upd, displ = 10, '24h'
-        query = urlparse.parse_qs(query)
-        if query.has_key('update'): upd = int(query['update'][0])
-        if query.has_key('display'): displ = query['display'][0]
+        query = parse_qs(query)
+        if 'update' in query: upd = int(query['update'][0])
+        if 'display' in query: displ = query['display'][0]
 
         if path.endswith('.html') or path.endswith('htm'):
             self.send_webpage(upd,displ)
@@ -41,6 +45,7 @@ class MyHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type',content_type)
         self.end_headers()
+        if isinstance(data, str): data = data.encode('utf-8')
         self.wfile.write( data )
         return
     def send_webpage(self,upd=10,displ='24h'):
@@ -100,7 +105,7 @@ def serve():
         global temp, max, min
         temp = max = min = thermo.read()
     except:
-        print 'Thermometer not found. Webserver mode only.'
+        print('Thermometer not found. Webserver mode only.')
         thermo = None
 
     server = HTTPServer(('', port), MyHandler)
@@ -112,7 +117,7 @@ def serve():
     
     try:        
         server_thread.start()
-        print "Start server on port %s. Hit Ctrl+C to stop." % port
+        print("Start server on port %s. Hit Ctrl+C to stop." % port)
 
         next_read = next_store = time()
         while(1):

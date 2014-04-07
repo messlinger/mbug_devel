@@ -1,5 +1,5 @@
 
-from mbug_base import *
+from .mbug_base import *
 
 #==========================================================================
 class mbug_2820(mbug):
@@ -51,19 +51,19 @@ class mbug_2820(mbug):
 def mbug_2820_test():
     # Print device list
     devs = list_devices(2820)
-    print "Attached MBUG-2820 devices:"
-    print devs if devs!=[] else 'None'
+    print("Attached MBUG-2820 devices:")
+    print(devs if devs!=[] else 'None')
 
     # Open devices
     for ser in devs:
         try:
-            print "Device", ser
+            print("Device", ser)
             dev = mbug_2820(ser)
             ##data = dev.read_raw()
             ##T, rH = dev.from_raw(data)
             ##print "Data:", data, T, rH
             T,rH = dev.read()
-            print "Data:", T, rH
+            print("Data:", T, rH)
         finally:
             try: dev.close()
             except: pass

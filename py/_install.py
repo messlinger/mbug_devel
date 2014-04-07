@@ -2,4 +2,4 @@
 
 import os
 os.chdir('mbug_dev')
-execfile('_install.py')
+exec(compile(open('_install.py').read(), '_install.py', 'exec'))

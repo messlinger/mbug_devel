@@ -1,5 +1,5 @@
 
-from mbug_base import *
+from .mbug_base import *
 
 #==========================================================================
 class mbug_2802(mbug):
@@ -106,15 +106,15 @@ GPIODAT  = 0x0E
 def mbug_2802_test():
     # Print device list
     devs = list_devices(2812)
-    print "Attached MBUG-2812 devices:"
-    print devs if devs!=[] else 'None'
+    print("Attached MBUG-2812 devices:")
+    print(devs if devs!=[] else 'None')
 
     # Open devices
     for ser in devs:
         try:
-            print "Device", ser
+            print("Device", ser)
             dev = mbug_2812(ser)
-            print "No test implemented for this device"
+            print("No test implemented for this device")
         finally:
             dev.close()
 
@@ -193,13 +193,13 @@ from time import time
 
 ##for Iex in [0.25, 0.5, 0.25, 0.75, 0.25, 1.0, 0.25, 1.5, 0.25, 1.5, 0.25, 1.0, 0.25, 0.75, 0.25, 0.5, 0.25]:
 for Iex in [0.05, 0.1, 0.05, 0.25, 0.05, 0.5, 0.05, 0.5, 0.05, 0.25, 0.05, 0.1, 0.05]:
-    print 
+    print() 
     for N in range(200):
         Ur,Or,Uref,Oref = meas(Iex, pga=2) 
-        print time(), '\t',
-        print 1e2*(Ur-Or)/(Uref-Oref), '\t',
-        print Ur, '\t', Or, '\t', Uref, '\t', Oref, '\t', 
-        print Iex
+        print(time(), '\t', end=' ')
+        print(1e2*(Ur-Or)/(Uref-Oref), '\t', end=' ')
+        print(Ur, '\t', Or, '\t', Uref, '\t', Oref, '\t', end=' ') 
+        print(Iex)
         
 
 
