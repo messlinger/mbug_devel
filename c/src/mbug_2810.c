@@ -51,12 +51,16 @@ int mbug_2810_read_raw( mbug_device dev )
 // Read the current temperature (ascii mode)
 double mbug_2810_read_ascii( mbug_device dev )
 {
-	char tem[16] = {0};
+	char str[16] = {0};
+	double tem;
 	if (mbug_write( dev, "read", 5) <5)
 		return NOT_A_TEMPERATURE;
-	if (mbug_read( dev, tem, 8 ) <8)
+	if (mbug_read( dev, str, 8 ) <8)
 		return NOT_A_TEMPERATURE;
-	return atof(tem);
+	tem = atof(str);
+	if (tem < NOT_A_TEMPERATURE)
+		tem -= strtol(str+5, 0, 16);
+	return tem;
 }
 
 //------------------------------------------------------------------------------
