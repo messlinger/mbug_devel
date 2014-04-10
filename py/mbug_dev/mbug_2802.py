@@ -1,4 +1,4 @@
-
+import sys
 from .mbug_base import *
 
 #==========================================================================
@@ -196,10 +196,9 @@ for Iex in [0.05, 0.1, 0.05, 0.25, 0.05, 0.5, 0.05, 0.5, 0.05, 0.25, 0.05, 0.1, 
     print() 
     for N in range(200):
         Ur,Or,Uref,Oref = meas(Iex, pga=2) 
-        print(time(), '\t', end=' ')
-        print(1e2*(Ur-Or)/(Uref-Oref), '\t', end=' ')
-        print(Ur, '\t', Or, '\t', Uref, '\t', Oref, '\t', end=' ') 
-        print(Iex)
+        sys.stdout.write('%f\t ' % time() )
+        sys.stdout.write('%f\t ' % (1e2*(Ur-Or)/(Uref-Oref)) )
+        print( Ur, '\t', Or, '\t', Uref, '\t', Oref, '\t', Iex )
         
 
 

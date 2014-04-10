@@ -3,6 +3,18 @@ MBUG host software
 Installation instructions
 -------------------------------------------
 
+
+0. DOWNLOAD
+
+   The latest release version of the MBUG host software can be downloaded from
+     http://www.staff.uni-bayreuth.de/~bt150361/mbug/mbug.zip
+   
+   The latest development version can be get from github:
+     https://github.com/messlinger/mbug_devel
+   For the development version, the python module is named mbug_dev, to allow
+   both release and develompment modules to be installed concurrently.
+
+
 1. LINUX
 
 
@@ -33,30 +45,48 @@ Installation instructions
     files to /usr/local/include and the command line tools to /usr/local/bin.
     It will also install the python module and create an udev-rule that gives 
     all users full access to all plugged-in mbug devices.  
+
+    To install the python module separately, eg. for a different python 
+    version, change to the folder mbug/py/ and execute
+    
+      python setup.py install
+    
+    This will install the mbug module (or the mbug_dev module for the develop-
+    ment version) to your python library.
+    
     
     
 2. WINDOWS
 
 
-1.1 Prerequisites
+2.1 Prerequisites
 
     None.  
 
     
-1.2 Installation
+2.2 Installation
 
     The software comes with a pre-built library and command line tools. Copy
-    the command line tools from folder mbug_host\c\windows\bin\ to your system
+    the command line tools from folder mbug\c\windows\bin\ to your system
     folder (typically C:\windows), or to any other folder contained in your 
-    search path.
+    search path. The install.bat script in mbug\c\windows folder does
+    exactly this.
     
     To use the C library in your own programs, use the static library from 
-    mbug_host\c\windows\lib\mbug.lib and the header files from folder 
-    mbug_host\c\include\ . The windows library is already contains all depen-
+    mbug\c\windows\lib\mbug.lib and the header files from folder 
+    mbug\c\include\ . The windows library is already contains all depen-
     dencies to the underlying libusb library.  
+    
+    The python module has to be installed separately: Change to the folder
+    mbug\py\ and execute  
+    
+      python setup.py install  
+      
+    from the command line.  Alternatively, you can just execute the script 
+    _install.py without any parameters (eg. by double-clicking).
 
 
-1.3 Device drivers
+2.3 Device drivers
 
     To use an MBUG device on a Windows platform, a device driver is needed.
     After plugging in a new MBUG device, the operating system will ask for
@@ -64,5 +94,6 @@ Installation instructions
     should then be installed automatically.  You can safely disregard any
     messages concerning compatibility or certification.
     
+
     
 3. HAVE FUN
