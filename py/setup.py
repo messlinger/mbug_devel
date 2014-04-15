@@ -9,5 +9,5 @@ setup(name='mbug_dev',
     )
 
 remove_tree('build')
-if sys.version[0] >= 3:
+if int(sys.version[0]) >= 3:
     print('### Warning: python3 support may still be buggy.')
