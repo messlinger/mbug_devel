@@ -1,4 +1,3 @@
-
 import time as _time
 
 #==========================================================================
@@ -522,7 +521,7 @@ class IKT201(mbug_2151_target):
         except:
             syscode = self.syscode
             self.addr = addr
-        seq = self._sequence(addr, level=level)
+        seq = self._sequence(syscode,addr, level=level)
         self._send( seq, force )
 
     def __setitem__(self, addr, on):
