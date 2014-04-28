@@ -49,7 +49,7 @@ Installation instructions
     To install the python module separately, eg. for a different python 
     version, change to the folder mbug/py/ and execute
     
-      python setup.py install
+      sudo python setup.py install
     
     This will install the mbug module (or the mbug_dev module for the develop-
     ment version) to your python library.
@@ -82,8 +82,8 @@ Installation instructions
     
       python setup.py install  
       
-    from the command line.  Alternatively, you can just execute the script 
-    _install.py without any parameters (eg. by double-clicking).
+    from the command line.  Alternatively, you can just execute the 
+    _install.py script without any parameters (eg. by double-clicking).
 
 
 2.3 Device drivers
