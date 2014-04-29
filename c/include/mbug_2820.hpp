@@ -66,10 +66,9 @@ class mbug_2820
 
 		unsigned long read_raw( void )
 			{
-				unsigned long data = 
-					mbug_2820_read_raw(dev);
-				if (data==0xFFFFFFFF)
-					throw mbug::error("mbug_2820: sensor or read error.");
+				long data =  mbug_2820_read_raw(dev);
+				if (data<0)
+					throw mbug::error("mbug_2820: sensor or usb error.");
 				return data;
 			}
 		
