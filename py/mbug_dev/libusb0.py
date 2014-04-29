@@ -601,7 +601,7 @@ def get_string(hdev, index, langid=None):
 #----------------------------------------------------------------
 # Helper function 
 # Set default timeout for transfer calls 
-_timeout = 5000
+_timeout = 1000
 def set_timeout(timeout):
     _timeout = int(timeout)
 #----------------------------------------------------------------

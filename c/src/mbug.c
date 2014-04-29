@@ -25,7 +25,7 @@
 #define MBUG_MAX_DEVICES		255
 #define MBUG_MAX_SERIAL_LEN		32
 
-#define MBUG_TIMEOUT			5000 // (ms)
+#define MBUG_TIMEOUT			1000 // (ms)
 
 //-----------------------------------------------------------------------------------------
 
