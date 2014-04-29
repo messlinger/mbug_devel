@@ -18,7 +18,6 @@ install: udev_rule
 	
 python: udev_rule
 	$(MAKE) -C  py/  install
-	cp  99-mbug.rules  $(sysconfdir)/udev/rules.d
 
 udev_rule:
 	echo  SUBSYSTEM==\"usb\", ATTRS{idVendor}==\"04d8\", ATTRS{idProduct}==\"fbc3\", MODE=\"0666\" \
