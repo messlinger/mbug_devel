@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>304</width>
-    <height>316</height>
+    <width>299</width>
+    <height>314</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -315,8 +315,42 @@
     </item>
    </layout>
   </widget>
-  <zorder>gridLayoutWidget</zorder>
-  <zorder>label_2</zorder>
+  <widget class="QComboBox" name="comboBox_CurrentTarget">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>280</y>
+     <width>101</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="currentIndex">
+    <number>-1</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="debug">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>280</y>
+     <width>81</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="comboBox_SystemCode">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>280</y>
+     <width>70</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
