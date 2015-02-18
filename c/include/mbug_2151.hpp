@@ -7,9 +7,6 @@
 /** MBUG Library
 	  Class wrapper for
 	  MBUG-2165 433 MHz Transmitter
-
-      Stephan Messlinger
-      Last change: 2013-08-04
 */
 
 //------------------------------------------------------------------------------

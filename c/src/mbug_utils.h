@@ -1,6 +1,6 @@
 
 //-----------------------------------------------------------------------
-// Common utility functions for mbug vommand line tools
+// Common utility functions for mbug command line tools
 //-----------------------------------------------------------------------
 
 #include <stdlib.h>
@@ -9,6 +9,15 @@
 #include <errno.h>
 #include <string.h>
 #include <ctype.h>
+#include <sys/timeb.h>
+#ifdef _WIN32
+	#include <windows.h>
+#elif __linux__
+	#include <unistd.h>
+#else
+	#error "OS not supported"
+#endif
+
 
 //-----------------------------------------------------------------------
 
@@ -120,3 +129,37 @@ static char* arg_tok( char**argv, const char* sep )
 	if (a) if (a = strtok( 0, sep )) return a;
 	return *av ? a = strtok( *av++, sep ) : 0;  // Remember: Standard requires argv[argc]==0
 }
+
+
+/** Get current time with millisecond resolution.
+    NOTE: On Windows, the timestamp is only updated every 10 or 15 milliseconds.
+ */
+double floattime( void )
+{
+	#ifdef _WIN32
+		struct timeb t = {0};
+		ftime(&t);
+		return t.time + 1e-3 * t.millitm;
+	#elif __linux__
+		struct timeval tv = {0};
+		gettimeofday( &tv, 0 );
+		return tv.tv_sec + 1e-6*tv.tv_usec;
+	#endif
+
+}
+
+
+/** Wait until specified timestamp with sub-second resolution. */
+void waittime( double timestamp )
+{
+	#ifdef _WIN32
+		while (floattime() < timestamp)
+			Sleep(0);	// Will return at next time update interrupt
+	#elif __linux__
+		double delta;
+		while ( (delta = timestamp - floattime()) > 0)
+			if (delta >= 1e-3) 
+				usleep( delta>0.1 ? 100000 : 0.8*1e6*delta );
+	#endif
+}
+

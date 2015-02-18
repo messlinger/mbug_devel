@@ -3,15 +3,12 @@
 #define MBUG_2820_H
 #ifdef __cplusplus
   extern "C" {
-#endif 
+#endif
 
 //------------------------------------------------------------------------------
 
 /** MBUG Library
 	2820 Environmeter device interface
-
-     Stephan Messlinger
-     Last change: 2013-12-03
 
 	mbug_2820_list()              - Get a list of attached devices
 	mbug_2820_open()		      - Open a device with specified serial number
@@ -38,12 +35,12 @@
  */
 const mbug_device_list  mbug_2820_list( void );
 
-/** Open a device specified by it's serial number (as int, 
+/** Open a device specified by it's serial number (as int,
  *  last digits of the serial number are matched only).
  */
 mbug_device mbug_2820_open( unsigned long serial_num );
 
-/** Open a device specified by it's id string (equals the 
+/** Open a device specified by it's id string (equals the
  *  usb serial string as returned by mbug_2820_list )
  */
 mbug_device mbug_2820_open_str( const char *id );
@@ -52,8 +49,8 @@ mbug_device mbug_2820_open_str( const char *id );
  */
 void mbug_2820_close( mbug_device dev );
 
-/** Read measurements: Temperature, humidity. Data is written to the passed 
- *  pointer locations. Values < NOT_A_TEMPERATURE indicate sensor errors. 
+/** Read measurements: Temperature, humidity. Data is written to the passed
+ *  pointer locations. Values < NOT_A_TEMPERATURE indicate sensor errors.
  *  Pass NULL if you are not interested in the respective value.
  */
 int mbug_2820_read( mbug_device dev, double *temperature, double *humidity );
@@ -75,5 +72,5 @@ long mbug_2820_read_raw( mbug_device dev );
 //------------------------------------------------------------------------------
 #ifdef __cplusplus
   }
-#endif 
+#endif
 #endif // MBUG_2820_h

@@ -10,9 +10,6 @@
 /** MBUG Library
 	MBUG-2155 IR Transmitter
 
-       Stephan Messlinger
-       Last change: 2013-08-02
-
 	mbug_2165_list()                    - Get a list of attached devices
 	mbug_2165_open()					- Open a device with specified serial number
 	mbug_2165_open_str()	            - Open a device with specified id string

@@ -1,6 +1,7 @@
 
 #include "mbug_2820.h"
 #include "mbug_utils.h"
+#include <stdio.h>
 
 //-------------------------------------------------------------------------------
 
@@ -35,8 +36,18 @@ const char* usage =
 
 //--------------------------------------------------------------------------------
 
+mbug_device device = 0;  // Device handle
+
 int device_serial = 0;
-enum Action { Read, List, Help } action = Read;
+enum Action { Read, List, Record, Help } action = Read;
+enum Format { Celsius, Fahrenheit, Kelvin, Raw } format = Celsius;
+
+// Recording mode:
+const char* rec_filename = 0;  // Destination file name
+FILE* rec_file = 0;          // File handle
+double rec_interval = 1.0; // Update interval
+unsigned long rec_number = 0;
+int rec_silent = 0;        // Silent flag (no print to stdout)
 
 //---------------------------------------------------------------
 
@@ -48,6 +59,46 @@ void parse_device_id( char* str )
 		device_serial = mbug_serial_from_id(str);
 	else device_serial = str_to_uint(str);
 	if (device_serial < 0) errorf( "#### Invalid device id: %s", str );
+}
+
+/** Extract temperature format. */
+void parse_format( char* str )
+{
+	char* s = str;
+	if (s == 0) errorf( "#### Invalid format: %s", str );
+	while (*s != 0) *s++ = toupper(*s);
+	if (str_in(str, "C", "CELSIUS", 0 ))  format = Celsius;
+	else if (str_in(str, "F", "FAHRENHEIT", 0 ))  format = Fahrenheit;
+	else if (str_in(str, "K", "KELVIN", 0 ))  format = Kelvin;
+	else if (str_in(str, "R", "RAW", 0 ))  format = Raw;
+	else errorf( "#### Invalid format: %s", str );
+}
+
+
+/** Extract record output filename. */
+void parse_recfilename( const char* str )
+{
+	if (str==0 || *str=='\0') 
+		errorf( "#### Invalid filename: %s", str );
+	rec_filename = str;
+}
+
+/** Extract record interval. */
+parse_recinterval( const char* str )
+{
+	rec_interval = str_to_float(str);
+	if (rec_interval<0)
+		errorf( "#### Invalid interval: %s", str );
+}
+
+/** Extract number of records. */
+parse_recnumber( const char* str )
+{
+	if (strcmp_upper(str,"INF") == 0)
+		rec_number = 0;
+	else if ((rec_number = str_to_uint(str))<0)
+		errorf( "#### Invalid number: %s", str );
+	printf("rec_number=%d\n",rec_number);
 }
 
 /** Parse the argv for command line parameters. */
@@ -65,8 +116,31 @@ void parse_options( int argc, char* argv[] )
 			action = Help;
 		else if (str_in( cmd, "d", "dev", "device", 0 ))
 			parse_device_id( arg_tok(0,"") );
+		else if (str_in( cmd, "fmt", "format", 0 ))
+			parse_format( arg_tok(0,"") );
+		else if (str_in( cmd, "log", "rec", "record", 0 ))
+			action = Record;
+		else if (str_in( cmd, "file", 0 ))
+			parse_recfilename( arg_tok(0,"") );
+		else if (str_in( cmd, "s", "silent", 0 ))
+			rec_silent = 1;
+		else if (str_in( cmd, "i", "int", "interval", 0 ))
+			parse_recinterval( arg_tok(0,"") );
+		else if (str_in( cmd, "n", "num", "number", 0 ))
+			parse_recnumber( arg_tok(0,"") );
 		else
 			errorf( "#### Unknown command: %s", cmd );
+	}
+}
+
+
+void cleanup( void )
+{
+	if (device)
+		mbug_2820_close( device );
+	if (rec_file) { 
+		fflush( rec_file );
+		fclose( rec_file ); rec_file=0;
 	}
 }
 
@@ -74,40 +148,77 @@ void parse_options( int argc, char* argv[] )
 
 int main( int argc, char* argv[] )
 {
-	mbug_device thermometer = 0;
-
+	atexit( cleanup );
 	parse_options( argc, argv );
 
 	if (action==List)
-		{
-			// List all attached thermometers
-			int i;
-			mbug_device_list list = mbug_get_device_list(2820);
-			for (i=0; list[i]!=0; i++ ) {
-				puts(list[i]);
-			}
-			return 0;
+	{
+		// List all attached devices
+		int i;
+		mbug_device_list list = mbug_get_device_list(2820);
+		for (i=0; list[i]!=0; i++ ) {
+			puts(list[i]);
 		}
+		return 0;
+	}
 
 	if (action==Help)
-		{
-			puts(usage);
-			return 0;
-		}
+	{
+		puts(usage);
+		return 0;
+	}
 
 	// Open device
-	thermometer = mbug_2820_open( device_serial );
-	if (thermometer ==0 )
+	device = mbug_2820_open( device_serial );
+	if (device ==0 )
 		errorf("#### Error opening device.");
 
 	if (action==Read)
-		{
-			double tem, hum;
-			mbug_2820_read( thermometer, &tem, &hum );
-			printf( "%.2f,%.2f\n", tem, hum );
+	{
+		int err = 0;
+		double tem, hum;
+		err = mbug_2820_read( device, &tem, &hum );
+		if (err) printf( "#### Read error\n" );
+		printf( "%.2f,%.2f\n", tem, hum );
+	}
+
+	if (action==Record)
+	{
+		int err = 0;
+		double tim, tem, hum;
+		char str[500];
+		unsigned long nn = 0;
+
+		if (rec_filename != 0) 
+		{			
+			rec_file = fopen( rec_filename, "a" );
+			if (rec_file == 0)
+				errorf( "#### Error opening file %s\n", rec_filename );  
 		}
 
-	mbug_2820_close(thermometer);
+		tim = floattime();
+		sprintf( str, "\n\n# %s\n# Start recording at %.2f\n# timestamp\ttemp\thumidity\n", mbug_id(device), tim );
+		if (rec_file)  fputs(str, rec_file);
+		if (!rec_silent)  fputs(str, stdout); 
+
+		tim = floattime();
+		for( nn=0; (rec_number==0)||(nn<rec_number); nn++)
+		{
+			err = mbug_2820_read( device, &tem, &hum );
+			if (err) { 
+				fputs( "#### Read error\n", stdout ); 
+				if (rec_file) fputs( "#### Read error\n", rec_file); 
+			}
+			sprintf( str, "%.2f\t%.2f\t%.2f\n", tim, tem, hum );
+			if (rec_file)  { fputs( str, rec_file ); fflush(rec_file); };
+			if (!rec_silent) { fputs(str, stdout); fflush(stdout); }
+
+			tim += rec_interval;
+			waittime( tim );
+		}
+
+	}
+
 	return 0;
 }
 

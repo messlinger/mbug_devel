@@ -3,15 +3,12 @@
 #define MBUG_2818_H
 #ifdef __cplusplus
   extern "C" {
-#endif 
+#endif
 
 //------------------------------------------------------------------------------
 
 /** MBUG Library
 	2818 Thermometer device interface
-
-     Stephan Messlinger
-     Last change: 2011-10-28
 
 	mbug_2818_list()        - Get a list of attached devices
 	mbug_2818_open()		- Open a device with specified serial number
@@ -37,12 +34,12 @@
  */
 const mbug_device_list  mbug_2820_list( void );
 
-/** Open a device specified by it's serial number (as int, 
+/** Open a device specified by it's serial number (as int,
  *  last digits of the serial number are matched only).
  */
 mbug_device mbug_2818_open( int serial_num );
 
-/** Open a device specified by it's id string (equals the 
+/** Open a device specified by it's id string (equals the
  *  usb serial string as returned by mbug_2820_list )
  */
 mbug_device mbug_2818_open_str( const char *id );
@@ -57,13 +54,13 @@ void mbug_2818_close( mbug_device dev );
 double mbug_2818_read( mbug_device dev, int channel );
 
 /** Read all temperature values (as Degrees Celsius).
-    Data is written to the passed double buffer, n specifies 
+    Data is written to the passed double buffer, n specifies
 	the number of channels to read (max 8).
  */
 int mbug_2818_read_all( mbug_device dev, double temperatures[], int n );
 
 /** Read raw 16-bit data values (as coming from ADC).
-    Data is written to the passed buffer buffer, n specifies 
+    Data is written to the passed buffer buffer, n specifies
 	the number of channels to read (max 8).
  */
 int mbug_2818_read_raw( mbug_device dev, unsigned short data[], int n );
@@ -71,5 +68,5 @@ int mbug_2818_read_raw( mbug_device dev, unsigned short data[], int n );
 //------------------------------------------------------------------------------
 #ifdef __cplusplus
   }
-#endif 
+#endif
 #endif // MBUG_2818_h

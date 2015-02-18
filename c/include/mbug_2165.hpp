@@ -7,9 +7,6 @@
 /** MBUG Library
 	  Class wrapper for
 	  MBUG-2165 IR Transmitter
-
-      Stephan Messlinger
-      Last change: 2013-08-02
 */
 
 //------------------------------------------------------------------------------

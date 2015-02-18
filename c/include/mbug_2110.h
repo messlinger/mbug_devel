@@ -10,9 +10,6 @@
 /** MBUG Library
 	2110 GPIO Interface
 
-     Stephan Messlinger
-     Last change: 2013-02-26
-
 	mbug_2110_list()        - Get a list of attached devices
 	mbug_2110_open()		- Open a device with specified serial number
 	mbug_2110_open_str()	- Open a device with specified id string
@@ -44,7 +41,7 @@ const mbug_device_list  mbug_2151_list( void );
  */
 mbug_device mbug_2110_open( int serial_num );
 
-/** Open a device specified by it's id string (equals the 
+/** Open a device specified by it's id string (equals the
  *  usb serial string as returned by mbug_2820_list )
  */
 mbug_device mbug_2110_open_str( const char *id );
@@ -63,17 +60,17 @@ will only be applied to GPIO ports that are configured for digital output.
  */
 int mbug_2110_set_gpio( mbug_device dev, unsigned int bits );
 
-/** Set the GPIO tristate directions (12 bits, little endian bit packed, 
+/** Set the GPIO tristate directions (12 bits, little endian bit packed,
 0: Output, 1: Input).
  */
 int mbug_2110_set_tris( mbug_device dev, unsigned int tris );
 
-/** Enable the analog input channels (8 bits, little endian bit packed, 1:enable, 
+/** Enable the analog input channels (8 bits, little endian bit packed, 1:enable,
 0:disable). ADC channels 0..7 are multiplexed with GPIO channels 3..10.
  */
 int mbug_2110_enable_adc( mbug_device dev, unsigned int channels );
 
-/** Read all analog input channels (wether enabled or not). ADC resolution is 
+/** Read all analog input channels (wether enabled or not). ADC resolution is
 10 bit (0-1023). Readings are returned as array of 8*16 bit integers.
  */
 const unsigned short * mbug_2110_read_adc( mbug_device dev );
@@ -83,7 +80,7 @@ const unsigned short * mbug_2110_read_adc( mbug_device dev );
 int mbug_2110_enable_pwm( mbug_device dev, int channels );
 
 /** Set the pwm duty cycle. Duty cycle resolution is 10 bit. For convenience,
-the duty cycle can be passed as integer in range 0..1023 or as float in the 
+the duty cycle can be passed as integer in range 0..1023 or as float in the
 range 0..1.
  */
 int mbug_2110_set_pwm( mbug_device dev, int duty );

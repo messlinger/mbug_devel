@@ -5,11 +5,8 @@
 //------------------------------------------------------------------------------
 
 /** MBUG Library
-	Class wrapper for 
+	Class wrapper for
 	2110 GPIO interface
-
-     Stephan Messlinger
-     Last change: 2013-02-27
 */
 
 //------------------------------------------------------------------------------
@@ -44,7 +41,7 @@ class mbug_2110
 			{
 				close();
 			}
-		
+
 		void close( void )
 			{
 				mbug_2110_close(dev);

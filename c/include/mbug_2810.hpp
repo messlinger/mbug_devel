@@ -5,11 +5,8 @@
 //------------------------------------------------------------------------------
 
 /** MBUG Library
-	Class wrapper for 
+	Class wrapper for
 	2810 Thermometer device interface
-
-     Stephan Messlinger
-     Last change: 2011-10-13
 */
 
 //------------------------------------------------------------------------------
@@ -45,7 +42,7 @@ class mbug_2810
 			{
 				close();
 			}
-		
+
 		void close( void )
 			{
 				mbug_2810_close(dev);

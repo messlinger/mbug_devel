@@ -388,7 +388,7 @@ int mbug_2151_dmv7008_cmd_addr(mbug_device dev, int syscode, int channel, int cm
 		return -1;
 	}
 
-	if (cmd==2 | cmd==3) // :TODO: Use command definitions from mbug_2151_targets.h
+	if (cmd==2 || cmd==3) // :TODO: Use command definitions from mbug_2151_targets.h
 		iter = 1;
 	if(mbug_2151_set_iterations(dev, iter) == -1) {
 		return -1;

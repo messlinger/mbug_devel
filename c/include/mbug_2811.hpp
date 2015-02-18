@@ -7,9 +7,6 @@
 /** MBUG Library
 	Class wrapper for
 	2811 Thermometer device interface
-
-     Stephan Messlinger
-     Last change: 2013-2-14
 */
 
 //------------------------------------------------------------------------------

@@ -5,11 +5,8 @@
 //------------------------------------------------------------------------------
 
 /** MBUG Library
-	Class wrapper for 
+	Class wrapper for
 	2820 Environmeter device interface
-
-     Stephan Messlinger
-     Last change: 2013-12-15
 */
 
 //------------------------------------------------------------------------------
@@ -47,7 +44,7 @@ class mbug_2820
 			{
 				close();
 			}
-		
+
 		void close( void )
 			{
 				mbug_2820_close(dev);
@@ -71,7 +68,7 @@ class mbug_2820
 					throw mbug::error("mbug_2820: sensor or usb error.");
 				return data;
 			}
-		
+
 	protected:
 		mbug_device dev;
 

@@ -10,9 +10,6 @@
 /** MBUG Library
 	2810 Thermometer device interface
 
-     Stephan Messlinger
-     Last change: 2011-09-25
-
 	mbug_2810_list()        - Get a list of attached devices
 	mbug_2810_open()		- Open a device with specified serial number
 	mbug_2818_open_str()	- Open a device with specified id string
@@ -45,7 +42,7 @@ const mbug_device_list  mbug_2810_list( void );
  */
 mbug_device mbug_2810_open( int serial_num );
 
-/** Open a device specified by it's id string (equals the 
+/** Open a device specified by it's id string (equals the
  *  usb serial string as returned by mbug_2820_list )
  */
 mbug_device mbug_2810_open_str( const char *id );

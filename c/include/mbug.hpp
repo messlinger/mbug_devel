@@ -6,9 +6,6 @@
 
 /** MBUG Library
 	C++ wrapper
-
-     Stephan Messlinger
-     Last change: 2011-10-07
 */
 
 //------------------------------------------------------------------------------
@@ -28,7 +25,7 @@ namespace mbug {
 
 	device_list get_device_list( int device_type = 0)
 	{
-		mbug_device_list p = 
+		mbug_device_list p =
 			mbug_get_device_list(0);
 
 		device_list list;
@@ -36,15 +33,15 @@ namespace mbug {
 		{
 			list.push_back( std::string(p[i]) );
 		}
-		return list; 
+		return list;
 	}
 
 //------------------------------------------------------------------------------
 
 	struct error: public std::runtime_error
 	{
-		error(const std::string& msg) 
-			: runtime_error( msg + " " + mbug_error(0) ) 
+		error(const std::string& msg)
+			: runtime_error( msg + " " + mbug_error(0) )
 			{
 			}
 	};

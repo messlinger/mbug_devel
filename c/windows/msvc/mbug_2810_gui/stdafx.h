@@ -1,21 +1,26 @@
-// stdafx.h : include file for standard system include files,
-// or project specific include files that are used frequently, but
-// are changed infrequently
+// stdafx.h : Include-Datei für Standard-System-Include-Dateien,
+//  oder projektspezifische Include-Dateien, die häufig benutzt, aber
+//      in unregelmäßigen Abständen geändert werden.
 //
 
+#if !defined(AFX_STDAFX_H__5FE88848_D166_4A43_8FB6_9DEF20129B8C__INCLUDED_)
+#define AFX_STDAFX_H__5FE88848_D166_4A43_8FB6_9DEF20129B8C__INCLUDED_
+
+#if _MSC_VER > 1000
 #pragma once
+#endif // _MSC_VER > 1000
 
-#include "targetver.h"
+#define VC_EXTRALEAN		// Selten verwendete Teile der Windows-Header nicht einbinden
 
-#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
-// Windows Header Files:
-#include <windows.h>
-
-// C RunTime Header Files
-#include <stdlib.h>
-#include <malloc.h>
-#include <memory.h>
-#include <tchar.h>
+#include <afxwin.h>         // MFC-Kern- und -Standardkomponenten
+#include <afxext.h>         // MFC-Erweiterungen
+#include <afxdtctl.h>		// MFC-Unterstützung für allgemeine Steuerelemente von Internet Explorer 4
+#ifndef _AFX_NO_AFXCMN_SUPPORT
+#include <afxcmn.h>			// MFC-Unterstützung für gängige Windows-Steuerelemente
+#endif // _AFX_NO_AFXCMN_SUPPORT
 
 
-// TODO: reference additional headers your program requires here
+//{{AFX_INSERT_LOCATION}}
+// Microsoft Visual C++ fügt unmittelbar vor der vorhergehenden Zeile zusätzliche Deklarationen ein.
+
+#endif // !defined(AFX_STDAFX_H__5FE88848_D166_4A43_8FB6_9DEF20129B8C__INCLUDED_)

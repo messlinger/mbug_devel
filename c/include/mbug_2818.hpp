@@ -5,11 +5,8 @@
 //------------------------------------------------------------------------------
 
 /** MBUG Library
-	Class wrapper for 
+	Class wrapper for
 	2818 Thermometer device interface
-
-     Stephan Messlinger
-     Last change: 2011-10-27
 */
 
 //------------------------------------------------------------------------------
@@ -47,7 +44,7 @@ class mbug_2818
 			{
 				close();
 			}
-		
+
 		void close( void )
 			{
 				mbug_2818_close(dev);
@@ -74,7 +71,7 @@ class mbug_2818
 				std::vector<double> vdat(dat, dat+8);
 				return vdat;
 			}
-		
+
 	protected:
 		mbug_device dev;
 

@@ -9,8 +9,6 @@
 
 /** MBUG Library
 
-     Stephan Messlinger
-
   Very thin layer above libusb-0 to provide a slightly more convenient interface.
 
     mbug_get_device_list()  -  Get a list of available devices.
@@ -41,10 +39,10 @@ enum mbug_acquistion_mode {  // (Most devices only support a subset of acquisiti
 };
 
 enum mbug_transmission_mode {
-	TX_MODE_BITSTREAM = 0,	// Bitstream mode: Transmit sequence bits subsequently with 
+	TX_MODE_BITSTREAM = 0,	// Bitstream mode: Transmit sequence bits subsequently with
 						    //    fixed bitrate. Start with the LSB of the first sequence byte.
 	TX_MODE_TIMED_8, 	    // Timed 8-bit mode: Sequence bytes specifiy the interval
-					        //    times (high/low alternatingly). 
+					        //    times (high/low alternatingly).
 	TX_MODE_TIMED_16	    // Timed 8-bit mode: Like 8-bit mode, but 2 consecutive bytes
 };
 
@@ -62,7 +60,7 @@ const mbug_device_list  mbug_get_device_list( unsigned int device_type );
  */
 mbug_device mbug_open_int( unsigned int device_type, unsigned long serial );
 
-/** Open a device specified by it's id string (equals the USB serial number, 
+/** Open a device specified by it's id string (equals the USB serial number,
  * as returned by mbug_device_list: "MBUG-TTTT-SSSSSS"). The leading "MBUG-"
  * may be omitted.
  */
@@ -87,6 +85,10 @@ int mbug_read( mbug_device dev, void* data, int size );
 /** Write data to device (blocking).
  */
 int mbug_write( mbug_device dev, const void* data, int size );
+
+/** Get id string from opened device handle ("MBUG-XXXX-XXXXXX").
+ */
+const char* mbug_id( mbug_device dev );
 
 /** Get last error message (in plain text).
  */

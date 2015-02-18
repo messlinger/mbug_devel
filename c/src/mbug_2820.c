@@ -42,7 +42,7 @@ void mbug_2820_close( mbug_device dev )
 int mbug_2820_read( mbug_device dev, double *temperature, double *humidity )
 {
 	char data[16] = {0};
-	int ret;
+	int ret = 0;
 	char* endp = 0;
 
 	if (temperature!=0)

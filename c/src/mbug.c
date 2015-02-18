@@ -22,10 +22,10 @@
 #define VID	 0x04D8
 #define PID	 0xFBC3
 
-#define MBUG_MAX_DEVICES		255
-#define MBUG_MAX_SERIAL_LEN		32
+#define MBUG_MAX_DEVICES	255
+#define MBUG_MAX_ID_LEN		32
 
-#define MBUG_TIMEOUT			1000 // (ms)
+#define MBUG_TIMEOUT		1000 // (ms)
 
 //-----------------------------------------------------------------------------------------
 
@@ -36,7 +36,7 @@ struct mbug_device_struct {
 	struct usb_device* usb_device;
 	struct usb_dev_handle* usb_dev_handle;
 	int device_type;
-	char serial[MBUG_MAX_SERIAL_LEN+1];
+	char id[MBUG_MAX_ID_LEN+1];
 	int timeout;
 	int ep_out, ep_in;
 	int size_out, size_in;
@@ -76,13 +76,15 @@ int set_feature_endpoint_halt( usb_dev_handle * handle, unsigned int ep )
 // Intended for usage with bcd format descriptor fields.
 unsigned short _bcd(unsigned short bin)
 {
-    return ((bin/1)%10)*(1<<0) + ((bin/10)%10)*(1<<4)
-		+ ((bin/100)%10)*(1<<8) + ((bin/1000)%10)*(1<<12);
+    return (unsigned short)
+		( ((bin/1)%10)*(1<<0) + ((bin/10)%10)*(1<<4)
+		+ ((bin/100)%10)*(1<<8) + ((bin/1000)%10)*(1<<12) );
 }
 unsigned short _bin(unsigned short bcd)
 {
-	return ((bcd>>0)%16 )*(1) + ((bcd>>4)%16 )*(10)
-		+ ((bcd>>8)%16 )*(100) + ((bcd>>12)%16 )*(1000);
+	return (unsigned short)
+		( ((bcd>>0)%16 )*(1) + ((bcd>>4)%16 )*(10)
+		+ ((bcd>>8)%16 )*(100) + ((bcd>>12)%16 )*(1000) );
 }
 
 //-----------------------------------------------------------------------------------------
@@ -90,12 +92,12 @@ unsigned short _bin(unsigned short bcd)
 const mbug_device_list mbug_get_device_list(unsigned int device_type)
 {
 	static char* device_list[MBUG_MAX_DEVICES+1];
-	static char serial_numbers[MBUG_MAX_DEVICES+1][MBUG_MAX_SERIAL_LEN+1];
+	static char serial_numbers[MBUG_MAX_DEVICES+1][MBUG_MAX_ID_LEN+1];
 
 	struct usb_bus* bus = 0;
 	usb_dev_handle* handle = 0;
 	int idev = 0;
-	char serial_str[MBUG_MAX_SERIAL_LEN] = "";
+	char serial_str[MBUG_MAX_ID_LEN] = "";
 	int ret = 0;
 	int i;
 
@@ -143,7 +145,7 @@ const mbug_device_list mbug_get_device_list(unsigned int device_type)
 			if (ret<0) goto close_and_continue;
 
 			// Match! Add device to list.
-			strncpy( serial_numbers[idev], serial_str, MBUG_MAX_SERIAL_LEN );
+			strncpy( serial_numbers[idev], serial_str, MBUG_MAX_ID_LEN );
 			device_list[idev] = serial_numbers[idev];
 			if (++idev>=MBUG_MAX_DEVICES) break;
 
@@ -163,7 +165,7 @@ mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 	struct usb_bus* bus =0 ;
 	struct usb_device *dev = 0;
 	usb_dev_handle* handle = 0;
-	char serial_str[MBUG_MAX_SERIAL_LEN] = "";
+	char id_str[MBUG_MAX_ID_LEN] = "";
 	int ret = 0;
 	int nepts = 0;
 	int i = 0;
@@ -198,19 +200,19 @@ mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 
 			// Read the iSerialNumber string
 			ret = usb_get_string_simple( handle, dev->descriptor.iSerialNumber,
-				                             serial_str, sizeof(serial_str)  );
+				                             id_str, sizeof(id_str)  );
 			// :XXX:
 			// Low speed mbugs sometimes give errors when querying string descriptors:
 			// -5 sending control message failed. This only happens with some USB hubs.
 			// Workaround: Try several times
 			for (i=0; ret<0 && i<50; i++)
 				ret = usb_get_string_simple( handle, dev->descriptor.iSerialNumber,
-				                             serial_str, sizeof(serial_str)  );
+				                             id_str, sizeof(id_str)  );
 			if (ret<0) goto close_and_continue;
 
 			// Compare serial number.
 			if (serial_num != 0 &&
-				serial_num != atoi(serial_str+strlen(serial_str)-6) )
+				serial_num != (unsigned long)atoi(id_str+strlen(id_str)-6) )  // MBUG-XXXX-XXXXXX, last 6 chars are the serial number
 				goto close_and_continue;
 
 			// Everything matches, so this is our device.
@@ -247,7 +249,7 @@ mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 			mbug_dev->usb_device = dev;
 			mbug_dev->usb_dev_handle = handle;
 			mbug_dev->device_type = _bin(device_type);
-			strncpy( mbug_dev->serial, serial_str, sizeof(mbug_dev->serial) );
+			strncpy( mbug_dev->id, id_str, sizeof(mbug_dev->id) );
 			mbug_dev->timeout = MBUG_TIMEOUT;
 			mbug_dev->aux = 0;
 			// Parse endpoints
@@ -311,7 +313,7 @@ int mbug_type_from_id( const char *id )
 	if (strlen(id)!=11 || id[4]!='-')
 		return -1;
 	device_type = strtoul( id, &endp, 10 );
-	if (*endp != '\0' || device_type<1000)
+	if (*endp != '-' || device_type<1000)
 		return -1;
 	return device_type;
 }
@@ -342,6 +344,7 @@ void mbug_close( mbug_device dev )
 	if (dev->aux != 0)
 		free( dev->aux );
 	free(dev);
+	dev = 0;
 	return;
 }
 
@@ -389,6 +392,13 @@ int mbug_write( mbug_device dev, const void* data, int size )
 		dev->size_out,
 		dev->timeout);
 	return ret;
+}
+
+//-----------------------------------------------------------------------------------------
+
+const char* mbug_id( mbug_device dev )
+{
+	return (const char*) dev->id;
 }
 
 //-----------------------------------------------------------------------------------------
