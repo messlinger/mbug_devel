@@ -2,7 +2,6 @@
 '''
     File :       libusb0.py
     Author:      Stephan Messligner
-    Last change: 2012-01-15
 
     Simple ctypes wrapper for libusb-0.1
 
@@ -66,7 +65,7 @@ elif sys.platform=='linux2':
     LIBUSB_PATH_MAX = os.pathconf('/',4)+1 
     LIBUSB_HAS_GET_DRIVER_NP = 1
     LIBUSB_HAS_DETACH_KERNEL_DRIVER_NP = 1
-else: raise RuntimeError('libusb0.py: Operating system not supported.')
+else: raise 'libusb0.py: Operating system not supported.'    
 
 
 #================================================================
@@ -578,7 +577,7 @@ def get_string(hdev, index, langid=None):
         s = create_string_buffer(len)
         r = usb_get_string_simple(hdev, index, s, len)
         if r<=0: return None
-        if r<len: return s.value.decode()
+        if r<len: return s.value
         len *= 2
 # :TODO: 
 # Distinguish between unicode/simple version by presence of language id parameter
@@ -601,7 +600,7 @@ def get_string(hdev, index, langid=None):
 #----------------------------------------------------------------
 # Helper function 
 # Set default timeout for transfer calls 
-_timeout = 1000
+_timeout = 5000
 def set_timeout(timeout):
     _timeout = int(timeout)
 #----------------------------------------------------------------

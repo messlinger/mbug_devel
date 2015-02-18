@@ -1,6 +1,6 @@
 
-from .mbug_base import *
-from . import mbug_2151_target
+from mbug_base import *
+import mbug_2151_target
 import time as _time
 
 #==========================================================================
@@ -47,7 +47,7 @@ class mbug_2151(mbug):
     	dividers and word length (8 or 16 bit) are chose automatically from the 
     	data if not passed explicitely. If set manually, the on/off time intervals
     	equate as t*clkdiv/base_clock. Minimum interval = ??? XXXX"""
-    	print(":TODO: NOT IMPLEMENTED YET")
+    	print ":TODO: NOT IMPLEMENTED YET"
 
     def set_sequence_times_8(self, data):
         nbytes = len(data)
@@ -113,7 +113,7 @@ class mbug_2151(mbug):
         if div>2**16-1: div=2**16-1;
         rfreq = self._base_clock/div
         if abs(1.*rfreq/freq-1.)>0.01:  # Deviation > 1%
-            print("Warning. Set bitrate to %.1e."%(rfreq))
+            print "Warning. Set bitrate to %.1e."%(rfreq)
         self.set_clock_div(div)
         return rfreq
 
@@ -215,13 +215,13 @@ class mbug_2151(mbug):
 def mbug_2151_test():
     # Print device list
     devs = list_devices(2151)
-    print("Attached MBUG-2151 devices:")
-    print(devs if devs!=[] else 'None')
+    print "Attached MBUG-2151 devices:"
+    print devs if devs!=[] else 'None'
 
     # Open devices
     for ser in devs:
         try:
-            print("Device", ser)
+            print "Device", ser
             dev = mbug_2151(ser)
             sw = dev.target.AB440S()
             sw['A'] = 1

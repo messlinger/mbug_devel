@@ -1,7 +1,7 @@
 
 
 #-----------------------------------------------------------------
-from .mbug_base import *
+from mbug_base import *
 #-----------------------------------------------------------------
 
 # Moved all device classes to separate files. Import them all.
@@ -9,9 +9,9 @@ mbug_types = [ 2110, 2151, 2165, 2810, 2811, 2818, 2820 ]
 types = mbug_types
 
 for _t in mbug_types:
-    exec( "from .mbug_%.4d import mbug_%.4d" % (_t,_t) )
+    exec( "from mbug_%.4d import mbug_%.4d" % (_t,_t) )
     
-from . import mbug_2151_target
+import mbug_2151_target
 
 #-----------------------------------------------------------------
 

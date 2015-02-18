@@ -1,5 +1,5 @@
 
-from .mbug_base import *
+from mbug_base import *
 
 #==========================================================================
 class mbug_2818(mbug):
@@ -21,7 +21,7 @@ class mbug_2818(mbug):
         """ Get the current reading as temperature"""      
         self._write( (0xFB, 0xA0) )     # ASCII format, read
         raw = self._read()
-        return [float(i.strip()) for i in raw.strip(b'\0').split(b',')]
+        return [float(i.strip()) for i in raw.strip('\0').split(',')]
         
     read = read_ascii
 
@@ -78,16 +78,16 @@ class mbug_2818(mbug):
 def mbug_2818_test():
     # Print device list
     devs = list_devices(2818)
-    print("Attached MBUG-2818 devices:")
-    print(devs if devs!=[] else 'None')
+    print "Attached MBUG-2818 devices:"
+    print devs if devs!=[] else 'None'
 
     # Open devices
     for ser in devs:
         try:
-            print("Device", ser)
+            print "Device", ser
             dev = mbug_2818(ser)
             temps = dev.read()
-            print("Temperatures: ", temps)
+            print "Temperatures: ", temps
         finally:
             try: dev.close()
             except: pass

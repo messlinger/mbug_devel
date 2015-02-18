@@ -1,5 +1,5 @@
 
-from .mbug_base import *
+from mbug_base import *
 
 #==========================================================================
 class mbug_2165(mbug):
@@ -66,10 +66,10 @@ class mbug_2165(mbug):
             "### Warning: Some sequence items are too long and will be clipped. ###"
         tau = 1.*div/self._base_clock
         if min(data)/tau<10:
-            print("### Warning: Some sequence items are too short and will have a low resolution. ###")
+            print "### Warning: Some sequence items are too short and will have a low resolution. ###"
         for i,d in enumerate(data):
             data[i] = int(data[i]/tau + 0.5)
-        self.set_timebase(tau)
+        self.set_tau(tau)
         if bits==8: self.set_sequence_times_8bit(data)
         else: self.set_sequence_times_16bit(data)
         return
@@ -139,7 +139,7 @@ class mbug_2165(mbug):
         if div>2**16-1: div=2**16-1;
         rfreq = self._base_clock/div
         if abs(1.*rfreq/freq-1.)>0.01:  # Deviation > 1%
-            print("Warning. Set bitrate to %.1e."%(rfreq))
+            print "Warning. Set bitrate to %.1e."%(rfreq)
         self.set_clock_div(div)
         return rfreq
 
@@ -176,7 +176,7 @@ class mbug_2165(mbug):
             rfreq = self._mod_base_clock/div
             rd = 1.*rfreq/freq-1.
             if abs(rd)>0.01:
-                print("Warning. Set modulation frequency to %.1e."%(rfreq))
+                print "Warning. Set modulation frequency to %.1e."%(rfreq)
         self.set_mod_clock_div(div)
         return rfreq
 
@@ -388,13 +388,13 @@ class Canon_WLD5000(mbug_2165_target):
 def mbug_2165_test():
     # Print device list
     devs = list_devices(2165)
-    print("Attached MBUG-2165 devices:")
-    print(devs if devs!=[] else 'None')
+    print "Attached MBUG-2165 devices:"
+    print devs if devs!=[] else 'None'
 
     # Open devices
     for ser in devs:
         try:
-            print("Device", ser)
+            print "Device", ser
             dev = mbug_2165(ser)
             ##tar = mbug_2165.target.Canon_WLD5000()
             ##tar.trigger()
