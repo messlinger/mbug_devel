@@ -2,11 +2,12 @@
 # Demo script for the MBUG_2810 device interface class
 #
 
-from devices.mbug import mbug_2818
+try: import mbug
+except ImportError: import mbug_dev as mbug
 import time
 
 # Open the first device and print the current temperature
-therm = mbug_2818()
+therm = mbug.mbug_2818()
 
 # Open file
 file = open('temperature.dat', 'a', 0)

@@ -41,6 +41,7 @@ lib  /out:mbug.lib   mbug.obj  mbug_2110.obj  mbug_2151.obj  mbug_2165.obj ^
                      libusb.lib
 
 cl /Felsmbug.exe     %_src%/lsmbug.c          /link mbug.lib
+cl /Fembug_2110.exe  %_src%/mbug_2110_tool.c  /link mbug.lib
 cl /Fembug_2151.exe  %_src%/mbug_2151_tool.c  /link mbug.lib
 cl /Fembug_2165.exe  %_src%/mbug_2165_tool.c  /link mbug.lib
 cl /Fembug_2810.exe  %_src%/mbug_2810_tool.c  /link mbug.lib

@@ -156,8 +156,7 @@ def mbug_2110_test():
     for ser in devs:
         try:
             print "Device", ser
-            dev = mbug_2110(ser)
-            d = mbug_2110()
+            d = mbug_2110(ser)
             d.gpio_tris(0x000)
             d.gpio_set(0xfff)
             d.gpio_set(0x000)

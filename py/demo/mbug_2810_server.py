@@ -94,8 +94,9 @@ def create_plot():
 
 def serve():
     try:
-        import mbug_2810
-        thermo = mbug_2810.open()
+        try: import mbug
+	except ImportError: import mbug_dev as mbug
+        thermo = mbug.mbug_2810()
         serial = thermo.serial()
         global temp, max, min
         temp = max = min = thermo.read()

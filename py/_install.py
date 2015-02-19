@@ -1,5 +1,4 @@
 #!/usr/bin/env python
 
 import os
-os.chdir('mbug_dev')
-execfile('_install.py')
+os.system('python setup.py install')

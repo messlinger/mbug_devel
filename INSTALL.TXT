@@ -66,11 +66,14 @@ Installation instructions
     
 2.2 Installation
 
-    The software comes with a pre-built library and command line tools. Copy
-    the command line tools from folder mbug\c\windows\bin\ to your system
-    folder (typically C:\windows), or to any other folder contained in your 
-    search path. The install.bat script in mbug\c\windows folder does
-    exactly this.
+    The software comes with a pre-built library, command line tools and
+    some GUI programs.
+    Unfotunately, there is no covenient installer yet. To make the tools
+    accessible on your system, copy the command line tools from folder 
+    mbug\c\windows\bin\ to your system folder (typically C:\windows), or 
+    to any other folder contained in your search path. The install.bat 
+    script in the mbug\ folder does exactly this. Alternatively, you can
+    add the folder mbug\c\windows\bin\ to your search path.
     
     To use the C library in your own programs, use the static library from 
     mbug\c\windows\lib\mbug.lib and the header files from folder 
