@@ -1,8 +1,8 @@
-// stdafx.cpp : source file that includes just the standard includes
-// mbug_2810_gui.pch will be the pre-compiled header
-// stdafx.obj will contain the pre-compiled type information
+// stdafx.cpp : Quelltextdatei, die nur die Standard-Includes einbindet
+//	mbug_2810_gui.pch ist die vorcompilierte Header-Datei
+//	stdafx.obj enthält die vorcompilierte Typinformation
 
 #include "stdafx.h"
 
-// TODO: reference any additional headers you need in STDAFX.H
-// and not in this file
+
+

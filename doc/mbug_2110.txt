@@ -7,9 +7,9 @@ Documentation
 1. OVERVIEW
 
     The MBUG-2110 GPIO is a general purpose USB input/output device.  Besides
-    12 channels digital input/outputs it provides 8 analog inputs (10 bit resolution),
-    1 PWM output (10 bits duty cycle resolution) and one channel asynchronous 
-    serial input/output. 
+    12 channels digital input/outputs it provides 8 analog inputs (10 bit 
+    resolution), 1 PWM output (10 bits duty cycle resolution) and one channel 
+    asynchronous serial input/output. 
     The device comes with cross platform C library, Python library and command 
     line tool.  A graphical user interface tool is in preparation.  On Linux,
     platform the device works without drivers by using the libusb-0 library. 
@@ -21,14 +21,15 @@ Documentation
     SPI/I2C
     Counter/Timer input
     Digital input interrupt on change
+    Eeprom read/write
     Impulse generator
 
 
 
 2. HARDWARE
 
-    The device is based on a PIC18F14k50 microcontroller.  More extensive 
-    specifications on the various hardware modules can be found in the 
+    The device is based on a PIC18F14k50 microcontroller running at 16Mhz CPU clock.  More extensive 
+    specifications on the various built-in hardware modules can be found in the 
     datasheet.  See www.microchip.com for the latest revision.
     
     
@@ -117,7 +118,7 @@ Documentation
 
     Port 0 can be configured as pulse width modulated output.  The digital 
     output function is disabled in this case.  Currently, the PWM frequency 
-    is fixed to 11718.75 Hz.  (However, future revisions my allow to change
+    is fixed to 15625 Hz.  (However, future revisions my allow to change
     the PWM frequency.)  The PWM duty cycle can be set with 10 bit resolution
     (range 0..1023), corresponding to duty cycles in the range 0..1023/1024.
     
