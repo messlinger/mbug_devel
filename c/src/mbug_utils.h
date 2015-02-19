@@ -103,7 +103,7 @@ static long str_to_uint( const char* str )
   * unconvertable characters are allowed.
   * TODO: Return NAN/INF/etc. in case of a conversion error.
   */
-static double str_to_float( char* str )
+static double str_to_float( const char* str )
 {
 	char *endp = 0;
 	double val = -1;

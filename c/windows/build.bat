@@ -24,14 +24,16 @@ set LIB=%_lib%;%_lusb_lib%;%LIB%
 
 pushd build
 
-cl  %_src%/mbug.c       /c 
-cl  %_src%/mbug_2110.c  /c
-cl  %_src%/mbug_2151.c  /c
-cl  %_src%/mbug_2165.c  /c
-cl  %_src%/mbug_2810.c  /c 
-cl  %_src%/mbug_2811.c  /c 
-cl  %_src%/mbug_2818.c  /c
-cl  %_src%/mbug_2820.c  /c
+: NOTE: /GS- compiler flag: Disable buffer security cookie. /GS is on by default and makes the library incompatible to older compiler versions.
+
+cl  /c /GS-  %_src%/mbug.c       
+cl  /c /GS-  %_src%/mbug_2110.c 
+cl  /c /GS-  %_src%/mbug_2151.c 
+cl  /c /GS-  %_src%/mbug_2165.c 
+cl  /c /GS-  %_src%/mbug_2810.c  
+cl  /c /GS-  %_src%/mbug_2811.c  
+cl  /c /GS-  %_src%/mbug_2818.c 
+cl  /c /GS-  %_src%/mbug_2820.c 
 
 
 lib  /out:mbug.lib   mbug.obj  mbug_2110.obj  mbug_2151.obj  mbug_2165.obj ^
