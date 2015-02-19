@@ -2,6 +2,7 @@
 :: Binaries go to bin/
 :: Libraries got to lib/
 
+:: NOTE: GUI applications haveto be built separately by the respective Visual Studio projects.
 
 rem @echo off
 setlocal

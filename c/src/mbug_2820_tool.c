@@ -16,7 +16,15 @@ const char* usage =
 "    option style), or nothing.  Some commands take parameters, which have     \n"
 "    to be separeted from the command by a ':', '=' or a whitespace.           \n"
 "                                                                              \n"
+"    The data output is in degree Celsius and percent relative humidity,       \n"
+"    comma separated in this order. Other data formats may be implemented in   \n"
+"    future versions. Time stamps are stored in standard POSIX format          \n"
+"    (i.e. seconds since UTC 1970-01-01T00:00:00Z).                            \n"
+"                                                                              \n"
 "Commands:                                                                     \n"
+"                                                                              \n"
+"    h             Display this usage info.                                    \n"
+"    help                                                                      \n"
 "                                                                              \n"
 "    l             List attached devices.                                      \n"
 "    ls                                                                        \n"
@@ -27,12 +35,27 @@ const char* usage =
 "    read          errors. The values are returned comma separated:            \n"
 "                  <temperature>,<humidty>                                     \n"
 "                                                                              \n"
-"    d=<id>        Select device with specified serial number or id string (as \n"
-"    dev=          returned by the list command). If no device is specified,   \n"
-"    device=       the first available device is used.                         \n"
+"    d=<id>        Select device with specified serial number or id string     \n"
+"    dev=          as returned by the list command). If no device is           \n"
+"    device=       specified, the first available device is used.              \n"
 "                                                                              \n"
-"    h             Display this usage info.                                    \n"
-"    help                                                                      \n";
+"    log           Recording mode: Take periodic measurements with a specified \n"
+"    rec           interval. The data is printed to stdout. If a file is       \n"
+"    record        specified, the data is also printed to the specified file.  \n"
+"                                                                              \n"
+"    file          Output filename used in recording mode                      \n"
+"                                                                              \n"
+"    silent        Suppress data output to stdout, write to file only.         \n"
+"                                                                              \n"
+"    i             Measurement interval in seconds. Default is 1.              \n"
+"    int                                                                       \n"
+"    interval                                                                  \n"
+"                                                                              \n"
+"    n             Number of measurements to take. To take an infinite number  \n"
+"    num           of measurements (default), specify 0 or \"inf\".            \n"
+"    number                                                                    \n"
+"                                                                              \n"
+;
 
 //--------------------------------------------------------------------------------
 
@@ -78,7 +101,7 @@ void parse_format( char* str )
 /** Extract record output filename. */
 void parse_recfilename( const char* str )
 {
-	if (str==0 || *str=='\0') 
+	if (str==0 || *str=='\0')
 		errorf( "#### Invalid filename: %s", str );
 	rec_filename = str;
 }
@@ -98,7 +121,6 @@ parse_recnumber( const char* str )
 		rec_number = 0;
 	else if ((rec_number = str_to_uint(str))<0)
 		errorf( "#### Invalid number: %s", str );
-	printf("rec_number=%d\n",rec_number);
 }
 
 /** Parse the argv for command line parameters. */
@@ -108,12 +130,12 @@ void parse_options( int argc, char* argv[] )
 	arg_tok( argv+1, 0 );
 	while (cmd = arg_tok(0,":="))
 	{
-		if (str_in( cmd, "l", "ls", "list", 0 ))
+		if (str_in( cmd, "h", "help", 0 ))
+			action = Help;
+		else if (str_in( cmd, "l", "ls", "list", 0 ))
 			action = List;
 		else if (str_in( cmd, "r", "rd", "read", 0 ))
 			action = Read;
-		else if (str_in( cmd, "h", "help", 0 ))
-			action = Help;
 		else if (str_in( cmd, "d", "dev", "device", 0 ))
 			parse_device_id( arg_tok(0,"") );
 		else if (str_in( cmd, "fmt", "format", 0 ))
@@ -138,7 +160,7 @@ void cleanup( void )
 {
 	if (device)
 		mbug_2820_close( device );
-	if (rec_file) { 
+	if (rec_file) {
 		fflush( rec_file );
 		fclose( rec_file ); rec_file=0;
 	}
@@ -179,7 +201,7 @@ int main( int argc, char* argv[] )
 		double tem, hum;
 		err = mbug_2820_read( device, &tem, &hum );
 		if (err) printf( "#### Read error\n" );
-		printf( "%.2f,%.2f\n", tem, hum );
+		printf( "%.3f,%.2f\n", tem, hum );
 	}
 
 	if (action==Record)
@@ -189,27 +211,27 @@ int main( int argc, char* argv[] )
 		char str[500];
 		unsigned long nn = 0;
 
-		if (rec_filename != 0) 
-		{			
+		if (rec_filename != 0)
+		{
 			rec_file = fopen( rec_filename, "a" );
 			if (rec_file == 0)
-				errorf( "#### Error opening file %s\n", rec_filename );  
+				errorf( "#### Error opening file %s\n", rec_filename );
 		}
 
 		tim = floattime();
 		sprintf( str, "\n\n# %s\n# Start recording at %.2f\n# timestamp\ttemp\thumidity\n", mbug_id(device), tim );
 		if (rec_file)  fputs(str, rec_file);
-		if (!rec_silent)  fputs(str, stdout); 
+		if (!rec_silent)  fputs(str, stdout);
 
 		tim = floattime();
 		for( nn=0; (rec_number==0)||(nn<rec_number); nn++)
 		{
 			err = mbug_2820_read( device, &tem, &hum );
-			if (err) { 
-				fputs( "#### Read error\n", stdout ); 
-				if (rec_file) fputs( "#### Read error\n", rec_file); 
+			if (err) {
+				fputs( "#### Read error\n", stdout );
+				if (rec_file) fputs( "#### Read error\n", rec_file);
 			}
-			sprintf( str, "%.2f\t%.2f\t%.2f\n", tim, tem, hum );
+			sprintf( str, "%.2f\t%.3f\t%.2f\n", tim, tem, hum );
 			if (rec_file)  { fputs( str, rec_file ); fflush(rec_file); };
 			if (!rec_silent) { fputs(str, stdout); fflush(stdout); }
 
