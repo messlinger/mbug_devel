@@ -11,6 +11,8 @@ del /Q /S msvc\*.ilk
 del /Q /S msvc\*.exe
 del /Q /S msvc\*.obj
 del /Q /S msvc\*.user
+del /Q /S msvc\*.opt
+del /Q /S msvc\*.plg
 for /R msvc\ /D %%X in (Debug Release) do rd /S /Q "%%X"
 
 del /Q /S build\*.*
