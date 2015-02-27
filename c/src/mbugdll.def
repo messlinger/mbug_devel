@@ -1,0 +1,24 @@
+; This is an export definition file for the Visual C compiler
+; Only the functions lited here will be exported by mbugdll.dll
+LIBRARY mbugdll
+EXPORTS
+    mbug_get_device_list
+    mbug_open_int
+    mbug_open_str
+    mbug_type_from_id
+    mbug_serial_from_id
+    mbug_close
+    mbug_read
+    mbug_write
+    mbug_id
+    mbug_error
+    
+    mbug_2820_list
+    mbug_2820_open
+    mbug_2820_open_str
+    mbug_2820_close
+    mbug_2820_read_temperature
+    mbug_2820_read_humidity
+    mbug_2820_read
+    mbug_2820_read_raw
+    

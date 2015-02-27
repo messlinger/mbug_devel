@@ -47,7 +47,7 @@ struct mbug_device_struct {
 // Helper functions. Libusb-0 does not provide those special device requests.
 int get_configuration( usb_dev_handle *handle )
 {
-	unsigned char conf;
+	char conf;
 	int ret = usb_control_msg( handle, USB_ENDPOINT_IN | USB_RECIP_DEVICE,
 				   USB_REQ_GET_CONFIGURATION,
 				   0, 0, &conf, 1, MBUG_TIMEOUT );
@@ -57,7 +57,7 @@ int get_configuration( usb_dev_handle *handle )
 
 int get_altinterface( usb_dev_handle *handle, unsigned char interface )
 {
-	unsigned char alt;
+	char alt;
 	int ret = usb_control_msg( handle, USB_ENDPOINT_IN | USB_RECIP_INTERFACE,
 				   USB_REQ_GET_INTERFACE ,
 				   0, interface, &alt, 1, MBUG_TIMEOUT );

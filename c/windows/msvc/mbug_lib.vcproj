@@ -41,12 +41,14 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\ext\libusb-win32-bin-1.2.6.0\include;..\..\include"
-				MinimalRebuild="true"
+				MinimalRebuild="false"
+				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				BufferSecurityCheck="false"
 				WarningLevel="3"
-				DebugInformationFormat="4"
+				DebugInformationFormat="1"
+				CompileAs="0"
 				DisableSpecificWarnings="4996"
 			/>
 			<Tool
@@ -109,12 +111,14 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\ext\libusb-win32-bin-1.2.6.0\include;..\..\include..\ext\libusb-win32-bin-1.2.6.0\include;..\..\include"
+				AdditionalIncludeDirectories="..\ext\libusb-win32-bin-1.2.6.0\include;..\..\include"
+				ExceptionHandling="0"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
 				DebugInformationFormat="0"
+				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"

@@ -45,6 +45,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mbug_2820_tool", "mbug_2820
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lsmbug", "lsmbug.vcproj", "{C5D69749-DA64-54A2-B8B9-3031FFB04CAA}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mbug_dll", "mbug_dll.vcproj", "{36F6B9E8-A01F-4058-A14B-392C3C1F6E9A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -91,6 +93,10 @@ Global
 		{C5D69749-DA64-54A2-B8B9-3031FFB04CAA}.Debug|Win32.Build.0 = Debug|Win32
 		{C5D69749-DA64-54A2-B8B9-3031FFB04CAA}.Release|Win32.ActiveCfg = Release|Win32
 		{C5D69749-DA64-54A2-B8B9-3031FFB04CAA}.Release|Win32.Build.0 = Release|Win32
+		{36F6B9E8-A01F-4058-A14B-392C3C1F6E9A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{36F6B9E8-A01F-4058-A14B-392C3C1F6E9A}.Debug|Win32.Build.0 = Debug|Win32
+		{36F6B9E8-A01F-4058-A14B-392C3C1F6E9A}.Release|Win32.ActiveCfg = Release|Win32
+		{36F6B9E8-A01F-4058-A14B-392C3C1F6E9A}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

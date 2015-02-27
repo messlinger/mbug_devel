@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="mbug_2165_tool"
-	ProjectGUID="{23D75A13-7F75-5369-8752-AC43A6006985}"
-	RootNamespace="mbug_2151_tool"
+	Name="mbug_dll"
+	ProjectGUID="{36F6B9E8-A01F-4058-A14B-392C3C1F6E9A}"
+	RootNamespace="mbug_dll"
 	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
@@ -19,7 +19,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="$(ProjectName)/$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="2"
 			>
 			<Tool
@@ -40,10 +40,12 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include"
-				MinimalRebuild="true"
+				AdditionalIncludeDirectories="..\ext\libusb-win32-bin-1.2.6.0\include;..\..\include"
+				MinimalRebuild="false"
+				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
+				BufferSecurityCheck="false"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 				CompileAs="0"
@@ -60,11 +62,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="mbugd.lib"
-				OutputFile="$(OutDir)\mbug_2165.exe"
-				AdditionalLibraryDirectories="..\lib"
-				GenerateDebugInformation="true"
-				TargetMachine="1"
+				AdditionalDependencies="libusb.lib"
+				OutputFile="$(OutDir)\mbugdll.dll"
+				AdditionalLibraryDirectories="..\ext\libusb-win32-bin-1.2.6.0\lib\msvc"
+				ModuleDefinitionFile="..\..\src\mbugdll.def"
+				ImportLibrary="$(TargetDir)/mbugdll.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -86,13 +88,15 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Postbuild: Copy output file"
+				CommandLine="copy mbug_lib\debug\mbugd.lib ..\lib"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="$(ProjectName)/$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -115,13 +119,14 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\..\include"
-				RuntimeLibrary="2"
+				AdditionalIncludeDirectories="..\ext\libusb-win32-bin-1.2.6.0\include;..\..\include"
+				ExceptionHandling="0"
+				RuntimeLibrary="0"
+				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
-				DebugInformationFormat="3"
+				DebugInformationFormat="0"
 				CompileAs="0"
-				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -134,13 +139,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="mbug.lib"
-				OutputFile="$(OutDir)\mbug_2165.exe"
-				AdditionalLibraryDirectories="..\lib"
-				GenerateDebugInformation="true"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				TargetMachine="1"
+				AdditionalDependencies="libusb.lib"
+				OutputFile="$(OutDir)\mbugdll.dll"
+				AdditionalLibraryDirectories="..\ext\libusb-win32-bin-1.2.6.0\lib\msvc"
+				ModuleDefinitionFile="..\..\src\mbugdll.def"
+				ImportLibrary="$(OutDir)\mbugdll.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -162,8 +165,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="Copy binary"
-				CommandLine="copy mbug_2165_tool\release\mbug_2165.exe ..\bin"
+				Description="Postbuild: Copy output file"
+				CommandLine="copy /Y mbug_dll\release\mbugdll.lib ..\lib &amp; copy /Y mbug_dll\release\mbugdll.dll ..\lib"
 			/>
 		</Configuration>
 	</Configurations>
@@ -173,24 +176,76 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC738F2-C7A5-4387-A177-FFFA6FAE45BC}"
+			UniqueIdentifier="{380BB68D-3C2B-4CD4-BC83-330317C35F91}"
 			>
 			<File
-				RelativePath="..\..\src\mbug_2165_tool.c"
+				RelativePath="..\..\src\mbug.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\mbug_2110.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\mbug_2151.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\mbug_2165.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\mbug_2810.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\mbug_2811.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\mbug_2818.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\mbug_2820.c"
 				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{04995491-90BD-5b05-99EB-234567FFAC09}"
+			UniqueIdentifier="{48B91C14-9276-4FD6-90D6-64F79AB3C912}"
 			>
 			<File
 				RelativePath="..\..\include\mbug.h"
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\mbug_2110.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\mbug_2151.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\mbug_2165.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\mbug_2810.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\mbug_2811.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\mbug_2818.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\mbug_2820.h"
 				>
 			</File>
 		</Filter>

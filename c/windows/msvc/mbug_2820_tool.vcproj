@@ -41,11 +41,13 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include"
-				MinimalRebuild="true"
+				MinimalRebuild="false"
+				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				WarningLevel="3"
 				DebugInformationFormat="4"
+				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -115,10 +117,11 @@
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="..\..\include"
 				PreprocessorDefinitions="../include"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
 				DebugInformationFormat="3"
+				CompileAs="0"
 				DisableSpecificWarnings="4996"
 			/>
 			<Tool
@@ -132,7 +135,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="mbug.lib"
+				AdditionalDependencies="mbugdll.lib"
 				OutputFile="$(OutDir)\mbug_2820.exe"
 				AdditionalLibraryDirectories="../lib"
 				GenerateDebugInformation="true"

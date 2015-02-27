@@ -405,7 +405,7 @@ int mbug_2151_dmv7008_cmd_str(mbug_device dev, const char *addr, int cmd) {
 	static int syscode = 0;
 	int channel;
 
-	char *colon = strchr(addr, ':');
+	const char *colon = strchr(addr, ':');
 	if(colon != NULL) {
 		syscode = atoi(addr);
 		channel = atoi(colon+1);

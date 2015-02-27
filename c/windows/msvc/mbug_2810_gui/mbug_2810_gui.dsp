@@ -186,6 +186,10 @@ SOURCE=.\res\usb32.ico
 
 SOURCE=.\res\usb64.ico
 # End Source File
+# Begin Source File
+
+SOURCE=.\res\usb_x2.ico
+# End Source File
 # End Group
 # Begin Source File
 

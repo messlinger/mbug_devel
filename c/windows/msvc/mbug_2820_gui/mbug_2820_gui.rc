@@ -50,7 +50,6 @@ BEGIN
     "LANGUAGE 9, 1\r\n"
     "#pragma code_page(1252)\r\n"
     "#endif //_WIN32\r\n"
-    "#include ""res\\mbug_2820_gui.rc2""  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen\r\n"
     "#include ""afxres.rc""         // Standardkomponenten\r\n"
     "#endif\r\n"
     "\0"
@@ -100,7 +99,7 @@ BEGIN
     CONTROL         "None",IDC_LABEL_VALUE_STATUS,"Static",SS_LEFTNOWORDWRAP |
                     WS_GROUP,44,115,87,8
     COMBOBOX        IDC_COMBO_DEVICE,43,96,83,81,CBS_DROPDOWNLIST |
-                    WS_VSCROLL | WS_TABSTOP
+                    WS_VSCROLL | WS_TABSTOP | CBS_SORT
     CONTROL         "",IDC_HEARTBEAT_T,"Static",SS_BLACKRECT | NOT
                     WS_VISIBLE | WS_DISABLED,125,14,3,3
     GROUPBOX        "Humidity",IDC_GROUP_HUMIDITY,7,50,126,38
@@ -195,7 +194,6 @@ END
 LANGUAGE 9, 1
 #pragma code_page(1252)
 #endif //_WIN32
-#include "res\mbug_2820_gui.rc2"  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen
 #include "afxres.rc"         // Standardkomponenten
 #endif
 

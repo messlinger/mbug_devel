@@ -27,18 +27,18 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE DISCARDABLE
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE DISCARDABLE
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE 
+3 TEXTINCLUDE DISCARDABLE
 BEGIN
     "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
     "#define _AFX_NO_OLE_RESOURCES\r\n"
@@ -50,7 +50,6 @@ BEGIN
     "LANGUAGE 9, 1\r\n"
     "#pragma code_page(1252)\r\n"
     "#endif //_WIN32\r\n"
-    "#include ""res\\mbug_2810_gui.rc2""  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen\r\n"
     "#include ""afxres.rc""         // Standardkomponenten\r\n"
     "#endif\r\n"
     "\0"
@@ -66,9 +65,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON    DISCARDABLE     "res\\usb16.ico"
-IDI_ICON3               ICON    DISCARDABLE     "res\\usb32.ico"
-IDI_ICON4               ICON    DISCARDABLE     "res\\usb64.ico"
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\usb_x2.ico"
 #endif    // Deutsch (Deutschland) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -88,7 +85,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 //
 
 IDD_MBUG_2810_GUI_DIALOG DIALOGEX 0, 0, 140, 87
-STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | 
+STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION |
     WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "mbug_2810"
@@ -99,11 +96,11 @@ BEGIN
                     SS_LEFTNOWORDWRAP | WS_GROUP,14,16,105,24
     LTEXT           "Device:",IDC_LABEL_DEVICE,12,55,26,8
     LTEXT           "Status:",IDC_LABEL_STATUS,12,72,23,8
-    CONTROL         "None",IDC_LABEL_VALUE_STATUS,"Static",SS_LEFTNOWORDWRAP | 
+    CONTROL         "None",IDC_LABEL_VALUE_STATUS,"Static",SS_LEFTNOWORDWRAP |
                     WS_GROUP,44,72,87,8
-    COMBOBOX        IDC_COMBO_DEVICE,43,53,83,81,CBS_DROPDOWNLIST | CBS_SORT | 
+    COMBOBOX        IDC_COMBO_DEVICE,43,53,83,81,CBS_DROPDOWNLIST | CBS_SORT |
                     WS_VSCROLL | WS_TABSTOP
-    CONTROL         "",IDC_HEARTBEAT,"Static",SS_BLACKRECT | NOT WS_VISIBLE | 
+    CONTROL         "",IDC_HEARTBEAT,"Static",SS_BLACKRECT | NOT WS_VISIBLE |
                     WS_DISABLED,125,14,3,3
 END
 
@@ -160,7 +157,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+GUIDELINES DESIGNINFO DISCARDABLE
 BEGIN
     IDD_MBUG_2810_GUI_DIALOG, DIALOG
     BEGIN
@@ -192,7 +189,6 @@ END
 LANGUAGE 9, 1
 #pragma code_page(1252)
 #endif //_WIN32
-#include "res\mbug_2810_gui.rc2"  // Nicht mit Microsoft Visual C++ bearbeitete Ressourcen
 #include "afxres.rc"         // Standardkomponenten
 #endif
 

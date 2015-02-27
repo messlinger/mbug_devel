@@ -3,4 +3,6 @@
 
 
 copy bin\*.exe %systemRoot%
+copy lib\*.dll %systemRoot%
+
 pause
