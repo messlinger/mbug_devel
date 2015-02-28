@@ -2,9 +2,10 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="mbug_2820_tool"
-	ProjectGUID="{B4C58638-C953-4391-A7A8-2F20EEAF3B99}"
-	RootNamespace="mbug_2820_tool"
+	Name="mbug_2810_gui"
+	ProjectGUID="{AF38974E-8FFF-4423-AC2E-C76A5E8DFB30}"
+	RootNamespace="mbug_2810_gui"
+	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
@@ -17,10 +18,10 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			CharacterSet="2"
+			CharacterSet="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -40,14 +41,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include"
-				MinimalRebuild="false"
-				ExceptionHandling="0"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
+				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
-				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -60,10 +60,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="mbugd.lib"
-				OutputFile="$(OutDir)\mbug_2820.exe"
-				AdditionalLibraryDirectories="../lib"
+				LinkIncremental="2"
 				GenerateDebugInformation="true"
+				SubSystem="2"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -90,10 +89,10 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(ProjectName)/$(ConfigurationName)"
-			IntermediateDirectory="$(ProjectName)/$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			CharacterSet="2"
+			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -115,14 +114,12 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\..\include"
-				PreprocessorDefinitions="../include"
-				RuntimeLibrary="0"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
-				CompileAs="0"
-				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -135,10 +132,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="mbug.lib"
-				OutputFile="$(OutDir)\mbug_2820.exe"
-				AdditionalLibraryDirectories="../lib"
+				LinkIncremental="1"
 				GenerateDebugInformation="true"
+				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -163,8 +159,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="Copy binary"
-				CommandLine="copy mbug_2820_tool\release\mbug_2820.exe ..\bin"
 			/>
 		</Configuration>
 	</Configurations>
@@ -174,32 +168,50 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{50D84802-D8B6-5487-B177-3B3E863B300}"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\mbug_2820_tool.c"
+				RelativePath=".\mbug_2810_gui.cpp"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						DisableSpecificWarnings="4996"
-					/>
-				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{A4AA6491-9ACE-5B15-99FC-7360CF63FC0C}"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\include\mbug.h"
+				RelativePath=".\mbug_2810_gui.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\mbug_2820.h"
+				RelativePath=".\Resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\stdafx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\targetver.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Resource Files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
+			<File
+				RelativePath=".\mbug_2810_gui.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\mbug_2810_gui.rc"
+				>
+			</File>
+			<File
+				RelativePath=".\small.ico"
 				>
 			</File>
 		</Filter>

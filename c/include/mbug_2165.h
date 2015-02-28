@@ -25,8 +25,8 @@
 	mbug_2165_set_clock_div()			- Set the clock divider (clock = base_clock/div)
 	mbug_2165_get_clock_div()			- Get the clock divider
     mbug_2165_set_bitrate()				- Set bit rate (via clock div)
-    mbug_2165_set_timebase()					- Set the timebase (via claock div)
-	mbug_2165_get_mod_base_clock()		- Get the modulation base clock
+    mbug_2165_set_timebase()			- Set the timebase (via clock div)
+	mbug_2165_get_mod_clock()			- Get the modulation base clock
 	mbug_2165_set_mod_clock_div()		- Set the modulation clock divider
 	mbug_2165_get_mod_clock_div()		- Get the modulation clock divider
 	mbug_2165_set_mod_freq()			- Set the modulation frequency (via modulation clock div)

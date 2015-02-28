@@ -65,7 +65,8 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON    DISCARDABLE     "res\\usb_x2.ico"
+IDR_MAINFRAME           ICON    DISCARDABLE     "..\\..\\icon\\usb_16.ico"
+IDI_ICON3               ICON    DISCARDABLE     "..\\..\\icon\\usb_32.ico"
 #endif    // Deutsch (Deutschland) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -89,7 +90,7 @@ STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION |
     WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "mbug_2810"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     GROUPBOX        "Temperature",IDC_GROUP_TEMPERATURE,7,7,126,38
     CONTROL         "--.-- °C",IDC_LABEL_VALUE_TEMPERATURE,"Static",
@@ -98,7 +99,7 @@ BEGIN
     LTEXT           "Status:",IDC_LABEL_STATUS,12,72,23,8
     CONTROL         "None",IDC_LABEL_VALUE_STATUS,"Static",SS_LEFTNOWORDWRAP |
                     WS_GROUP,44,72,87,8
-    COMBOBOX        IDC_COMBO_DEVICE,43,53,83,81,CBS_DROPDOWNLIST | CBS_SORT |
+    COMBOBOX        IDC_COMBO_DEVICE,43,53,83,81,CBS_DROPDOWNLIST |
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "",IDC_HEARTBEAT,"Static",SS_BLACKRECT | NOT WS_VISIBLE |
                     WS_DISABLED,125,14,3,3

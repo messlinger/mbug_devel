@@ -12,7 +12,7 @@
 
 	mbug_2810_list()        - Get a list of attached devices
 	mbug_2810_open()		- Open a device with specified serial number
-	mbug_2818_open_str()	- Open a device with specified id string
+	mbug_2810_open_str()	- Open a device with specified id string
 	mbug_2810_close()
 	mbug_2810_read()		- Read the current temeprature value
 	mbug_2810_set_mode()	- Set the acquisition mode

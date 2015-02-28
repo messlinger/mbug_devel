@@ -1,5 +1,6 @@
 ; This is an export definition file for the Visual C compiler
-; Only the functions lited here will be exported by mbugdll.dll
+; Only the functions listed here will be exported by mbugdll.dll
+
 LIBRARY mbugdll
 EXPORTS
     mbug_get_device_list
@@ -13,6 +14,87 @@ EXPORTS
     mbug_id
     mbug_error
     
+    mbug_2110_list
+    mbug_2110_open
+    mbug_2110_open_str
+    mbug_2110_close
+    mbug_2110_get_gpio
+    mbug_2110_set_gpio
+    mbug_2110_set_tris
+    mbug_2110_enable_adc
+    mbug_2110_read_adc
+    mbug_2110_enable_pwm
+    mbug_2110_set_pwm
+        
+    mbug_2151_list
+    mbug_2151_open
+    mbug_2151_open_str
+    mbug_2151_close
+    mbug_2151_set_sequence
+    mbug_2151_set_seq_bitstream
+    mbug_2151_set_seq_times_8bit
+    mbug_2151_set_seq_times_16bit
+    mbug_2151_get_seq_length
+    mbug_2151_set_iterations
+    mbug_2151_get_iterations
+    mbug_2151_get_base_clock
+    mbug_2151_set_clock_div
+    mbug_2151_get_clock_div
+    mbug_2151_set_bitrate
+    mbug_2151_start
+    mbug_2151_stop_gracefully
+    mbug_2151_stop_immediately
+    mbug_2151_reset
+    mbug_2151_get_busy
+    
+    mbug_2165_list
+    mbug_2165_open
+    mbug_2165_open_str
+    mbug_2165_close
+    mbug_2151_set_sequence
+    mbug_2165_set_seq_bitstream
+    mbug_2165_set_seq_times_8bit
+    mbug_2165_set_seq_times_16bit
+    mbug_2165_get_seq_length
+    mbug_2165_set_iterations
+    mbug_2165_get_iterations
+    mbug_2165_get_base_clock
+    mbug_2165_set_clock_div
+    mbug_2165_get_clock_div
+    mbug_2165_set_bitrate
+    mbug_2165_set_timebase
+    mbug_2165_get_mod_clock
+    mbug_2165_set_mod_clock_div
+    mbug_2165_get_mod_clock_div
+    mbug_2165_set_mod_freq
+    mbug_2165_start
+    mbug_2165_stop_gracefully
+    mbug_2165_stop_immediately
+    mbug_2165_reset
+    mbug_2165_get_busy
+    
+    mbug_2810_list
+    mbug_2810_open
+    mbug_2810_open_str
+    mbug_2810_close
+    mbug_2810_read
+    mbug_2810_set_mode
+    
+    mbug_2811_list
+    mbug_2811_open
+    mbug_2811_open_str
+    mbug_2811_close
+    mbug_2811_read
+    mbug_2811_set_mode
+    
+    mbug_2818_list 
+    mbug_2818_open	
+    mbug_2818_open_str	
+    mbug_2818_close
+    mbug_2818_read	
+    mbug_2818_read_all	
+    mbug_2818_read_raw	
+
     mbug_2820_list
     mbug_2820_open
     mbug_2820_open_str

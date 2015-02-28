@@ -2,12 +2,12 @@
 :: Binaries go to bin/
 :: Libraries got to lib/
 
-:: NOTE: GUI applications haveto be built separately by the respective Visual Studio projects.
-
 rem @echo off
 setlocal
 
-:: ---- Environment paths ---- ::
+::---------------------------------------------------------------------------- ::
+:: Environment paths ::
+
 set _src=%CD%/../src
 set _inc=%CD%/../include
 set _lib=%CD%/lib
@@ -17,13 +17,16 @@ set _build=%CD%/build
 set _lusb=%CD%/ext/libusb-win32-bin-1.2.6.0
 set _lusb_inc=%_lusb%/include
 set _lusb_lib=%_lusb%/lib/msvc
-:: ------------------------------------------------ :: 
+
+::---------------------------------------------------------------------------- ::
 
 set INCLUDE=%_inc%;%_lusb_inc%;%INCLUDE%
 set LIB=%_lib%;%_lusb_lib%;%LIB%
 
 pushd build
 
+::---------------------------------------------------------------------------- ::
+:: Compile library source files
 :: NOTE: /GS- compiler flag: Disable buffer security cookie. /GS is on by default and makes the library incompatible to older compiler versions.
 
 cl  /c /GS-  %_src%/mbug.c       
@@ -35,7 +38,7 @@ cl  /c /GS-  %_src%/mbug_2811.c
 cl  /c /GS-  %_src%/mbug_2818.c 
 cl  /c /GS-  %_src%/mbug_2820.c 
 
-:: Create libraries
+:: Create static and dynamic libraries
 :: NOTE: libusb.lib is bundled into the mbug.lib for convenince.
 
 set _lib_objs=mbug.obj  mbug_2110.obj  mbug_2151.obj  mbug_2165.obj ^
@@ -45,7 +48,8 @@ set _lib_objs=mbug.obj  mbug_2110.obj  mbug_2151.obj  mbug_2165.obj ^
 lib  /out:mbug.lib  %_lib_objs%
 link /dll /out:mbugdll.dll  /def:%_src%/mbugdll.def  %_lib_objs% 
 
-:: Create command line tools
+::---------------------------------------------------------------------------- ::
+:: Build command line tools
 
 cl /Felsmbug.exe     %_src%/lsmbug.c          /link mbug.lib
 cl /Fembug_2110.exe  %_src%/mbug_2110_tool.c  /link mbug.lib
@@ -57,6 +61,15 @@ cl /Fembug_2818.exe  %_src%/mbug_2818_tool.c  /link mbug.lib
 cl /Fembug_2820.exe  %_src%/mbug_2820_tool.c  /link mbug.lib
 cl /Fembug_demo.exe  %_src%/mbug_demo.cpp  /EHsc  /link  mbug.lib
 
+::---------------------------------------------------------------------------- ::
+:: Build GUI applications
+:: NOTE: MFC dependent GUI application must be separately built from the respective Visual C projects
+
+set _gui_src=../msvc/mbug_2820_gui/
+rc  %_gui_src%/mbug_2820_gui.rc
+cl  %_gui_src%/mbug_2820_gui.c  %_gui_src%/mbug_2820_gui.res  /link  mbug.lib  user32.lib  gdi32.lib
+
+::---------------------------------------------------------------------------- ::
 :: Copy to output directories
 
 move /Y  *.lib  %_lib%

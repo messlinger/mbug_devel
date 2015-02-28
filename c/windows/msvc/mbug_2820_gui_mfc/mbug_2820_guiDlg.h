@@ -57,9 +57,6 @@ protected:
 	void close_device( int verbose = 1 );
 	void update_measurement(void);
 
-	void OnCancel();
-	void OnOK();
-
 	// Generierte Message-Map-Funktionen
 	//{{AFX_MSG(CMbug_2820_guiDlg)
 	virtual BOOL OnInitDialog();

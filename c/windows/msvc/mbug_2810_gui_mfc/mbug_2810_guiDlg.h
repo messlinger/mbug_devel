@@ -47,14 +47,13 @@ protected:
 	double m_temperature;
 	mbug_device m_device;
 
+	CRgn rgn;
+
 	void print_status( const char* msg);
 	void print_temperature( double temp );
 	void open_device( const char* id );
 	void close_device( int verbose = 1 );
 	void update_temperature(void);
-
-	void CMbug_2810_guiDlg::OnCancel();
-	void CMbug_2810_guiDlg::OnOK();
 
 	// Generierte Message-Map-Funktionen
 	//{{AFX_MSG(CMbug_2810_guiDlg)

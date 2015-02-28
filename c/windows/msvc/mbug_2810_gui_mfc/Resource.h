@@ -6,6 +6,8 @@
 #define IDR_MAINFRAME                   128
 #define IDI_ICON1                       135
 #define IDI_ICON2                       139
+#define IDI_ICON3                       140
+#define IDI_ICON4                       141
 #define IDC_COMBO_DEVICE                1000
 #define IDC_GROUP_TEMPERATURE           1001
 #define IDC_LABEL_VALUE_TEMPERATURE     1002

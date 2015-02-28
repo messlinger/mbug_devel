@@ -64,6 +64,7 @@ BOOL CMbug_2810_guiDlg::OnInitDialog()
 	// Symbol für dieses Dialogfeld festlegen. Wird automatisch erledigt
 	//  wenn das Hauptfenster der Anwendung kein Dialogfeld ist
 	SetIcon(m_hIcon, TRUE);			// Großes Symbol verwenden
+	SetIcon(m_hIcon, FALSE);		// Kleines Symbol verwenden
 	
 	// ZU ERLEDIGEN: Hier zusätzliche Initialisierung einfügen
 	
@@ -74,7 +75,7 @@ BOOL CMbug_2810_guiDlg::OnInitDialog()
 	// Write initial text
 	m_disp_temp.SetWindowText("  ---.--- \xB0""C");
 
-	return FALSE;  // Geben Sie TRUE zurück, außer ein Steuerelement soll den Fokus erhalten
+	return TRUE;  // Geben Sie TRUE zurück, außer ein Steuerelement soll den Fokus erhalten
 }
 
 
@@ -133,27 +134,12 @@ void CMbug_2810_guiDlg::OnDestroy()
 		
 }
 
-void CMbug_2810_guiDlg::OnCancel()
-{
-	CDialog::OnCancel();
-}
-
-void CMbug_2810_guiDlg::OnOK()
-{
-}
-
 
 void CMbug_2810_guiDlg::OnDropdownComboDevice() 
 {
-	// Remember the current selection
-	int sel_index = m_combo_device.GetCurSel();
-	CString sel_str;
-	if (sel_index != CB_ERR)
-		m_combo_device.GetLBText( sel_index, sel_str );
-
-	// Refill the list
 	m_combo_device.ResetContent();
-
+	m_combo_device.AddString( "None" );
+	
 	mbug_device_list list = mbug_get_device_list(0);		
 	for (int i=0; list[i]!=0; i++ )
 	{
@@ -166,14 +152,6 @@ void CMbug_2810_guiDlg::OnDropdownComboDevice()
 				break;
 		}
 	}
-
-	m_combo_device.InsertString( 0, "None" );
-
-	// Reselect the last selection if present
-	if (sel_index != CB_ERR)
-		m_combo_device.SelectString( -1, sel_str );
-
-
 }
 
 

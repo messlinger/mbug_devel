@@ -27,7 +27,7 @@ Type=0
 HeaderFile=mbug_2810_guiDlg.h
 ImplementationFile=mbug_2810_guiDlg.cpp
 Filter=D
-LastObject=IDOK
+LastObject=CMbug_2810_guiDlg
 BaseClass=CDialog
 VirtualFilter=dWC
 
@@ -50,6 +50,6 @@ Control2=IDC_LABEL_VALUE_TEMPERATURE,static,1342308364
 Control3=IDC_LABEL_DEVICE,static,1342308352
 Control4=IDC_LABEL_STATUS,static,1342308352
 Control5=IDC_LABEL_VALUE_STATUS,static,1342308364
-Control6=IDC_COMBO_DEVICE,combobox,1344340227
+Control6=IDC_COMBO_DEVICE,combobox,1344339971
 Control7=IDC_HEARTBEAT,static,1207959556
 
