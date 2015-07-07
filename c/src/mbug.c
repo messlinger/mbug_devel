@@ -95,7 +95,9 @@ const mbug_device_list mbug_get_device_list(unsigned int device_type)
 	static char serial_numbers[MBUG_MAX_DEVICES+1][MBUG_MAX_ID_LEN+1];
 
 	struct usb_bus* bus = 0;
+	struct usb_device* dev = 0;
 	usb_dev_handle* handle = 0;
+	struct usb_device_descriptor dev_desc = {0};
 	int idev = 0;
 	char serial_str[MBUG_MAX_ID_LEN] = "";
 	int ret = 0;
@@ -111,36 +113,43 @@ const mbug_device_list mbug_get_device_list(unsigned int device_type)
 	// Iterate through all available devices
 	for ( bus = usb_get_busses(); bus; bus = bus->next)
 	{
-		struct usb_device *dev;
         for (dev = bus->devices; dev; dev = dev->next)
 		{
-			// VID:PID match?
-			if (VID != dev->descriptor.idVendor ||
-				PID != dev->descriptor.idProduct)
-				continue;
-
-			// Device_type match?
-			if (device_type != 0 &&
-				_bcd(device_type) != dev->descriptor.bcdDevice )
-				continue;
-
-			// Serial number string defined?
-			if (dev->descriptor.iSerialNumber == 0)
-				continue;
-
-			// Need to obtain a device handle to query string descriptors
+			// :XXX:
+			// dev->descriptor seems to be not reliably updated when devices are un/replugged while 
+			// the application is running. As a workaround, read the device descriptor manually.
+			
+			// Need to obtain a device handle to query descriptors
 			handle = usb_open( dev );
 			if (handle<=0) continue;
 
+			// Query the device descriptor
+			ret =  usb_get_descriptor( handle, USB_DT_DEVICE, 0, &dev_desc, sizeof(dev_desc));
+			if (ret<0) goto close_and_continue;
+
+			// VID:PID match?
+			if (VID != dev_desc.idVendor ||
+				PID != dev_desc.idProduct)
+				goto close_and_continue;
+
+			// Device_type match?
+			if (device_type != 0 &&
+				_bcd(device_type) != dev_desc.bcdDevice )
+				goto close_and_continue;
+
+			// Serial number string defined?
+			if (dev_desc.iSerialNumber == 0)
+				goto close_and_continue;
+
 			// Read the iSerialNumber string
-			ret = usb_get_string_simple( handle, dev->descriptor.iSerialNumber,
+			ret = usb_get_string_simple( handle, dev_desc.iSerialNumber,
 				                             serial_str, sizeof(serial_str)  );
 			// :XXX:
 			// Low speed mbugs sometimes give errors when querying string descriptors:
 			// -5 sending control message failed. This only happens with some USB hubs.
 			// Workaround: Try several times
 			for (i=0; ret<0 && i<50; i++)
-				ret = usb_get_string_simple( handle, dev->descriptor.iSerialNumber,
+				ret = usb_get_string_simple( handle, dev_desc.iSerialNumber,
 				                             serial_str, sizeof(serial_str)  );
 			if (ret<0) goto close_and_continue;
 
@@ -159,12 +168,25 @@ const mbug_device_list mbug_get_device_list(unsigned int device_type)
 }
 
 //-----------------------------------------------------------------------------------------
+// Iterate through an mbug_device_list. Pass the list pointer at first call,
+// pass 0 get the next entry.
+const char * mbug_device_list_next( mbug_device_list dev_list )
+{
+	static mbug_device_list list = 0;
+	if (dev_list != 0)  
+		return *(list = dev_list);
+	if (*list == 0)  return 0;
+	return *(++list);
+}
+
+//-----------------------------------------------------------------------------------------
 // Open by type and serial number. serial=0 will open the first available device.
 mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 {
 	struct usb_bus* bus =0 ;
-	struct usb_device *dev = 0;
+	struct usb_device* dev = 0;
 	usb_dev_handle* handle = 0;
+	struct usb_device_descriptor dev_desc = {0};
 	char id_str[MBUG_MAX_ID_LEN] = "";
 	int ret = 0;
 	int nepts = 0;
@@ -173,40 +195,48 @@ mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
 
 	usb_init();
 	usb_find_busses();
-    	usb_find_devices();
+	usb_find_devices();
 
 	// Iterate through all available devices
 	for (bus = usb_get_busses(); bus; bus = bus->next)
 	{
-
         for (dev = bus->devices; dev; dev = dev->next)
 		{
-			//  VID:PID match?
-			if (VID != dev->descriptor.idVendor ||
-				PID != dev->descriptor.idProduct )
-				continue;
+			// :XXX:
+			// dev->descriptor seems to be not reliably updated when devices are un/replugged while 
+			// the application is running. As a workaround, read the device descriptor manually.
 
-			// Device_type match?
-			if ( _bcd(device_type) != dev->descriptor.bcdDevice )
-				continue;
-
-			// Serial number string defined?
-			if (dev->descriptor.iSerialNumber == 0)
-				continue;
-
-			// Need to obtain a device handle to query string descriptors
+			// Need to obtain a device handle to query descriptors
 			handle = usb_open( dev );
 			if (handle<=0) continue;
 
+			// Query the device descriptor
+			ret =  usb_get_descriptor( handle, USB_DT_DEVICE, 0, &dev_desc, sizeof(dev_desc));
+			if (ret<0) goto close_and_continue;
+
+			// VID:PID match?
+			if (VID != dev_desc.idVendor ||
+				PID != dev_desc.idProduct)
+				goto close_and_continue;
+
+			// Device_type match?
+			if (device_type != 0 &&
+				_bcd(device_type) != dev_desc.bcdDevice )
+				goto close_and_continue;
+
+			// Serial number string defined?
+			if (dev_desc.iSerialNumber == 0)
+				goto close_and_continue;
+
 			// Read the iSerialNumber string
-			ret = usb_get_string_simple( handle, dev->descriptor.iSerialNumber,
-				                             id_str, sizeof(id_str)  );
+			ret = usb_get_string_simple( handle, dev_desc.iSerialNumber,
+				                         id_str, sizeof(id_str)  );
 			// :XXX:
 			// Low speed mbugs sometimes give errors when querying string descriptors:
 			// -5 sending control message failed. This only happens with some USB hubs.
 			// Workaround: Try several times
 			for (i=0; ret<0 && i<50; i++)
-				ret = usb_get_string_simple( handle, dev->descriptor.iSerialNumber,
+				ret = usb_get_string_simple( handle, dev_desc.iSerialNumber,
 				                             id_str, sizeof(id_str)  );
 			if (ret<0) goto close_and_continue;
 

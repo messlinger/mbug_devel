@@ -55,6 +55,16 @@ enum mbug_transmission_mode {
  */
 const mbug_device_list  mbug_get_device_list( unsigned int device_type );
 
+/** Iterate through the entries in an mbug_device_list. When passing the
+ * actual mbug_device_list, the first entry is returned. When passing 0,
+ * the next entry is returned. A return value of 0 indicates the end of the
+ * list. This function has been added to simplify the access to the list
+ * from environments where dereference of pointers is difficult (eg. Labview).
+ * In a C program, it is normally not necessary to use this function, just
+ * increment or dereference the list of pointers. */
+
+const char * mbug_device_list_next( mbug_device_list dev_list );
+
 /** Open a device specified by it's device type and serial number
  *  (as int, last digits of the serial number are matched only).
  */
