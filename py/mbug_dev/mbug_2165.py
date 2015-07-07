@@ -69,7 +69,7 @@ class mbug_2165(mbug):
             print "### Warning: Some sequence items are too short and will have a low resolution. ###"
         for i,d in enumerate(data):
             data[i] = int(data[i]/tau + 0.5)
-        self.set_tau(tau)
+        self.set_timebase(tau)
         if bits==8: self.set_sequence_times_8bit(data)
         else: self.set_sequence_times_16bit(data)
         return

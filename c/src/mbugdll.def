@@ -4,6 +4,7 @@
 LIBRARY mbugdll
 EXPORTS
     mbug_get_device_list
+    mbug_device_list_next
     mbug_open_int
     mbug_open_str
     mbug_type_from_id

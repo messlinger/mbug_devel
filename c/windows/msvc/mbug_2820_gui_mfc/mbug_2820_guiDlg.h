@@ -27,6 +27,10 @@ public:
 // Dialogfelddaten
 	//{{AFX_DATA(CMbug_2820_guiDlg)
 	enum { IDD = IDD_MBUG_2820_GUI_DIALOG };
+	CStatic	m_test_img;
+	CStatic	m_test;
+	CButton	m_button_logfile;
+	CEdit	m_edit_logfile;
 	CStatic	m_disp_hum;
 	CStatic	m_Heartbeat_hum;
 	CStatic	m_Heartbeat_t;
@@ -43,7 +47,7 @@ public:
 
 // Implementierung
 protected:
-	HICON m_hIcon;
+	HICON m_hIcon, m_hIcon_open;
 	CFont m_big_font;
 	UINT m_acq_timer;
 	double m_temperature;
@@ -67,6 +71,9 @@ protected:
 	afx_msg void OnSelchangeComboDevice();
 	afx_msg void OnClose();
 	afx_msg void OnDestroy();
+	afx_msg void OnButtonLogfile();
+	afx_msg void OnStaticTestClicked();
+	afx_msg void OnStaticImgClicked();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

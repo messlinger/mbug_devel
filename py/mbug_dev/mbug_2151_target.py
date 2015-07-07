@@ -126,7 +126,7 @@ class LUC308554(mbug_2151_target):
         mbug_2151_target.__init__(self, dev)
         self.addr = addr
 
-    def _addr_sequence(self, (syscode, addr), on):
+    def _addr_sequence(self, syscode, addr, on):
         # The 7-bit system code is fixed internally via solder pads at a the address
         # pins of the HS-2262 encoder.  For the ease of use, we treat a closed
         # solder pad as 1, an open solder pad as 0 and pin 1 as the leftmost bit.
@@ -161,10 +161,14 @@ class LUC308554(mbug_2151_target):
         into a specific transmitter. If you do not know your syscode, try out all values 0..127,
         which takes less than a minute.
         """
-        try: addr = (addr[0],addr[1])
-        except: addr = (self.addr[0],addr)
-        self.addr = addr
-        seq = self._addr_sequence(addr, on)
+        try:
+            syscode, addr = addr[0], addr[1]
+            self.syscode, self.addr = syscode, addr
+        except:
+            syscode = self.syscode
+            self.addr = addr
+
+        seq = self._addr_sequence(syscode, addr, on)
         self._send( seq, force )
     
     def __setitem__(self, addr, on):
@@ -327,7 +331,7 @@ class DMV7008(mbug_2151_target):
         try: self.syscode, self.addr = addr[0], addr[1]
         except: self.syscode, self.addr = 0, None
 
-    def _addr_sequence(self, (syscode, addr), cmd):
+    def _addr_sequence(self, syscode, addr, cmd):
         # Addresses consist of a 12 bit system code + 8 bits addr/cmd code.
         # The system code is randlomly chosen for a given remote control,
         # and can be learned by the receivers. Per system, there are 4 known
@@ -378,7 +382,7 @@ class DMV7008(mbug_2151_target):
         except:
             syscode = self.syscode
             self.addr = addr
-        seq = self._addr_sequence((syscode,addr), on)
+        seq = self._addr_sequence( syscode, addr, on)
         self._send( seq, force )
         
     def dim(self, addr, level, force=0):
@@ -454,11 +458,11 @@ class IKT201(mbug_2151_target):
         mbug_2151_target.__init__(self, dev)
         self.addr = addr
 
-    def _sequence(self, (syscode, channels), on=None, level=None, rel=None, gradual=0):
+    def _sequence(self, syscode, channels, on=None, level=None, rel=None, gradual=0):
         
         syscode = int(syscode-1)&0x0f
-        try:
-            channels = [int(i%10) for i in channels] # to iterate
+        try: # to iterate
+            channels = [int(i%10) for i in channels] 
         except:
             try: channels = [int(channels%10)]
             except: raise TypeError("Invalid channel list")
@@ -497,10 +501,13 @@ class IKT201(mbug_2151_target):
         2 numbers: The system code (1-16) and a list of addressed receivers (0-10).
         Use with tuple (syscode,addrlist) as addr, or addrlist only, in which case a
         previously stored syscode is used (default syscode = 0)."""
-        try: addr = (addr[0],addr[1])
-        except: addr = (self.addr[0],addr)
-        self.addr = addr
-        seq = self._sequence(addr, on)
+        try:
+            syscode, addr = addr[0], addr[1]
+            self.syscode, self.addr = syscode, addr
+        except:
+            syscode = self.syscode
+            self.addr = addr        
+        seq = self._sequence(syscode, addr, on=on)
         self._send( seq, force )
         
     def set_level(self, addr, level, force=0):
@@ -509,9 +516,12 @@ class IKT201(mbug_2151_target):
         2 numbers: The system code (1-16) and a list of addressed receivers (0-10).
         Use with tuple (syscode,addrlist) as addr, or addrlist only, in which case a
         previously stored syscode is used (default syscode = 0)."""
-        try: addr = (addr[0],addr[1])
-        except: addr = (self.addr[0],addr)
-        self.addr = addr
+        try:
+            syscode, addr = addr[0], addr[1]
+            self.syscode, self.addr = syscode, addr
+        except:
+            syscode = self.syscode
+            self.addr = addr
         seq = self._sequence(addr, level=level)
         self._send( seq, force )
 
@@ -551,7 +561,7 @@ class RS200(mbug_2151_target):
         mbug_2151_target.__init__(self, dev)
         self.addr = addr
 
-    def _sequence(self, (syscode, chan), on=1 ):
+    def _sequence(self, syscode, chan, on=1 ):
         # Adresses consist of an 8 bit system code and a switch channel of 1-4 or master (switches all).
         # On the original transmitter, the system code is set at power up by a 4 digit code of 1-4.
         # Here, the system code can be passed as number 0-255 or as the 4 digits code typed on the receiver.
@@ -593,11 +603,14 @@ class RS200(mbug_2151_target):
     def switch(self, addr, on, force=0):
         """Turn addressed remote switches on/off. The address of a switch target consists of
         2 numbers: The system code (4 digits 1-4, or number 0-255 alternatively) and a
-        receiver address (1-4 or M or A for master). Use with tuple (syscode,addres) as addr, or
+        receiver address (1-4 or M or A for master). Use with tuple (syscode,address) as addr, or
         addres only, in which case a previously stored syscode is used (default syscode = 0)."""
-        try: addr = (addr[0],addr[1])
-        except: addr = (self.addr[0],addr)
-        self.addr = addr
+        try:
+            syscode, addr = addr[0], addr[1]
+            self.syscode, self.addr = syscode, addr
+        except:
+            syscode = self.syscode
+            self.addr = addr
         seq = self._sequence(addr, on)
         self._send( seq, force )
 

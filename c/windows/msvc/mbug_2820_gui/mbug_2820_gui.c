@@ -269,7 +269,7 @@ void update_measurement( void )
 	int type = 0;
 	double temp = -300;
 	double hum = -300;
-	static tog = 1;
+	static int tog = 1;
 
 	if (instrument == 0) return;
 
@@ -280,24 +280,40 @@ void update_measurement( void )
 	}
 	switch (type)
 	{
-		case 2810: temp = mbug_2810_read( instrument ); break;
-		case 2811: temp = mbug_2811_read( instrument ); break;
+		case 2810: temp = mbug_2810_read( instrument );
+		case 2811: temp = mbug_2811_read( instrument );
 		case 2820: mbug_2820_read( instrument, &temp, &hum ); break;
 		default:  print_status("Unsupported device"); return;
 	}
 
-	if (temp <= NOT_A_TEMPERATURE || hum < NOT_A_TEMPERATURE )
-	{
-		print_status("Read error"); return;
+    switch (type)
+    {
+		case 2810:  /* temperature only */
+		case 2811:
+			if (temp <= NOT_A_TEMPERATURE ) {
+				print_status("Read error"); return;
+			}
+			print_temp( temp );
+			print_hum( NOT_A_TEMPERATURE );
+			ShowWindow( GetDlgItem( hMainDlg, IDC_BEAT_TEMP), tog ? SW_SHOW : SW_HIDE );
+			ShowWindow( GetDlgItem( hMainDlg, IDC_BEAT_HUM), SW_HIDE );
+			tog = !tog;
+			break;
+
+		case 2820:
+			if (temp <= NOT_A_TEMPERATURE || hum < 0 ) {
+				print_status("Read error"); return;
+			}
+			print_temp( temp );
+			print_hum( hum );
+
+			ShowWindow( GetDlgItem( hMainDlg, IDC_BEAT_TEMP), tog ? SW_SHOW : SW_HIDE );
+			ShowWindow( GetDlgItem( hMainDlg, IDC_BEAT_HUM), tog ? SW_SHOW : SW_HIDE );
+			tog = !tog;
+			break;
 	}
-
-	print_temp( temp );
-	print_hum( hum );
-
-	ShowWindow( GetDlgItem( hMainDlg, IDC_BEAT_TEMP), tog ? SW_SHOW : SW_HIDE );
-	ShowWindow( GetDlgItem( hMainDlg, IDC_BEAT_HUM), tog ? SW_SHOW : SW_HIDE );
-	tog = !tog;
 }
+
 
 void on_timer( void )
 {
@@ -327,7 +343,7 @@ void print_temp( double temp )
 void print_hum( double hum )
 {
 	char str[50] = {0};
-	if (hum <= -300.)   sprintf( str, " ---.--- %" );
+	if (hum < 0)        sprintf( str, " ---.--- %" );
 	else if (hum<100.)  sprintf( str, "% 2.2f %%", hum );
 	else                sprintf( str, "%3.2f %%", hum );
 

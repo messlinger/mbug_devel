@@ -47,7 +47,7 @@
 				RuntimeLibrary="3"
 				BufferSecurityCheck="false"
 				WarningLevel="3"
-				DebugInformationFormat="4"
+				DebugInformationFormat="1"
 				CompileAs="0"
 				DisableSpecificWarnings="4996"
 			/>
@@ -89,7 +89,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Postbuild: Copy output file"
-				CommandLine="copy mbug_lib\debug\mbugd.lib ..\lib"
+				CommandLine="copy /Y mbug_dll\debug\mbugdll.lib ..\lib &amp; copy /Y mbug_dll\debug\mbugdll.dll ..\lib"
 			/>
 		</Configuration>
 		<Configuration

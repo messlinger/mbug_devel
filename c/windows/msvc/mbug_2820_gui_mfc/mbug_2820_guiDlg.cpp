@@ -28,6 +28,15 @@ CMbug_2820_guiDlg::CMbug_2820_guiDlg(CWnd* pParent /*=NULL*/)
 	m_humidity = -300;
 	m_device = 0;
 
+	//m_hIcon_open = AfxGetApp()->LoadIcon(IDI_ICON_OPEN);
+	m_hIcon_open = (HICON)LoadImage( 
+								AfxGetApp()->m_hInstance,
+								MAKEINTRESOURCE(IDI_ICON_OPEN),
+								IMAGE_ICON,
+								16,16, // use actual size
+								LR_DEFAULTCOLOR
+							);
+
 }
 
 
@@ -35,6 +44,10 @@ void CMbug_2820_guiDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CMbug_2820_guiDlg)
+	DDX_Control(pDX, IDC_STATIC_IMG, m_test_img);
+	DDX_Control(pDX, IDC_STATIC_TEST, m_test);
+	DDX_Control(pDX, IDC_BUTTON_LOGFILE, m_button_logfile);
+	DDX_Control(pDX, IDC_EDIT_LOGFILE, m_edit_logfile);
 	DDX_Control(pDX, IDC_LABEL_VALUE_HUMIDITY, m_disp_hum);
 	DDX_Control(pDX, IDC_HEARTBEAT_HUM, m_Heartbeat_hum);
 	DDX_Control(pDX, IDC_HEARTBEAT_T, m_Heartbeat_t);
@@ -51,9 +64,12 @@ BEGIN_MESSAGE_MAP(CMbug_2820_guiDlg, CDialog)
 	ON_CBN_DROPDOWN(IDC_COMBO_DEVICE, OnDropdownComboDevice)
 	ON_WM_TIMER()
 	ON_CBN_SELCHANGE(IDC_COMBO_DEVICE, OnSelchangeComboDevice)
-	ON_WM_CANCELMODE()
 	ON_WM_CLOSE()
 	ON_WM_DESTROY()
+	ON_BN_CLICKED(IDC_BUTTON_LOGFILE, OnButtonLogfile)
+	ON_BN_CLICKED(IDC_STATIC_TEST, OnStaticTestClicked)
+	ON_WM_CANCELMODE()
+	ON_BN_CLICKED(IDC_STATIC_IMG, OnStaticImgClicked)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -78,6 +94,15 @@ BOOL CMbug_2820_guiDlg::OnInitDialog()
 	// Write initial text
 	m_disp_temp.SetWindowText(" ---.--- \xB0""C");
 	m_disp_hum.SetWindowText(" ---.--- %");
+	m_edit_logfile.SetWindowText("None");
+	//m_button_logfile.SetIcon( static_cast<HICON>(LoadImage(AfxGetInstanceHandle(),
+	//                                    MAKEINTRESOURCE(IDI_ICON_OPEN),
+	//									IMAGE_ICON, 16, 16, LR_DEFAULTSIZE) ));
+	//m_button_logfile.SetBitmap(::LoadBitmap(AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDI_ICON_OPEN)));
+	m_button_logfile.SetIcon( m_hIcon_open );
+	m_test.SetBitmap( (HBITMAP) m_hIcon_open );
+	m_test_img.SetBitmap( (HBITMAP) m_hIcon_open );
+	m_button_logfile.ModifyStyle(0, WS_BORDER);
 
 	return TRUE;  // Geben Sie TRUE zurück, außer ein Steuerelement soll den Fokus erhalten
 }
@@ -315,8 +340,8 @@ void CMbug_2820_guiDlg::update_measurement()
 			return;
 	}
 
-	if (temperature <= NOT_A_TEMPERATURE |
-		humidity < NOT_A_TEMPERATURE )
+	if ((temperature <= NOT_A_TEMPERATURE) ||
+		(humidity < NOT_A_TEMPERATURE) )
 	{
 		print_status("Read error");
 		return;
@@ -331,3 +356,47 @@ void CMbug_2820_guiDlg::update_measurement()
 	tog = !tog;
 }
 
+
+void CMbug_2820_guiDlg::OnButtonLogfile() 
+{
+	char filename[500] = "";
+	OPENFILENAME ofn = {
+		sizeof(OPENFILENAME),	// DWORD         lStructSize; 
+		0,						// HWND          hwndOwner; 
+		0,						// HINSTANCE     hInstance;     
+		0,						// LPCTSTR       lpstrFilter; 
+		0,						// LPTSTR        lpstrCustomFilter; 
+		0,						// DWORD         nMaxCustFilter; 
+		0,						// DWORD         nFilterIndex; 
+		filename,				// LPTSTR        lpstrFile; 
+		sizeof(filename)-1,		// DWORD         nMaxFile; 
+		0,						// LPTSTR        lpstrFileTitle; 
+		0,						// DWORD         nMaxFileTitle; 
+		0,						// LPCTSTR       lpstrInitialDir; 
+		"Seelct logfile",		// LPCTSTR       lpstrTitle; 
+		OFN_HIDEREADONLY | OFN_PATHMUSTEXIST, // DWORD         Flags; 
+		0,						// WORD          nFileOffset; 
+		0,						// WORD          nFileExtension; 
+		"dat",					// LPCTSTR       lpstrDefExt; 
+		0,						// DWORD         lCustData; 
+		0,						// LPOFNHOOKPROC lpfnHook; 
+		0						// LPCTSTR       lpTemplateName; 
+	};
+	
+	BOOL res = GetOpenFileName( &ofn );
+	if (res) {
+		m_edit_logfile.SetWindowText(filename);
+	}
+	
+}
+
+void CMbug_2820_guiDlg::OnStaticTestClicked() 
+{
+	OnButtonLogfile();
+}
+
+void CMbug_2820_guiDlg::OnStaticImgClicked() 
+{
+	OnButtonLogfile();
+	
+}

@@ -21,7 +21,7 @@ class mbug_2810(mbug):
         """ Get the current temperature in degrees Celsius as float. """      
         self._write('read\0')     # Ascii format 
         s = self._read()
-        return float(s.split('\0')[0].splitlines()[0])
+        return float(s.strip(b'\0').splitlines()[0])
 
     read = read_ascii    
     

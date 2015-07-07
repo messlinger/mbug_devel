@@ -258,7 +258,7 @@ void CMbug_2810_guiDlg::close_device( int verbose )
 
 	if (m_device != 0)
 	{
-		if (verbose) print_status("Cosing device");
+		if (verbose) print_status("Closing device");
 		mbug_close( m_device );
 		m_device = 0;
 		if (verbose) print_status("Device closed");
@@ -293,7 +293,7 @@ void CMbug_2810_guiDlg::update_temperature()
 			return;
 	}
 
-	if (temperature<=NOT_A_TEMPERATURE)
+	if (temperature <= NOT_A_TEMPERATURE)
 	{
 		print_status("Read error");
 		return;
@@ -301,7 +301,7 @@ void CMbug_2810_guiDlg::update_temperature()
 
 	print_temperature( temperature );
 
-	static tog = 1;
+	static int tog = 1;
 	m_Heartbeat.ShowWindow( tog ? SW_SHOW : SW_HIDE );
 	tog = !tog;
 }

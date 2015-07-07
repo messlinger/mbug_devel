@@ -65,7 +65,7 @@ elif sys.platform=='linux2':
     LIBUSB_PATH_MAX = os.pathconf('/',4)+1 
     LIBUSB_HAS_GET_DRIVER_NP = 1
     LIBUSB_HAS_DETACH_KERNEL_DRIVER_NP = 1
-else: raise 'libusb0.py: Operating system not supported.'    
+else: raise RuntimeError('libusb0.py: Operating system not supported.')
 
 
 #================================================================

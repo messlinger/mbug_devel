@@ -57,7 +57,7 @@ class mbug(object):
                     handle = usb.open(dev)  # Need to open the device to query string descriptors
                     try:    
                         ## s = usb.get_string( handle, desc.iSerialNumber )
-                        s = _repeat( usb.get_string, handle, desc.iSerialNumber )    
+                        s = _repeat( usb.get_string, handle, desc.iSerialNumber )
                         if (serial==None or s.endswith( str(serial) )):
                             ##usb.set_configuration( handle, 1 )
                             _repeat( usb.set_configuration, handle, 0 )  # Workaround for xHCI bug
@@ -119,9 +119,9 @@ class mbug(object):
 # Helper function. Convert integer to 4 digit bcd format and vice versa.
 # Intended for usage with bcd format descriptor fields.
 def _bcd(bin):
-    return sum([ ((int(bin)/10**d)%10 )*(1<<4*d) for d in range(4)])
+    return sum([ ((int(bin)//10**d)%10 )*(1<<4*d) for d in range(4) ])
 def _bin(bcd):
-    return sum([ ((int(bcd)/16**d)%16 )*(10**d) for d in range(4)])
+    return sum([ ((int(bcd)//16**d)%16 )*(10**d) for d in range(4) ])
     
 #----------------------------------------------------------------------
 # Helper function. Try call to libusb function several times.

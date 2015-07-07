@@ -168,6 +168,14 @@ SOURCE=.\res\mbug_2820_gui.rc2
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\icon\open_16.ico
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\icon\open_16_exp.ico
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\usb.ico
 # End Source File
 # Begin Source File

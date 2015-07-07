@@ -47,6 +47,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lsmbug", "lsmbug.vcproj", "
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mbug_dll", "mbug_dll.vcproj", "{36F6B9E8-A01F-4058-A14B-392C3C1F6E9A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "scratch", "..\scratch\scratch.vcproj", "{EE8B68AA-B362-4CC2-9035-1EC3C67428DC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -97,6 +99,10 @@ Global
 		{36F6B9E8-A01F-4058-A14B-392C3C1F6E9A}.Debug|Win32.Build.0 = Debug|Win32
 		{36F6B9E8-A01F-4058-A14B-392C3C1F6E9A}.Release|Win32.ActiveCfg = Release|Win32
 		{36F6B9E8-A01F-4058-A14B-392C3C1F6E9A}.Release|Win32.Build.0 = Release|Win32
+		{EE8B68AA-B362-4CC2-9035-1EC3C67428DC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{EE8B68AA-B362-4CC2-9035-1EC3C67428DC}.Debug|Win32.Build.0 = Debug|Win32
+		{EE8B68AA-B362-4CC2-9035-1EC3C67428DC}.Release|Win32.ActiveCfg = Release|Win32
+		{EE8B68AA-B362-4CC2-9035-1EC3C67428DC}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
