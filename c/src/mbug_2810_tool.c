@@ -18,6 +18,9 @@ const char* usage =
 "                                                                              \n"
 "Commands:                                                                     \n"
 "                                                                              \n"
+"    h             Display this usage info.                                    \n"
+"    help                                                                      \n"
+"                                                                              \n"
 "    l             List attached devices, does not read any temperature.       \n"
 "    ls                                                                        \n"
 "    list                                                                      \n"
@@ -36,18 +39,42 @@ const char* usage =
 "                  K, kelvin: Absolute temperature in Kelvin                   \n"
 "                  R, raw: Raw sensor reading in the range 0..4095 (12 bit)    \n"
 "                                                                              \n"
-"    h             Display this usage info.                                    \n"
-"    help                                                                      \n";
+"    log           Recording mode: Take periodic measurements with a specified \n"
+"    rec           interval. The data is printed to stdout. If a file is       \n"
+"    record        specified, the data is also printed to the specified file.  \n"
+"                                                                              \n"
+"    file          Output filename used in recording mode                      \n"
+"                                                                              \n"
+"    silent        Suppress data output to stdout, write to file only.         \n"
+"                                                                              \n"
+"    i             Measurement interval in seconds. Default is 1.              \n"
+"    int                                                                       \n"
+"    interval                                                                  \n"
+"                                                                              \n"
+"    n             Number of measurements to take. To take an infinite number  \n"
+"    num           of measurements (default), specify 0 or \"inf\".            \n"
+"    number                                                                    \n"
+"                                                                              \n"
+;
 
 //--------------------------------------------------------------------------------
 
+mbug_device thermometer = 0;
+
 int device_serial = 0;
-enum Action { Read, List, Help } action = Read;
+enum Action { Read, List, Record, Help } action = Read;
 enum Format { Celsius, Fahrenheit, Kelvin, Raw } format = Celsius;
+
+// Recording mode:
+const char* rec_filename = 0;  // Destination file name
+FILE* rec_file = 0;          // File handle
+double rec_interval = 1.0; // Update interval
+unsigned long rec_number = 0;
+int rec_silent = 0;        // Silent flag (no print to stdout)
 
 //---------------------------------------------------------------
 
-/** Extract device serial. */
+/** Extract device id. */
 void parse_device_id( char* str )
 {
 	if (strncmp_upper(str,"MBUG-2810",9) == 0)
@@ -69,6 +96,31 @@ void parse_format( char* str )
 	else errorf( "#### Invalid format: %s", str );
 }
 
+/** Extract record output filename. */
+void parse_recfilename( const char* str )
+{
+	if (str==0 || *str=='\0')
+		errorf( "#### Invalid filename: %s", str );
+	rec_filename = str;
+}
+
+/** Extract record interval. */
+parse_recinterval( const char* str )
+{
+	rec_interval = str_to_float(str);
+	if (rec_interval<0)
+		errorf( "#### Invalid interval: %s", str );
+}
+
+/** Extract number of records. */
+parse_recnumber( const char* str )
+{
+	if (strcmp_upper(str,"INF") == 0)
+		rec_number = 0;
+	else if ((rec_number = str_to_uint(str))<0)
+		errorf( "#### Invalid number: %s", str );
+}
+
 /** Parse the argv for command line parameters. */
 void parse_options( int argc, char* argv[] )
 {
@@ -77,18 +129,39 @@ void parse_options( int argc, char* argv[] )
 	while (cmd = arg_tok(0,":="))
 	{
 		cmd += strspn( cmd, "-/" );
-		if (str_in( cmd, "l", "ls", "list", 0 ))
+		if (str_in( cmd, "h", "help", 0 ))
+			action = Help;
+		else if (str_in( cmd, "l", "ls", "list", 0 ))
 			action = List;
 		else if (str_in( cmd, "r", "rd", "read", 0 ))
 			action = Read;
-		else if (str_in( cmd, "h", "help", 0 ))
-			action = Help;
 		else if (str_in( cmd, "d", "dev", "device", 0 ))
 			parse_device_id( arg_tok(0,"") );
 		else if (str_in( cmd, "f", "fmt", "format", 0 ))
 			parse_format( arg_tok(0,"") );
+		else if (str_in( cmd, "log", "rec", "record", 0 ))
+			action = Record;
+		else if (str_in( cmd, "file", 0 ))
+			parse_recfilename( arg_tok(0,"") );
+		else if (str_in( cmd, "s", "silent", 0 ))
+			rec_silent = 1;
+		else if (str_in( cmd, "i", "int", "interval", 0 ))
+			parse_recinterval( arg_tok(0,"") );
+		else if (str_in( cmd, "n", "num", "number", 0 ))
+			parse_recnumber( arg_tok(0,"") );
 		else
 			errorf( "#### Unknown command: %s", cmd);
+	}
+}
+
+
+void cleanup( void )
+{
+	if (thermometer)
+		mbug_2810_close( thermometer );
+	if (rec_file) {
+		fflush( rec_file );
+		fclose( rec_file ); rec_file=0;
 	}
 }
 
@@ -96,13 +169,17 @@ void parse_options( int argc, char* argv[] )
 
 int main( int argc, char* argv[] )
 {
-	mbug_device thermometer = 0;
-
+	atexit( cleanup );
 	parse_options( argc, argv );
 
-	if (action==List)
+	if (action==Help)
 		{
-			// List all attached thermometers
+			puts(usage);
+			return 0;
+		}
+
+	if (action==List)  		// List all attached thermometers
+		{
 			int i;
 			mbug_device_list list = mbug_get_device_list(2810);
 			for (i=0; list[i]!=0; i++ ) {
@@ -111,11 +188,6 @@ int main( int argc, char* argv[] )
 			return 0;
 		}
 
-	if (action==Help)
-		{
-			puts(usage);
-			return 0;
-		}
 
 	// Open device
 	thermometer = mbug_2810_open( device_serial );
@@ -131,19 +203,71 @@ int main( int argc, char* argv[] )
 		else
 			tem = mbug_2810_read( thermometer );
 
-		if (format==Fahrenheit)
-				tem = tem * 9./5 + 32.;
-		else if (format==Kelvin && tem >= -273.15)
-				tem += 273.15;
+		if ( raw<0 || tem <= NOT_A_TEMPERATURE )
+					fputs( "#### Read error\n", stdout );
 
 		// print
 		if (format==Raw)
 			printf( "%d", raw );
-		else
+		else if (format==Fahrenheit)
+			printf( "%.2f", tem * 9./5 + 32. );
+		else if (format==Kelvin)
+			printf( "%.2f", tem + 273.15 );
+		else // format Celsius
 			printf( "%.2f", tem );
 	}
 
-	mbug_2810_close(thermometer);
+	if (action==Record)
+	{
+		double tim = 0.0, tem = 0.0;
+		int raw = 0;
+		char str[500] = {0};
+		unsigned long nn = 0;
+
+		if (rec_filename != 0)
+		{
+			rec_file = fopen( rec_filename, "a" );
+			if (rec_file == 0)
+				errorf( "#### Error opening file %s\n", rec_filename );
+		}
+
+		tim = floattime();
+		sprintf( str, "\n\n# %s\n# Start recording at %.2f\n# timestamp\ttemperature\n", mbug_id(thermometer), tim );
+		if (rec_file)  fputs(str, rec_file);
+		if (!rec_silent)  fputs(str, stdout);
+
+		tim = floattime();
+		for( nn=0; (rec_number==0)||(nn<rec_number); nn++)
+		{
+			tem = raw = 0.;
+			if (format==Raw)
+				raw = mbug_2811_read_raw( thermometer );
+			else
+				tem = mbug_2811_read( thermometer );
+
+			if ( raw<0 || tem <= NOT_A_TEMPERATURE )
+			{
+				fputs( "#### Read error\n", stdout );
+				if (rec_file) fputs( "#### Read error\n", rec_file);
+			}
+
+			if (format==Raw)
+				sprintf( str, "%.2f\t%d\n", tim, raw );
+			else if (format==Fahrenheit)
+				sprintf( str, "%.2f\t%.3f\n", tim, tem*9./5.+32. );
+			else if (format==Kelvin)
+				sprintf( str, "%.2f\t%.3f\n", tim, tem+273.15 );
+			else // format Celsius
+				sprintf( str, "%.2f\t%.3f\n", tim, tem );
+
+			if (rec_file)  { fputs( str, rec_file ); fflush(rec_file); };
+			if (!rec_silent) { fputs(str, stdout); fflush(stdout); }
+
+			tim += rec_interval;
+			waittime( tim );
+		}
+	}
+
 	return 0;
 }
 

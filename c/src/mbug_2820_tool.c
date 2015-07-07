@@ -75,7 +75,7 @@ int rec_silent = 0;        // Silent flag (no print to stdout)
 //---------------------------------------------------------------
 
 
-/** Extract device serial. */
+/** Extract device id. */
 void parse_device_id( char* str )
 {
 	if (strncmp_upper(str,"MBUG-2810",9) == 0)
@@ -130,6 +130,7 @@ void parse_options( int argc, char* argv[] )
 	arg_tok( argv+1, 0 );
 	while (cmd = arg_tok(0,":="))
 	{
+		cmd += strspn( cmd, "-/" );
 		if (str_in( cmd, "h", "help", 0 ))
 			action = Help;
 		else if (str_in( cmd, "l", "ls", "list", 0 ))
@@ -238,7 +239,6 @@ int main( int argc, char* argv[] )
 			tim += rec_interval;
 			waittime( tim );
 		}
-
 	}
 
 	return 0;
