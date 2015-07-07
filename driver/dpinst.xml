@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+  <dpinst>
+    <legacyMode/>
+    <language code="0x0409">
+      <dpinstTitle>MBUG Driver Package Installer</dpinstTitle>
+      <welcomeTitle>Welcome to the MBUG Device Driver Installation Wizard!</welcomeTitle>
+      <welcomeIntro>This Program will pre-install the MBUG device drivers on your system. After that, when a new MBUG device is plugged in for the first time, the appropriate driver will be installed automatically.
+To learn more about the underlying system, have a look at the Windows Driver Install Frameworks (DIFx).</welcomeIntro>
+      <finishTitle>Completing the MBUG Device Driver Installation Wizard</finishTitle>
+      <finishText>The drivers where succesfully installed on this computer.</finishText>
+    </language>
+    <enableNotListedLanguages/>
+  </dpinst>

@@ -1,0 +1,8 @@
+Sign MBUG device driver
+
+
+You can get a list of the certificates intalled on your system by running
+the certmgr.msc tool.
+For additional information on this topic, please visit
+https://github.com/pbatard/libwdi/wiki/Certification-Practice-Statement
+

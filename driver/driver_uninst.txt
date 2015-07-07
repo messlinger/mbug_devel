@@ -1,0 +1,20 @@
+
+
+dpist.exe tool (part of windows driver sdk): 
+  can install and uninstall drivers
+  
+libusb:
+  install-filter.exe tool: can install and uninstall drivers, does not delete oem infs.
+  libubs0.dll,usb_install_driver_np_rundll:
+    can install driver based on given inf
+  (see libusb source insall.c)
+
+
+Links:
+https://msdn.microsoft.com/en-us/library/windows/desktop/aa377446%28v=vs.85%29.aspx
+http://blogs.technet.com/b/svengruenitz/archive/2008/07/02/driver-installation-and-updating-made-easy-dpinst-exe.aspx
+http://sourceforge.net/p/libusb-win32/mailman/libusb-win32-devel/thread/20070819190836.GA29875@trikaliotis.net/
+https://stackoverflow.com/questions/11624334/deleting-inf-and-pnf-files/11853352#11853352
+
+
+

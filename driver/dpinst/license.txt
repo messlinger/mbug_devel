@@ -1,0 +1,23 @@
+The executables in this folder are part of the reditributable files contained
+in the Microsoft Windows Driver Kit 7.1 (7600.16385.1). Microsoft permits the
+distribution of these files under the following conditions:
+
+Distribution Requirements. For any Distributable Code you distribute, you must
+  * add significant primary functionality to it in your programs;
+  * require distributors and external end users to agree to terms that protect
+    it at least as much as this agreement;
+  * display your valid copyright notice on your programs;
+  * indemnify, defend, and hold harmless Microsoft from any claims, including 
+    attorneys’ fees, related to the distribution or use of your programs.
+Distribution Restrictions.  You may not
+  * alter any copyright, trademark or patent notice in the Distributable Code; 
+  * use Microsoft’s trademarks in your programs’ names or in a way that 
+    suggests your programs come from or are endorsed by Microsoft; 
+  * distribute Distributable Code to run on a platform other than the Windows 
+    platform;
+  * include Distributable Code in malicious, deceptive or unlawful programs;
+  * modify or distribute the source code of any Distributable Code so that any
+    part of it becomes subject to an Excluded License.  An Excluded License is
+    one that requires, as a condition of use, modification or distribution, 
+      * that the code be disclosed or distributed in source code form; or 
+      * others have the right to modify it.

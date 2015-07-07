@@ -1,0 +1,12 @@
+MBUG command line tools
+
+MBUG_2110  GPIO interface
+MBUG_2151  433MHz transmitter
+MBUG_2165  IR transmitter
+MBUG_2810  Thermometer
+MBUG_2811  Thermometer
+MBUG_2818  8 Channel Thermometer
+MBUG_2820  Environmeter
+
+Call  MBUG_XXXX help  for command line options.
+
