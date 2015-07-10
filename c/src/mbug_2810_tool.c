@@ -239,11 +239,11 @@ int main( int argc, char* argv[] )
 		tim = floattime();
 		for( nn=0; (rec_number==0)||(nn<rec_number); nn++)
 		{
-			tem = raw = 0.;
+			tem = raw = 0;
 			if (format==Raw)
-				raw = mbug_2811_read_raw( thermometer );
+				raw = mbug_2810_read_raw( thermometer );
 			else
-				tem = mbug_2811_read( thermometer );
+				tem = mbug_2810_read( thermometer );
 
 			if ( raw<0 || tem <= NOT_A_TEMPERATURE )
 			{

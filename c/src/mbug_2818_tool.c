@@ -17,6 +17,9 @@ const char* usage =
 "                                                                              \n"
 "Commands:                                                                     \n"
 "                                                                              \n"
+"    h             Display this usage info.                                    \n"
+"    help                                                                      \n"
+"                                                                              \n"
 "    l             List attached devices, does not read any temperature.       \n"
 "    ls                                                                        \n"
 "    list                                                                      \n"
@@ -40,15 +43,46 @@ const char* usage =
 "                  K, kelvin: Absolute temperature in Kelvin                   \n"
 "                  R, raw: Raw ADC input value in the range 0..65535 (16 bit)  \n"
 "                                                                              \n"
-"    h             Display this usage info.                                    \n"
-"    help                                                                      \n";
+"    log           Recording mode: Take periodic measurements with a specified \n"
+"    rec           interval. The data is printed to stdout. If a file is       \n"
+"    record        specified, the data is also printed to the specified file.  \n"
+"                                                                              \n"
+"    file          Output filename used in recording mode                      \n"
+"                                                                              \n"
+"    silent        Suppress data output to stdout, write to file only.         \n"
+"                                                                              \n"
+"    i             Measurement interval in seconds. Default is 1. Set to 0 for \n"
+"    int           For maximum rate (0.08 approx.), set to 0 or min., the \n"
+"    interval      For intervals < 0.1, the timing may be inaccurate.          \n"
+"                                                                              \n"
+"    n             Number of measurements to take. To take an infinite number  \n"
+"    num           of measurements (default), specify 0 or \"inf\".            \n"
+"    number                                                                    \n"
+"                                                                              \n"
+;
 
 //-------------------------------------------------------------------------------
+
+mbug_device thermometer = 0;
+
 long device_serial = 0;
+enum Action { Read, List, Record, Help } action = Read;
+enum Format { Celsius, Fahrenheit, Kelvin, Raw } format = Celsius;
+
+// Channel list
 enum { maxchan = 100 };
 int channels[maxchan+1] = {-1};
-enum Format { Celsius, Fahrenheit, Kelvin, Raw } format = Celsius;
-enum Action { Read, List, Help } action = Read;
+
+// Measurement results
+double tem[8] = {0};
+unsigned short raw[8] = {0};
+
+// Recording mode:
+const char* rec_filename = 0;  // Destination file name
+FILE* rec_file = 0;          // File handle
+double rec_interval = 1.0; // Update interval
+unsigned long rec_number = 0;
+int rec_silent = 0;        // Silent flag (no print to stdout)
 
 
 //---------------------------------------------------------------
@@ -93,6 +127,32 @@ void parse_format( char* str )
 	else errorf( "#### Invalid format: %s", str );
 }
 
+/** Extract record output filename. */
+void parse_recfilename( const char* str )
+{
+	if (str==0 || *str=='\0')
+		errorf( "#### Invalid filename: %s", str );
+	rec_filename = str;
+}
+
+/** Extract record interval. */
+parse_recinterval( const char* str )
+{
+	if (!strcmp_upper(str, "MIN")) rec_interval = 0;
+	else rec_interval = str_to_float(str);
+	if (rec_interval<0)
+		errorf( "#### Invalid interval: %s", str );
+}
+
+/** Extract number of records. */
+parse_recnumber( const char* str )
+{
+	if (strcmp_upper(str,"INF") == 0)
+		rec_number = 0;
+	else if ((rec_number = str_to_uint(str))<0)
+		errorf( "#### Invalid number: %s", str );
+}
+
 /** Parse the argv for command line parameters. */
 void parse_options( int argc, char* argv[] )
 {
@@ -101,33 +161,82 @@ void parse_options( int argc, char* argv[] )
 	while (cmd = arg_tok(0,":="))
 	{
 		cmd += strspn( cmd, "-/" );
-		if (str_in( cmd, "l", "ls", "list", 0 ))
+		if (str_in( cmd, "h", "help", 0 ))
+			action = Help;
+		else if (str_in( cmd, "l", "ls", "list", 0 ))
 			action = List;
 		else if (str_in( cmd, "r", "rd", "read", 0 ))
 			action = Read;
-		else if (str_in( cmd, "h", "help", 0 ))
-			action = Help;
 		else if (str_in( cmd, "d", "dev", "device", 0 ))
 			parse_device_id( arg_tok(0,"") );
 		else if (str_in( cmd, "c", "ch", "chan", "channel", 0 ))
 			parse_channel_list( arg_tok(0,"") );
 		else if (str_in( cmd, "f", "fmt", "format", 0 ))
 			parse_format( arg_tok(0,"") );
+		else if (str_in( cmd, "log", "rec", "record", 0 ))
+			action = Record;
+		else if (str_in( cmd, "file", 0 ))
+			parse_recfilename( arg_tok(0,"") );
+		else if (str_in( cmd, "s", "silent", 0 ))
+			rec_silent = 1;
+		else if (str_in( cmd, "i", "int", "interval", 0 ))
+			parse_recinterval( arg_tok(0,"") );
+		else if (str_in( cmd, "n", "num", "number", 0 ))
+			parse_recnumber( arg_tok(0,"") );
 		else
 			errorf( "#### Unknown command: %s", cmd );
 	}
+}
+
+
+void cleanup( void )
+{
+	if (thermometer)
+		mbug_2818_close( thermometer );
+	if (rec_file) {
+		fflush( rec_file );
+		fclose( rec_file ); rec_file=0;
+	}
+}
+
+int read_temperatures(void)
+{
+	int i = 0, err = 0;
+	if (format==Raw)
+		err = mbug_2818_read_raw( thermometer, raw, 8 );
+	else
+		err = mbug_2818_read_all( thermometer, tem, 8);
+
+	for (i=0; i<8; i++)
+		if (tem[i]==0.0)
+			err = 1;
+
+	if (format==Fahrenheit)
+		for (i=0; i<8; i++)
+			if (tem[i] > NOT_A_TEMPERATURE) 
+				tem[i] = tem[i] * 9./5 + 32.;
+	else if (format==Kelvin)
+		for (i=0; i<8; i++)
+			if (tem[i] > NOT_A_TEMPERATURE) 
+				tem[i] += 273.15;
+
+	return err;
 }
 
 //---------------------------------------------------------------
 
 int main( int argc, char* argv[] )
 {
-	int i = 0;
-	mbug_device thermometer = 0;
-	double tem[8] = {0};
-	unsigned short raw[8] = {0};
+	int i = 0, err = 0;
 
+	atexit( cleanup );
 	parse_options( argc, argv );
+
+	if (action==Help)
+		{
+			puts(usage);
+			return 0;
+		}
 
 	if (action==List)
 		{
@@ -140,38 +249,29 @@ int main( int argc, char* argv[] )
 			return 0;
 		}
 
-	if (action==Help)
-		{
-			puts(usage);
-			return 0;
-		}
-
 	// Open device
-	thermometer = mbug_2818_open(device_serial);
+	thermometer = mbug_2818_open( device_serial );
 	if (thermometer ==0 )
 		errorf( "#### Error opening device." );
 
+	// Channel list defined? .
+	if (channels[0]<0)  // No -> Print all values
+	{
+		for (i=0; i<8; i++) channels[i] = i;
+		channels[8] = -1;
+	}
+
+	//  Action: Read once
 	if (action==Read)
 	{
-		if (format==Raw)
-			mbug_2818_read_raw( thermometer, raw, 8 );
-		else
-			mbug_2818_read_all( thermometer, tem, 8);
+		int err = 0;
+		
+		err = mbug_2818_set_acq_mode( thermometer, ACQ_MODE_INST );
+		if (err<0) fputs( "#### Error setting acquisition mode\n", stdout );
 
-		if (format==Fahrenheit)
-			for (i=0; i<8; i++)
-				tem[i] = tem[i] * 9./5 + 32.;
-		else if (format==Kelvin)
-			for (i=0; i<8; i++)
-				if (tem[i] >= -273.15)
-					tem[i] += 273.15;
+		err = read_temperatures();
+		if (err<0) fputs( "#### Read error\n", stdout );
 
-		if (channels[0]<0)
-		{
-			// print all values
-			for (i=0; i<8; i++) channels[i] = i;
-			channels[8] = -1;
-		}
 		for (i=0; channels[i]>=0 ;i++)
 		{
 			if (channels[i] > 7)
@@ -184,7 +284,72 @@ int main( int argc, char* argv[] )
 		}
 	}
 
-	mbug_2818_close(thermometer);
+	if (action==Record)
+	{
+		int err = 0;
+		double tim = 0.0, mtim = 0.0;
+		char str[100] = {0};
+		char sout[500] = {0};
+		unsigned long nn = 0;
+
+		if (rec_filename != 0)
+		{
+			rec_file = fopen( rec_filename, "a" );
+			if (rec_file == 0)
+				errorf( "#### Error opening file %s\n", rec_filename );
+		}
+
+		// Header
+		tim = floattime();
+		sprintf( sout, "\n\n# %s\n# Start recording at %.2f\n# timestamp", mbug_id(thermometer), tim );
+		for (i=0; channels[i]>=0 ;i++) {
+			sprintf( str, "\tchan[%d]", channels[i] );
+			strcat( sout, str );
+		}
+		strcat( sout, "\n" );
+		if (rec_file)  fputs(sout, rec_file);
+		if (!rec_silent)  fputs(sout, stdout);
+
+		// Acquisition mode: For slow acquisitions, use synchronous mode.
+		if (rec_interval > 0)
+			err = mbug_2818_set_acq_mode( thermometer, ACQ_MODE_SYNC );
+		else  //   For maximum acquisitions rate, use instantaneous mode (continuous background acquisition)
+			err = mbug_2818_set_acq_mode( thermometer, ACQ_MODE_INST );
+		if (err<0) fputs( "#### Error setting acquisition mode\n", stdout );
+
+		// Measurement loop
+		tim = floattime();
+		for( nn=0; (rec_number==0)||(nn<rec_number); nn++)
+		{
+			err = read_temperatures();
+			mtim = floattime();
+			if (err<0) {
+				if (rec_file) fputs( "#### Read error\n", rec_file);
+				fputs( "#### Read error\n", stdout );
+			}
+
+			sprintf( sout, "%.2f", mtim );
+			for (i=0; channels[i]>=0 ;i++)
+			{
+				if (channels[i] > 7) channels[i] = 0;
+				if (format==Raw)
+					sprintf( str, "\t%d", raw[channels[i]] );
+				else // other formats already converted by read_temperatures()
+					sprintf( str, "\t%.2f", tem[channels[i]] );
+				strcat( sout, str );
+			}
+			strcat( sout, "\n" );
+
+			if (rec_file)  { fputs( sout, rec_file ); fflush(rec_file); };
+			if (!rec_silent) { fputs(sout, stdout); fflush(stdout); }
+			
+			if (rec_interval > 0) {
+				tim += rec_interval;
+				waittime( tim );
+			}
+		}
+	}
+
 	return 0;
 }
 

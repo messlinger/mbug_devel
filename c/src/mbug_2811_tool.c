@@ -73,7 +73,7 @@ int rec_silent = 0;        // Silent flag (no print to stdout)
 
 //---------------------------------------------------------------
 
-/** Extract device id. */
+/** Extract device serial. */
 void parse_device_id( char* str )
 {
 	if (strncmp_upper(str,"MBUG-2811",9) == 0)
@@ -157,7 +157,7 @@ void parse_options( int argc, char* argv[] )
 void cleanup( void )
 {
 	if (thermometer)
-		mbug_2810_close( thermometer );
+		mbug_2811_close( thermometer );
 	if (rec_file) {
 		fflush( rec_file );
 		fclose( rec_file ); rec_file=0;
@@ -230,14 +230,14 @@ int main( int argc, char* argv[] )
 		}
 
 		tim = floattime();
-		sprintf( str, "\n\n# %s\n# Start recording at %.2f\n# timestamp\ttemperature\n", mbug_id(thermometer), tim );
+		sprintf( str, "\n\n# %s\n# Start recording at %.3f\n# timestamp\ttemperature\n", mbug_id(thermometer), tim );
 		if (rec_file)  fputs(str, rec_file);
 		if (!rec_silent)  fputs(str, stdout);
 
 		tim = floattime();
 		for( nn=0; (rec_number==0)||(nn<rec_number); nn++)
 		{
-			tem = raw = 0.;
+			tem = raw = 0;
 			if (format==Raw)
 				raw = mbug_2811_read_raw( thermometer );
 			else
@@ -250,13 +250,13 @@ int main( int argc, char* argv[] )
 			}
 
 			if (format==Raw)
-				sprintf( str, "%.2f\t%d\n", tim, raw );
+				sprintf( str, "%.3f\t%d\n", tim, raw );
 			else if (format==Fahrenheit)
-				sprintf( str, "%.2f\t%.3f\n", tim, tem*9./5.+32. );
+				sprintf( str, "%.3f\t%.3f\n", tim, tem*9./5.+32. );
 			else if (format==Kelvin)
-				sprintf( str, "%.2f\t%.3f\n", tim, tem+273.15 );
+				sprintf( str, "%.3f\t%.3f\n", tim, tem+273.15 );
 			else // format Celsius
-				sprintf( str, "%.2f\t%.3f\n", tim, tem );
+				sprintf( str, "%.3f\t%.3f\n", tim, tem );
 
 			if (rec_file)  { fputs( str, rec_file ); fflush(rec_file); };
 			if (!rec_silent) { fputs(str, stdout); fflush(stdout); }

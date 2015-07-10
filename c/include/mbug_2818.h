@@ -14,6 +14,7 @@
 	mbug_2818_open()		- Open a device with specified serial number
 	mbug_2818_open_str()	- Open a device with specified id string
 	mbug_2818_close()
+	mbug_2818_set_acq_mode() - Set the acquisition mode
 	mbug_2818_read()		- Read a single channel
 	mbug_2818_read_all()	- Read all 8 channels
 	mbug_2818_read_raw()	- Read raw binary values
@@ -47,6 +48,10 @@ mbug_device mbug_2818_open_str( const char *id );
 /** Close a previously opened device.
  */
 void mbug_2818_close( mbug_device dev );
+
+/** Set the acquisition mode (default: instantaneous).
+ */
+int mbug_2818_set_acq_mode( mbug_device dev, enum mbug_acquisition_mode mode );
 
 /** Read one temperature channel (as Degrees Celsius).
 	Channel = 0..7

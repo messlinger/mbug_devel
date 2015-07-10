@@ -158,7 +158,7 @@ void waittime( double timestamp )
 	#elif __linux__
 		double delta;
 		while ( (delta = timestamp - floattime()) > 0)
-			if (delta >= 1e-3) 
+			if (delta >= 1e-3)
 				usleep( delta>0.1 ? 100000 : 0.8*1e6*delta );
 	#endif
 }

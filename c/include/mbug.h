@@ -30,12 +30,16 @@ typedef mbug_device_struct* mbug_device;
 /** Some parameter definitions that are used in more than one device.
  */
 
-enum mbug_acquistion_mode {  // (Most devices only support a subset of acquisition modes)
+// Acquisition modes  (devices may only support a subset of acquisition modes)
+enum mbug_acquistion_mode {
 	ACQ_MODE_INST = 0, // Instantaneous: Use last measured value if not read before, else wait for next.
 	ACQ_MODE_LAST,     // Last: Always use last valid value, never block.
 	ACQ_MODE_NEXT,     // Next: Always wait for next incoming value.
-	ACQ_MODE_TRIG,	   // Triggered: Start acquisition by software trigger
-	ACQ_MODE_HWTRIG    // Hardware triggered: Start acquisition by hardware trigger
+	ACQ_MODE_SYNC,	   // Synchronous: Acquisition is triggered by read command, blocks until value arrives.
+	ACQ_MODE_TRIG,     // Triggered: Acquisition is triggered by dedicated software command.
+	ACQ_MODE_HWTRIG,   // Hardware triggered: Start acquisition by hardware trigger
+	ACQ_MODE_CONT,     // Continuous: Send new values immediately once they arrive without read command.
+	ACQ_MODE_QUEUE     // Queued: Store values in internal queue. Read returns next value in queue, blocksif queue is empty.
 };
 
 enum mbug_transmission_mode {
@@ -95,6 +99,10 @@ int mbug_read( mbug_device dev, void* data, int size );
 /** Write data to device (blocking).
  */
 int mbug_write( mbug_device dev, const void* data, int size );
+
+/** Write a single byte to device (blocking).
+ */
+int mbug_write_byte( mbug_device dev, unsigned char data );
 
 /** Get id string from opened device handle ("MBUG-XXXX-XXXXXX").
  */

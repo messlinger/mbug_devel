@@ -383,7 +383,7 @@ void mbug_close( mbug_device dev )
 int mbug_read( mbug_device dev, void* data, int size )
 {
 	int ret = 0;
-	char data_in[64] = {0};		// (maximum packet size for full speed interrupt/bulk endpoints)
+	unsigned char data_in[64] = {0};	// (maximum packet size for full speed interrupt/bulk endpoints)
 
 	if (dev==0) return -1;
 	if (size > dev->size_in)
@@ -407,7 +407,7 @@ int mbug_read( mbug_device dev, void* data, int size )
 int mbug_write( mbug_device dev, const void* data, int size )
 {
 	int ret = 0;
-	char data_out[64] = {0};
+	unsigned char data_out[64] = {0};
 
 	if (dev==0) return -1;
 	if (size > dev->size_out)
@@ -422,6 +422,13 @@ int mbug_write( mbug_device dev, const void* data, int size )
 		dev->size_out,
 		dev->timeout);
 	return ret;
+}
+
+//-----------------------------------------------------------------------------------------
+
+int mbug_write_byte( mbug_device dev, unsigned char byte )
+{
+	return mbug_write( dev, &byte, 1 );
 }
 
 //-----------------------------------------------------------------------------------------
