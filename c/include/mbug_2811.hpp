@@ -54,7 +54,7 @@ class mbug_2811
 				return mbug_2811_read(dev);
 			}
 
-		int set_acq_mode(mbug_acquisition_mode mode)
+		int set_acq_mode(mbug_acq_mode mode)
 			{
 				return mbug_2811_set_acq_mode( dev, mode );
 			}

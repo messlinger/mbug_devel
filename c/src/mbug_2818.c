@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <errno.h>
 #include "mbug_2818.h"
 
 //------------------------------------------------------------------------------
@@ -61,7 +62,7 @@ void mbug_2818_close( mbug_device dev )
 
 //------------------------------------------------------------------------------
 // Set acquisition mode
-int mbug_2818_set_acq_mode( mbug_device dev, enum mbug_acquisition_mode mode )
+int mbug_2818_set_acq_mode( mbug_device dev, mbug_acq_mode mode )
 {
 	unsigned char cmd = 0;
 	switch (mode) {

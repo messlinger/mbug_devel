@@ -55,7 +55,7 @@ double mbug_2811_read( mbug_device dev );
 
 /** Set the acquisition mode. See mbug.h for more details.
  */
-int mbug_2811_set_acq_mode( mbug_device dev, enum mbug_acquisition_mode mode );
+int mbug_2811_set_acq_mode( mbug_device dev, mbug_acq_mode mode );
 
 /** Read raw data coming directly from the sensor.
  *  Return value <0 indicates a communication arror.

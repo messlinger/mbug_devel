@@ -1,5 +1,6 @@
 
 #include <stdlib.h>
+#include <errno.h>
 #include "mbug_2811.h"
 
 //------------------------------------------------------------------------------
@@ -110,7 +111,7 @@ double mbug_2811_read( mbug_device dev )
 
 //------------------------------------------------------------------------------
 // Set the acquisition mode (see mbug.h for documentation)
-int mbug_2811_set_acq_mode( mbug_device dev, enum mbug_acquisition_mode mode )
+int mbug_2811_set_acq_mode( mbug_device dev, mbug_acq_mode mode )
 {
 	unsigned char cmd = 0;
 	switch (mode) {

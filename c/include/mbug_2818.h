@@ -55,7 +55,7 @@ void mbug_2818_close( mbug_device dev );
 
 /** Set the acquisition mode (default: instantaneous).
  */
-int mbug_2818_set_acq_mode( mbug_device dev, enum mbug_acquisition_mode mode );
+int mbug_2818_set_acq_mode( mbug_device dev, mbug_acq_mode mode );
 
 /** Read one temperature channel (as Degrees Celsius).
 	Channel = 0..7

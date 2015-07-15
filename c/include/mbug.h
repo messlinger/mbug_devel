@@ -31,7 +31,7 @@ typedef mbug_device_struct* mbug_device;
  */
 
 // Acquisition modes  (devices may only support a subset of acquisition modes)
-enum mbug_acquistion_mode {
+enum mbug_acq_mode {
 	ACQ_MODE_INST = 0, // Instantaneous: Use last measured value if not read before, else wait for next.
 	ACQ_MODE_LAST,     // Last: Always use last valid value, never block.
 	ACQ_MODE_NEXT,     // Next: Always wait for next incoming value.
@@ -41,6 +41,7 @@ enum mbug_acquistion_mode {
 	ACQ_MODE_CONT,     // Continuous: Send new values immediately once they arrive without read command.
 	ACQ_MODE_QUEUE     // Queued: Store values in internal queue. Read returns next value in queue, blocksif queue is empty.
 };
+typedef enum mbug_acq_mode mbug_acq_mode;
 
 enum mbug_transmission_mode {
 	TX_MODE_BITSTREAM = 0,	// Bitstream mode: Transmit sequence bits subsequently with

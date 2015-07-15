@@ -69,6 +69,10 @@ class mbug_2820
 				return data;
 			}
 
+		int set_acq_mode(mbug_acq_mode mode)
+			{
+				return mbug_2810_set_acq_mode( dev, mode );
+			}
 	protected:
 		mbug_device dev;
 

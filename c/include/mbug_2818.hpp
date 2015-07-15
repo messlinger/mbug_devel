@@ -72,6 +72,11 @@ class mbug_2818
 				return vdat;
 			}
 
+		int set_acq_mode(mbug_acq_mode mode)
+			{
+				return mbug_2818_set_acq_mode( dev, mode );
+			}
+
 	protected:
 		mbug_device dev;
 

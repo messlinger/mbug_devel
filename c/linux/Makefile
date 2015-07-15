@@ -16,7 +16,7 @@ all: lib tool
 	
 LIB_OBJS =  mbug.o  mbug_2110.o  mbug_2151.o  mbug_2165.o  mbug_2810.o  \
             mbug_2811.o  mbug_2818.o  mbug_2820.o	
-LIB_VER = 1.0.2
+LIB_VER = 1.0.3
 LIB_MVER = 1
 
 .PHONY: lib
@@ -54,7 +54,7 @@ mbug_2820: mbug_2820_tool.c libmbug.so
 mbug_demo: mbug_demo.cpp libmbug.so
 
 $(CBINS):
-	$(CC)  -o  $@  $<  -I../include  -L.  -lmbug
+	$(CC)  -o  $@  $<  -I../include  -L.  -lmbug  -lm
 	mkdir -p bin/
 	cp  $@  bin/$@
 

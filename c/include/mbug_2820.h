@@ -54,7 +54,7 @@ void mbug_2820_close( mbug_device dev );
 /** Set the acquisition mode (default: instantaneous).
  *  see mbug.h for further explanations.
  */
-int mbug_2820_set_acq_mode( mbug_device dev, enum mbug_acquisition_mode mode );
+int mbug_2820_set_acq_mode( mbug_device dev, mbug_acq_mode mode );
 
 /** Read measurements: Temperature, humidity. Data is written to the passed
  *  pointer locations. Values < NOT_A_TEMPERATURE indicate sensor errors.

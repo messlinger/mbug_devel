@@ -149,7 +149,7 @@ double mbug_2820_read_humidity( mbug_device dev )
 
 //------------------------------------------------------------------------------
 // Set the acquisition mode (see mbug.h for documentation)
-int mbug_2820_set_acq_mode( mbug_device dev, enum mbug_acquisition_mode mode )
+int mbug_2820_set_acq_mode( mbug_device dev, mbug_acq_mode mode )
 {
 	unsigned char cmd[2] = {0xF2, 0};
 	switch (mode) {

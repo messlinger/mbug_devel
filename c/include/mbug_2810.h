@@ -52,7 +52,7 @@ void mbug_2810_close( mbug_device dev );
 /** Set the acquisition mode (default: instantaneous).
  *  see mbug.h for further explanations.
  */
-int mbug_2810_set_acq_mode( mbug_device dev, enum mbug_acquisition_mode mode );
+int mbug_2810_set_acq_mode( mbug_device dev, mbug_acq_mode mode );
 
 /** Read the current temperature value (as Degrees Celsius)
  */
