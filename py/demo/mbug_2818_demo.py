@@ -19,6 +19,6 @@ while(1):
     print t, T
     file.write("%.2f\t%.3f\n" % (t, T) )
     file.flush()
-    time.sleep(10)
+    time.sleep(0.25)
     
 
