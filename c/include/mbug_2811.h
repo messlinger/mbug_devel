@@ -14,9 +14,9 @@
 	mbug_2811_open()		- Open a device with specified serial number
 	mbug_2811_open_str()	- Open a device with specified id string
 	mbug_2811_close()
+	mbug_2811_set_acq_mode() - Set the acquisition mode
 	mbug_2811_read()		- Read the current temeprature value
-	mbug_2811_set_mode()	- Set the acquisition mode
-
+	mbug_2811_read_raw()	- Read raw sensor data
 */
 
 //------------------------------------------------------------------------------
@@ -26,8 +26,6 @@
 #ifndef NOT_A_TEMPERATURE
 	#define NOT_A_TEMPERATURE (-274.0)
 #endif
-
-typedef  enum mbug_acquistion_mode  mbug_2811_mode;
 
 //------------------------------------------------------------------------------
 
@@ -55,12 +53,9 @@ void mbug_2811_close( mbug_device dev );
  */
 double mbug_2811_read( mbug_device dev );
 
-/** Set the acquisition mode:
-  	MODE_INST: Use last measured value if not read before, else wait for next.
-	MODE_LAST: Always use last valid value, never block.
-	MODE_NEXT: Always wait for next incoming value.
+/** Set the acquisition mode. See mbug.h for more details.
  */
-int mbug_2811_set_mode( mbug_device dev, mbug_2811_mode mode );
+int mbug_2811_set_acq_mode( mbug_device dev, enum mbug_acquisition_mode mode );
 
 /** Read raw data coming directly from the sensor.
  *  Return value <0 indicates a communication arror.

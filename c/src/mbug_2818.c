@@ -12,11 +12,27 @@ const mbug_device_list  mbug_2818_list( void )
 }
 
 //------------------------------------------------------------------------------
+// Init device to default parameters
+static void mbug_2818_init( mbug_device dev )
+{
+	mbug_2818_set_acq_mode(dev, ACQ_MODE_INST);
+	mbug_2818_set_tris_bits(dev, 0xFFFF);
+	mbug_2818_set_dout_bits(dev, 0x0000);
+	mbug_2818_enable_pwm(dev, 0, 0);
+}
+
+//------------------------------------------------------------------------------
 // Open a device specified by it's serial number (as int,
 // last digits of the serial number are matched only).
-mbug_device mbug_2818_open( int serial_num )
+mbug_device mbug_2818_open( unsigned long serial_num )
 {
-	return mbug_open_int(2818, serial_num);
+	mbug_device dev = 
+		mbug_open_int(2818, serial_num);
+	if (!dev) return 0;
+
+	mbug_2818_init( dev );
+
+	return dev;
 }
 
 //------------------------------------------------------------------------------
@@ -24,9 +40,16 @@ mbug_device mbug_2818_open( int serial_num )
 // by mbug_2820_list()
 mbug_device mbug_2818_open_str( const char *id )
 {
+	mbug_device dev = 0;
 	unsigned int type = mbug_type_from_id( id );
-	if (type != 2818) return NULL;
-	return mbug_open_str( id );
+	if (type != 2818) return 0;
+
+	dev =  mbug_open_str( id );
+	if (!dev) return 0;
+
+	mbug_2818_init( dev );
+	
+	return dev;
 }
 
 //------------------------------------------------------------------------------
@@ -40,7 +63,6 @@ void mbug_2818_close( mbug_device dev )
 // Set acquisition mode
 int mbug_2818_set_acq_mode( mbug_device dev, enum mbug_acquisition_mode mode )
 {
-	int ret = 0;
 	unsigned char cmd = 0;
 	switch (mode) {
 		case ACQ_MODE_INST: cmd = 0xF2; break;
@@ -50,13 +72,11 @@ int mbug_2818_set_acq_mode( mbug_device dev, enum mbug_acquisition_mode mode )
 		default: // other modes not implemented
 			return -1;
 	}
-	ret = mbug_write_byte( dev, cmd );
-	if (ret<1)  return -1;
-	return 0;
+	return mbug_write_byte( dev, cmd );
 }
 
 //------------------------------------------------------------------------------
-// Read one temperatures channel (ascii mode)
+// Read one temperature channel (ascii mode)
 double mbug_2818_read( mbug_device dev, int channel )
 {
 	double temperatures[8];
@@ -81,10 +101,10 @@ int mbug_2818_read_all( mbug_device dev, double temperatures[], int n )
 		temperatures[i] = -300;
 
 	ret = mbug_write( dev, "\xFB\xA0", 2);
-	if (ret<2) return -1;
+	if (ret<0) return ret;
 
 	ret = mbug_read( dev, data, 64 );
-	if (ret<64) return -1;
+	if (ret<0) return ret;
 	data[63] = '\0';
 
 	ret = 0;
@@ -92,9 +112,9 @@ int mbug_2818_read_all( mbug_device dev, double temperatures[], int n )
 		char *endp = 0;
 		char* a = data + i*8;
 
-		// Channel return "+inf" or "-inf" on overflow, which is not treated as error
-		if ( !strncmp(a, "-inf", 4) )  // -inf typically indicates an open channel (no sensor)
-			temperatures[i] = -300;
+		// Channel returns "+inf" or "-inf" on overflow, which is not treated as error
+		if ( !strncmp(a, "-inf", 4) )  // -inf typically indicates an open channel (no sensor attached)
+			temperatures[i] = -300;    // report as invalid temperature, but do not treat as error 
 		else if ( !strncmp(a, "+inf", 4) )
 			temperatures[i] = -log(0);
 		else {
@@ -106,7 +126,6 @@ int mbug_2818_read_all( mbug_device dev, double temperatures[], int n )
 			}
 		}
 	}
-
 	return ret;
 }
 
@@ -122,18 +141,54 @@ int mbug_2818_read_raw( mbug_device dev, unsigned short data[], int n )
 		data[i] = 0;
 
 	ret = mbug_write( dev, "\xFA\xA0", 2);
-	if (ret<2) return -1;
+	if (ret<0) return ret;
 
 	ret = mbug_read( dev, data_in, 64 );
-	if (ret<64) return -1;
+	if (ret<0) return ret;
 
 	// Only the first 16 bytes carry values
 	for (i=0; i<n; i++)
-	{
-		data[i] = data_in[i*2]+data_in[i*2+1]*256;
-	}
+		data[i] = data_in[i*2] + data_in[i*2+1]*256;
 
 	return 0;
 }
 //------------------------------------------------------------------------------
 
+// Set the channels I/O direction (tristate, 0: Digital output, 1:Analog input),
+// bits packed in one integer
+int mbug_2818_set_tris_bits( mbug_device dev, unsigned short tris_bits )
+{
+	unsigned char cmd[8] = { 0xE2, tris_bits & 0xFF, 0 };
+	return mbug_write( dev, cmd, 3 );
+}
+
+//------------------------------------------------------------------------------
+// Set the channels digital output state (0: low, 1:high),
+// bits packed in one integer
+int mbug_2818_set_dout_bits( mbug_device dev, unsigned short dout_bits )
+{
+	unsigned char cmd[8] = { 0xE0, dout_bits & 0xFF, 0 };
+	return mbug_write( dev, cmd, 3 );
+}
+
+//------------------------------------------------------------------------------
+// Enable PWM generation on channel 1 (0: off, 1:on).
+// Argument chan is only supplied for upward compatibility and is ignored
+// The user must also explicitely configure channel 1 as digital output.
+int mbug_2818_enable_pwm( mbug_device dev, unsigned char chan, int enable )
+{
+	unsigned char cmd[8] = { 0xE4, enable & 0xFF, 0 };
+	return mbug_write( dev, cmd, 3 );
+}
+
+//------------------------------------------------------------------------------
+// Set the PWM duty cycle for channel 1 to duty/1024.
+// Argument chan is only supplied for upward comatibility and is ignored.
+int mbug_2818_set_pwm( mbug_device dev, unsigned char chan, unsigned short duty )
+{
+	unsigned char cmd[8] = { 0xE5, 0, 0, 0 };  // For upward compatibility: cmd[1] = channel
+	if (duty>1023) duty = 1023;
+	cmd[2] = duty & 0xFF;
+	cmd[3] = (duty>>8) & 0xFF;
+	return mbug_write( dev, cmd, 3 );
+}

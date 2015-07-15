@@ -10,11 +10,24 @@ const mbug_device_list  mbug_2811_list( void )
 }
 
 //------------------------------------------------------------------------------
-// Open a device specified by it's serial number (as int,
+// Init device to default parameters
+static void mbug_2811_init( mbug_device dev )
+{
+	mbug_2811_set_acq_mode(dev, ACQ_MODE_INST);
+}
+
+//------------------------------------------------------------------------------
+// Open a device specified by it's serial number (as int, 
 // last digits of the serial number are matched only).
 mbug_device mbug_2811_open( int serial_num )
 {
-	return mbug_open_int(2811, serial_num);
+	mbug_device dev = 
+		mbug_open_int(2811, serial_num);
+	if (!dev) return 0;
+
+	mbug_2811_init( dev );
+
+	return dev;
 }
 
 //------------------------------------------------------------------------------
@@ -22,9 +35,16 @@ mbug_device mbug_2811_open( int serial_num )
 // by mbug_2811_list()
 mbug_device mbug_2811_open_str( const char *id )
 {
+	mbug_device dev = 0;
 	unsigned int type = mbug_type_from_id( id );
 	if (type != 2811) return NULL;
-	return mbug_open_str( id );
+
+	dev =  mbug_open_str( id );
+	if (!dev) return 0;
+
+	mbug_2811_init( dev );
+	
+	return dev;
 }
 
 //------------------------------------------------------------------------------
@@ -38,25 +58,46 @@ void mbug_2811_close( mbug_device dev )
 // Read raw sensor value
 int mbug_2811_read_raw( mbug_device dev )
 {
-	unsigned char in[16] = {0};
+	unsigned char in[8] = {0};
+	int ret = 0;
 
-	if (mbug_write( dev, "\xFA\xA0\xF2", 3) <3)	// Raw format (0xF2 is the old revisions read cmd)
-		return -1;
-	if (mbug_read( dev, in, 8 ) <8)
-		return -1;
+	ret = mbug_write( dev, "\xFA\xA0\xF2", 3);	// Raw format (0xF2 is the old revisions read cmd)
+	if (ret<0) return -1;
+
+	ret = mbug_read( dev, in, 8 );
+	if (ret<0)	return -1;
+
 	return in[0]+(in[1]<<8);
+
 }
 
 //------------------------------------------------------------------------------
 // Read the current temperature (ascii mode)
 double mbug_2811_read_ascii( mbug_device dev )
 {
-	char tem[8] = {0};
-	if (mbug_write( dev, "read", 5) <5)
-		return NOT_A_TEMPERATURE;
-	if (mbug_read( dev, tem, 8 ) <8)
-		return NOT_A_TEMPERATURE;
-	return atof(tem);
+char str[8] = {0};
+	double tem = -300;
+	char *endp;
+	int ret = 0;
+
+	ret = mbug_write( dev, "read", 5);
+	if (ret<0) return -300;
+
+	ret = mbug_read( dev, str, 8 );
+	if (ret<0) return -300;
+
+	str[7] = 0;  // Just to be sure	
+	errno = 0;
+	tem = strtod( str, &endp );
+	if (errno || *endp != '\0' )
+		return -300;
+
+	// Data was succesfully received and converted. There might still be a device error,
+	//    indicated by an out-of-band value < NOT_A_TEMPERATURE.
+	if (tem <= NOT_A_TEMPERATURE && str[4]=='\0' && str[5]!='\0')    // Specific error code is located in str[5:6] as hex ascii
+		tem -= strtol(str+5, 0, 16); // until a decent error handler is written: just add
+
+	return tem;
 }
 
 //------------------------------------------------------------------------------
@@ -68,24 +109,17 @@ double mbug_2811_read( mbug_device dev )
 }
 
 //------------------------------------------------------------------------------
-// Set the acquisition mode:
-//  	MODE_INST: Use last measured value if not read before, else wait for next.
-//		MODE_LAST: Always use last valid value, never block.
-//		MODE_NEXT: Always wait for next incoming value.
-int mbug_2811_set_mode( mbug_device dev, mbug_2811_mode mode )
+// Set the acquisition mode (see mbug.h for documentation)
+int mbug_2811_set_acq_mode( mbug_device dev, enum mbug_acquisition_mode mode )
 {
-	char* cmd = "";
-
-	switch (mode)
-	{
-		case ACQ_MODE_INST: cmd = "MODE INS"; break;
-		case ACQ_MODE_LAST: cmd = "MODE LAS"; break;
-		case ACQ_MODE_NEXT: cmd = "MODE NEX"; break;
-		default: return -1;
+	unsigned char cmd = 0;
+	switch (mode) {
+		case ACQ_MODE_INST: cmd = 0xF2; break;
+		case ACQ_MODE_LAST: cmd = 0xF3; break;
+		case ACQ_MODE_NEXT: cmd = 0xF4; break;
+		default: // other modes not implemented
+			return -1;
 	}
-
-	if (mbug_write(dev, cmd, 10) <= 0)
-		return -1;
-	return 0;
+	return mbug_write_byte( dev, cmd );
 }
 

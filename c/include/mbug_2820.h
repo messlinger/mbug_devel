@@ -14,6 +14,7 @@
 	mbug_2820_open()		      - Open a device with specified serial number
 	mbug_2820_open_str()	      - Open a device with specified id string
 	mbug_2820_close()             - Close device
+	mbug_2820_set_acq_mode()      - Set acquisition mode
 	mbug_2820_read_temperature()  - Read temperature
 	mbug_2820_read_humidity()     - Read humidity
 	mbug_2820_read()		      - Read temperature and humidity
@@ -27,6 +28,7 @@
 #ifndef NOT_A_TEMPERATURE
 	#define NOT_A_TEMPERATURE (-274.0)
 #endif
+
 //------------------------------------------------------------------------------
 
 /** Get a list of all available mbug_2820 devices. List is returned as an array
@@ -48,6 +50,11 @@ mbug_device mbug_2820_open_str( const char *id );
 /** Close a previously opened device.
  */
 void mbug_2820_close( mbug_device dev );
+
+/** Set the acquisition mode (default: instantaneous).
+ *  see mbug.h for further explanations.
+ */
+int mbug_2820_set_acq_mode( mbug_device dev, enum mbug_acquisition_mode mode );
 
 /** Read measurements: Temperature, humidity. Data is written to the passed
  *  pointer locations. Values < NOT_A_TEMPERATURE indicate sensor errors.

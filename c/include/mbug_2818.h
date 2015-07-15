@@ -18,6 +18,10 @@
 	mbug_2818_read()		- Read a single channel
 	mbug_2818_read_all()	- Read all 8 channels
 	mbug_2818_read_raw()	- Read raw binary values
+	mbug_2818_set_tris_bits() - Set channels I/O direction bits
+	mbug_2818_set_dout_bits() - Set channels digital output bits
+	mbug_2818_enable_pwm()  - Enable/disable PWM generation on channel 1
+	mbug_2818_set_pwm()     - Set PWM uty cycle for channel 1
 */
 
 //------------------------------------------------------------------------------
@@ -38,7 +42,7 @@ const mbug_device_list  mbug_2820_list( void );
 /** Open a device specified by it's serial number (as int,
  *  last digits of the serial number are matched only).
  */
-mbug_device mbug_2818_open( int serial_num );
+mbug_device mbug_2818_open( unsigned long serial_num );
 
 /** Open a device specified by it's id string (equals the
  *  usb serial string as returned by mbug_2820_list )
@@ -69,6 +73,28 @@ int mbug_2818_read_all( mbug_device dev, double temperatures[], int n );
 	the number of channels to read (max 8).
  */
 int mbug_2818_read_raw( mbug_device dev, unsigned short data[], int n );
+
+/** Set the channels I/O direction (tristate, 0: Digital output, 1:Analog input),
+    bits packed in one integer
+ */
+int mbug_2818_set_tris_bits( mbug_device dev, unsigned short tris_bits );
+
+/** Set the channels digital output state (0: low, 1:high),
+    bits packed in one integer
+ */
+int mbug_2818_set_dout_bits( mbug_device dev, unsigned short dout_bits );
+
+/** Enable PWM generation on channel 1 (0: off, 1:on).
+    Argument chan is only supplied for upward compatibility and is ignored.
+    The user must also explicitely configure channel 1 as digital output.
+ */
+int mbug_2818_enable_pwm( mbug_device dev, unsigned char chan, int enable );
+
+/* Set the PWM duty cycle for channel 1 to duty/1024.
+   Argument chan is only supplied for upward compatibility and is ignored.
+ */
+int mbug_2818_set_pwm( mbug_device dev, unsigned char chan, unsigned short duty );
+
 
 //------------------------------------------------------------------------------
 #ifdef __cplusplus

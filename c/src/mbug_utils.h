@@ -145,21 +145,51 @@ double floattime( void )
 		gettimeofday( &tv, 0 );
 		return tv.tv_sec + 1e-6*tv.tv_usec;
 	#endif
-
 }
 
 
 /** Wait until specified timestamp with sub-second resolution. */
 void waittime( double timestamp )
 {
-	#ifdef _WIN32
-		while (floattime() < timestamp)
-			Sleep(0);	// Will return at next time update interrupt
-	#elif __linux__
-		double delta;
-		while ( (delta = timestamp - floattime()) > 0)
-			if (delta >= 1e-3)
-				usleep( delta>0.1 ? 100000 : 0.8*1e6*delta );
-	#endif
+	double delta;
+	while ( (delta = timestamp - floattime()) > 0)
+		if (delta >= 1e-3)
+			#ifdef _WIN32
+				Sleep( delta > 0.1 ? 80 : (DWORD)(0.8*1e3*delta));	// Will return at next time update interrupt
+			#elif __linux__
+				usleep( delta > 0.1 ? 80000 : (useconds_t)(0.8*1e6*delta) );
+			#endif
 }
 
+
+/* -----------------------------------------------------------------------------------------------------
+ * Want to be able to abort the program, even during blocking calls (sleep/read), but NOT during file 
+ * output to prevent data corruption. Install a signal handler, that only aborts if permitted. If not
+ * permitted to abort, remember the signal and exit immediately when permitted again.
+ */
+
+volatile struct { 
+	unsigned permit:1, abort : 1;
+	} permit_abort_flag = { 1, 0 };
+
+#ifdef _WIN32
+	BOOL permit_abort_handler( DWORD fdwCtrlType ) 
+	{
+		if (permit_abort_flag.permit) return FALSE; // Will delegate to normal handler and abort
+		permit_abort_flag.abort = 1;
+		return TRUE; // Will not abort
+	}
+#elif __linux__
+#endif
+
+void permit_abort(int permit)
+{
+	static int handler_registered = 0;
+	if (!handler_registered)
+		#ifdef _WIN32  
+			SetConsoleCtrlHandler( (PHANDLER_ROUTINE) permit_abort_handler, TRUE );
+		#elif __linux__
+		#endif
+	permit_abort_flag.permit = permit ? 1 : 0;
+	if (permit && permit_abort_flag.abort) exit(0);
+}

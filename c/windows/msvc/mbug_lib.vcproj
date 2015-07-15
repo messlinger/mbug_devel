@@ -232,6 +232,10 @@
 				RelativePath="..\..\include\mbug_2820.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\mbug_utils.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

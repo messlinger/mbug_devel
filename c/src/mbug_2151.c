@@ -83,12 +83,12 @@ static int io( mbug_device dev,  unsigned char* out,  size_t size )
 {
 	unsigned char in[8] = {0};
 	short status = 0;
-	int value = 0;
+	int value = 0, ret = 0;
 
-	if (mbug_write( dev, out, size ) <0)
-		return -1;
-	if (mbug_read( dev, in, sizeof(in) ) <0)
-		return -1;
+	ret = mbug_write( dev, out, size );
+	if (ret<0) return -1;
+	ret = mbug_read( dev, in, sizeof(in) );
+	if (ret<0) return -1;
 
 	// First 2 bytes contain the return status (signed 16 bit)
 	status = *(short*) in;

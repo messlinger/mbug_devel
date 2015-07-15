@@ -47,8 +47,8 @@ const char* usage =
 "    silent        Suppress data output to stdout, write to file only.         \n"
 "                                                                              \n"
 "    i             Measurement interval in seconds. Default is 1.              \n"
-"    int                                                                       \n"
-"    interval                                                                  \n"
+"    int           For maximum rate (0.1 approx.), set to 0 or min.            \n"
+"    interval      For small intervals, the timing may be inaccurate.          \n"
 "                                                                              \n"
 "    n             Number of measurements to take. To take an infinite number  \n"
 "    num           of measurements (default), specify 0 or \"inf\".            \n"
@@ -63,6 +63,10 @@ mbug_device thermometer = 0;
 int device_serial = 0;
 enum Action { Read, List, Record, Help } action = Read;
 enum Format { Celsius, Fahrenheit, Kelvin, Raw } format = Celsius;
+
+// Measurement results
+double temperature = 0;
+int raw = 0;
 
 // Recording mode:
 const char* rec_filename = 0;  // Destination file name
@@ -164,6 +168,24 @@ void cleanup( void )
 	}
 }
 
+int read_temperature(void)
+{
+	temperature = raw = 0;
+	if (format==Raw)
+		raw = mbug_2811_read_raw( thermometer );
+	else
+		temperature = mbug_2811_read( thermometer );
+
+	if ( raw<0 || temperature <= NOT_A_TEMPERATURE )
+		return -1;
+
+	if (format == Fahrenheit)
+		temperature = temperature * 9./5 + 32. ;
+	else if (format == Kelvin)
+		temperature += 273.15 ;
+	return 0;
+}
+
 //---------------------------------------------------------------
 
 int main( int argc, char* argv[] )
@@ -217,9 +239,9 @@ int main( int argc, char* argv[] )
 
 	if (action==Record)
 	{
-		double tim = 0.0, tem = 0.0;
-		int raw = 0;
-		char str[500] = {0};
+		int err = 0;
+		double tim = 0.0, mtim = 0.0;
+		char sout[500] = {0};
 		unsigned long nn = 0;
 
 		if (rec_filename != 0)
@@ -229,42 +251,43 @@ int main( int argc, char* argv[] )
 				errorf( "#### Error opening file %s\n", rec_filename );
 		}
 
-		tim = floattime();
-		sprintf( str, "\n\n# %s\n# Start recording at %.3f\n# timestamp\ttemperature\n", mbug_id(thermometer), tim );
-		if (rec_file)  fputs(str, rec_file);
-		if (!rec_silent)  fputs(str, stdout);
+		// Acquisition mode: Instantaneous always. Synchronus acquisition is not implemeted in the 2810
+		err = mbug_2811_set_acq_mode( thermometer, ACQ_MODE_INST );
+		if (err<0) errorf( "#### Error setting acquisition mode\n" );
 
+		// File header
+		tim = floattime();
+		sprintf( sout, "\n\n# %s\n# Start recording at %.2f\n# timestamp\ttemperature\n", mbug_id(thermometer), tim );
+		if (rec_file)  fputs(sout, rec_file);
+		if (!rec_silent)  fputs(sout, stdout);
+
+		// Measurement loop
 		tim = floattime();
 		for( nn=0; (rec_number==0)||(nn<rec_number); nn++)
 		{
-			tem = raw = 0;
-			if (format==Raw)
-				raw = mbug_2811_read_raw( thermometer );
-			else
-				tem = mbug_2811_read( thermometer );
-
-			if ( raw<0 || tem <= NOT_A_TEMPERATURE )
-			{
-				fputs( "#### Read error\n", stdout );
+			err = read_temperature();
+			mtim = floattime();
+			if (err<0) {
 				if (rec_file) fputs( "#### Read error\n", rec_file);
+				errorf( "#### Read error\n" );
 			}
 
 			if (format==Raw)
-				sprintf( str, "%.3f\t%d\n", tim, raw );
-			else if (format==Fahrenheit)
-				sprintf( str, "%.3f\t%.3f\n", tim, tem*9./5.+32. );
-			else if (format==Kelvin)
-				sprintf( str, "%.3f\t%.3f\n", tim, tem+273.15 );
-			else // format Celsius
-				sprintf( str, "%.3f\t%.3f\n", tim, tem );
+				sprintf( sout, "%.2f\t%d\n", mtim, raw );
+			else // formats already converted by read_temperature()
+				sprintf( sout, "%.2f\t%.3f\n", mtim, temperature );
 
-			if (rec_file)  { fputs( str, rec_file ); fflush(rec_file); };
-			if (!rec_silent) { fputs(str, stdout); fflush(stdout); }
-
-			tim += rec_interval;
-			waittime( tim );
+			permit_abort(0); // Prevent abortion during file write to prevent data corruption
+			if (rec_file)  { fputs( sout, rec_file ); fflush(rec_file); };
+			if (!rec_silent) { fputs(sout, stdout); fflush(stdout); }
+			permit_abort(1);
+			
+			if (rec_interval > 0) {
+				tim += rec_interval;
+				waittime( tim );
+			}
 		}
-	}
+	} // end Record
 
 	return 0;
 }

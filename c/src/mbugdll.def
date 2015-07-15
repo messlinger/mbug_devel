@@ -78,28 +78,36 @@ EXPORTS
     mbug_2810_open
     mbug_2810_open_str
     mbug_2810_close
+    mbug_2810_set_acq_mode
     mbug_2810_read
-    mbug_2810_set_mode
+    mbug_2810_read_raw
     
     mbug_2811_list
     mbug_2811_open
     mbug_2811_open_str
     mbug_2811_close
+    mbug_2811_set_acq_mode
     mbug_2811_read
-    mbug_2811_set_mode
+    mbug_2810_read_raw
     
     mbug_2818_list 
     mbug_2818_open	
     mbug_2818_open_str	
     mbug_2818_close
+    mbug_2818_set_acq_mode
     mbug_2818_read	
     mbug_2818_read_all	
     mbug_2818_read_raw	
+    mbug_2818_set_tris_bits
+    mbug_2818_set_dout_bits
+    mbug_2818_enable_pwm
+    mbug_2818_set_pwm
 
     mbug_2820_list
     mbug_2820_open
     mbug_2820_open_str
     mbug_2820_close
+    mbug_2818_set_acq_mode
     mbug_2820_read_temperature
     mbug_2820_read_humidity
     mbug_2820_read

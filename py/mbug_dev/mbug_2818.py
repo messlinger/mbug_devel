@@ -9,6 +9,9 @@ class mbug_2818(mbug):
 
     def __init__(self, serial=None):
         mbug.__init__(self, self._type, serial)
+        self.set_tris(0xFFFF)  # Set all channels to input and disable pwm to avoid surprises
+        self.set_dout(0x0000)
+        self.enable_pwm(0)
 
     def read_raw(self):
         """ Get the raw adc readings. """      
@@ -25,7 +28,7 @@ class mbug_2818(mbug):
         
     read = read_ascii
 
-    def set_mode(self, mode):
+    def set_acq_mode(self, mode):
         """Set the acquisition mode:
         'inst': Use last measured value if not read before, else wait for next.
         'last': Always use last valid value, never block.
@@ -36,7 +39,7 @@ class mbug_2818(mbug):
         self._write( (cmd,) )
         return
 
-    def set_dout(self, bits):
+    def set_dout_bits(self, bits):
     	""" Set the digital output state. 
     	    Bits can be passed as list or integer."""
     	try: raw = sum([ bool(bit)<<i for (i,bit) in enumerate(bits) ])
@@ -44,7 +47,7 @@ class mbug_2818(mbug):
     	self._write( (0xE0, raw&0xFF, 0 ) )
     	return
     
-    def set_tris(self, bits):
+    def set_tris_bits(self, bits):
         """ Set the gpio tristate state (1:Analog Input 0:Digital Output).
         Bits can be passed as list or integer."""
         try: raw = sum([ bool(bit)<<i for (i,bit) in enumerate(bits) ])
@@ -53,14 +56,14 @@ class mbug_2818(mbug):
         return
 
     def enable_pwm(self, channels=1):
-        """ Enable the pwm output on channel 5. """
+        """ Enable the pwm output on channel 1. """
         try: chb = sum([ bool(bit)<<i for (i,bit) in enumerate(channels) ]) # try to iterate
         except TypeError: chb = int(channels)
         self._write( (0xE4, chb%256, 0 ) )
         return
 
     def set_pwm(self, duty):
-        """ Set the pwm duty cycle. Duty cycle resolution is 10 bit.
+        """ Set the pwm duty cycle on channel 1. Duty cycle resolution is 10 bit.
         Duty cycle can be passed as integer in range 0..1023 or
         as float in range 0.1..1.0
         For upward compatibilty, duty can also passed as list. """

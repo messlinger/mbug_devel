@@ -51,8 +51,8 @@ const char* usage =
 "                                                                              \n"
 "    silent        Suppress data output to stdout, write to file only.         \n"
 "                                                                              \n"
-"    i             Measurement interval in seconds. Default is 1. Set to 0 for \n"
-"    int           For maximum rate (0.08 approx.), set to 0 or min., the \n"
+"    i             Measurement interval in seconds. Default is 1.              \n"
+"    int           For maximum rate (0.08 approx.), set to 0 or min.           \n"
 "    interval      For intervals < 0.1, the timing may be inaccurate.          \n"
 "                                                                              \n"
 "    n             Number of measurements to take. To take an infinite number  \n"
@@ -267,10 +267,10 @@ int main( int argc, char* argv[] )
 		int err = 0;
 		
 		err = mbug_2818_set_acq_mode( thermometer, ACQ_MODE_INST );
-		if (err<0) fputs( "#### Error setting acquisition mode\n", stdout );
+		if (err<0) errorf( "#### Error setting acquisition mode\n" );
 
 		err = read_temperatures();
-		if (err<0) fputs( "#### Read error\n", stdout );
+		if (err<0) errorf( "#### Read error\n" );
 
 		for (i=0; channels[i]>=0 ;i++)
 		{
@@ -299,7 +299,14 @@ int main( int argc, char* argv[] )
 				errorf( "#### Error opening file %s\n", rec_filename );
 		}
 
-		// Header
+		// Acquisition mode: For slow acquisitions, use synchronous mode.
+		if (rec_interval > 0)
+			err = mbug_2818_set_acq_mode( thermometer, ACQ_MODE_SYNC );
+		else  //   For maximum acquisitions rate, use instantaneous mode (continuous background acquisition)
+			err = mbug_2818_set_acq_mode( thermometer, ACQ_MODE_INST );
+		if (err<0) fputs( "#### Error setting acquisition mode\n", stdout );
+
+		// File header
 		tim = floattime();
 		sprintf( sout, "\n\n# %s\n# Start recording at %.2f\n# timestamp", mbug_id(thermometer), tim );
 		for (i=0; channels[i]>=0 ;i++) {
@@ -309,13 +316,6 @@ int main( int argc, char* argv[] )
 		strcat( sout, "\n" );
 		if (rec_file)  fputs(sout, rec_file);
 		if (!rec_silent)  fputs(sout, stdout);
-
-		// Acquisition mode: For slow acquisitions, use synchronous mode.
-		if (rec_interval > 0)
-			err = mbug_2818_set_acq_mode( thermometer, ACQ_MODE_SYNC );
-		else  //   For maximum acquisitions rate, use instantaneous mode (continuous background acquisition)
-			err = mbug_2818_set_acq_mode( thermometer, ACQ_MODE_INST );
-		if (err<0) fputs( "#### Error setting acquisition mode\n", stdout );
 
 		// Measurement loop
 		tim = floattime();
@@ -340,8 +340,10 @@ int main( int argc, char* argv[] )
 			}
 			strcat( sout, "\n" );
 
+			permit_abort(0); // Prevent abortion during file write to prevent data corruption
 			if (rec_file)  { fputs( sout, rec_file ); fflush(rec_file); };
 			if (!rec_silent) { fputs(sout, stdout); fflush(stdout); }
+			permit_abort(1);
 			
 			if (rec_interval > 0) {
 				tim += rec_interval;

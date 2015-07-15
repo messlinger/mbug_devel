@@ -39,6 +39,12 @@ const char* usage =
 "    dev=          as returned by the list command). If no device is           \n"
 "    device=       specified, the first available device is used.              \n"
 "                                                                              \n"
+"    fmt=<format>  Select the data format.  Implemented formats are            \n"
+"    format=       C, celsius : (default) Temperature in degrees Celsius,      \n"
+"                  F, fahrenheit: Temperature in degrees Fahrenheit            \n"
+"                  K, kelvin: Absolute temperature in Kelvin                   \n"
+"                  R, raw: Raw sensor reading (custom format)                  \n"
+"                                                                              \n"
 "    log           Recording mode: Take periodic measurements with a specified \n"
 "    rec           interval. The data is printed to stdout. If a file is       \n"
 "    record        specified, the data is also printed to the specified file.  \n"
@@ -48,12 +54,12 @@ const char* usage =
 "    silent        Suppress data output to stdout, write to file only.         \n"
 "                                                                              \n"
 "    i             Measurement interval in seconds. Default is 1.              \n"
-"    int                                                                       \n"
-"    interval                                                                  \n"
+"    int           For maximum rate (0.1), set to 0 or \"min\".                \n"
+"    interval      For small intervals, the timing may be inaccurate.          \n"
 "                                                                              \n"
 "    n             Number of measurements to take. To take an infinite number  \n"
 "    num           of measurements (default), specify 0 or \"inf\".            \n"
-"    number                                                                    \n"
+"    number        Use Ctrl+C to terminate at any time without loss of data.   \n"
 "                                                                              \n"
 ;
 
@@ -64,6 +70,10 @@ mbug_device device = 0;  // Device handle
 int device_serial = 0;
 enum Action { Read, List, Record, Help } action = Read;
 enum Format { Celsius, Fahrenheit, Kelvin, Raw } format = Celsius;
+
+// Measurement results
+long raw = 0;
+double temperature = 0, humidity = 0;
 
 // Recording mode:
 const char* rec_filename = 0;  // Destination file name
@@ -167,6 +177,26 @@ void cleanup( void )
 	}
 }
 
+int read_data(void)
+{
+	int ret = 0;
+	temperature = humidity = raw = 0;
+	if (format==Raw)
+		raw = mbug_2820_read_raw( device );
+	else
+		ret = mbug_2820_read( device, &temperature, &humidity);
+
+	if ( raw<0 || temperature <= NOT_A_TEMPERATURE ||
+		 ret<0 || humidity <= NOT_A_TEMPERATURE )
+		return -1;
+
+	if (format == Fahrenheit)
+		temperature = temperature * 9./5 + 32. ;
+	else if (format == Kelvin)
+		temperature += 273.15 ;
+	return 0;
+}
+
 //---------------------------------------------------------------
 
 int main( int argc, char* argv[] )
@@ -196,20 +226,27 @@ int main( int argc, char* argv[] )
 	if (device ==0 )
 		errorf("#### Error opening device.");
 
+	// Read once
 	if (action==Read)
 	{
 		int err = 0;
-		double tem, hum;
-		err = mbug_2820_read( device, &tem, &hum );
-		if (err) printf( "#### Read error\n" );
-		printf( "%.3f,%.2f\n", tem, hum );
+		err = mbug_2820_set_acq_mode( device, ACQ_MODE_INST );
+		if (err<0) errorf( "#### Error setting acquisition mode\n" );
+
+		err = read_data();
+		if (err) errorf( "#### Read error\n" );
+
+		if (format==Raw)
+			printf( "%d", raw );
+		else // format already converted by read_temperature()
+			printf( "%.3f,%.2f\n", temperature, humidity );
 	}
 
 	if (action==Record)
 	{
 		int err = 0;
-		double tim, tem, hum;
-		char str[500];
+		double tim = 0.0;
+		char sout[500] = {0};
 		unsigned long nn = 0;
 
 		if (rec_filename != 0)
@@ -219,22 +256,46 @@ int main( int argc, char* argv[] )
 				errorf( "#### Error opening file %s\n", rec_filename );
 		}
 
-		tim = floattime();
-		sprintf( str, "\n\n# %s\n# Start recording at %.2f\n# timestamp\ttemp\thumidity\n", mbug_id(device), tim );
-		if (rec_file)  fputs(str, rec_file);
-		if (!rec_silent)  fputs(str, stdout);
+		// Acquisition mode: For slow acquisitions, use synchronous mode.
+		if (rec_interval > 0.15) {
+			err = mbug_2820_set_acq_mode( device, ACQ_MODE_SYNC );
+			if (err)  // Pre 2015-07 firmware versions do not support synchronous acquisition
+				err = mbug_2820_set_acq_mode( device, ACQ_MODE_INST );
+		}
+		else  //   For high acquisitions rate, use instantaneous mode (continuous background acquisition)
+			err = mbug_2820_set_acq_mode( device, ACQ_MODE_INST );
+		if (err<0) fputs( "#### Error setting acquisition mode\n", stdout );
 
+		// File header
+		tim = floattime();
+		if (format==Raw)
+			sprintf( sout, "\n\n# %s\n# Start recording at %.2f\n# timestamp\tdata\n", mbug_id(device), tim );
+		else
+			sprintf( sout, "\n\n# %s\n# Start recording at %.2f\n# timestamp\ttemp\thumidity\n", mbug_id(device), tim );
+		if (rec_file)  fputs(sout, rec_file);
+		if (!rec_silent)  fputs(sout, stdout);
+
+		// Measurement loop
 		tim = floattime();
 		for( nn=0; (rec_number==0)||(nn<rec_number); nn++)
 		{
-			err = mbug_2820_read( device, &tem, &hum );
-			if (err) {
-				fputs( "#### Read error\n", stdout );
+			double mtim = 0;
+			err = read_data();
+			mtim = floattime();
+			if (err<0) {
 				if (rec_file) fputs( "#### Read error\n", rec_file);
+				errorf( "#### Read error\n" );
 			}
-			sprintf( str, "%.2f\t%.3f\t%.2f\n", tim, tem, hum );
-			if (rec_file)  { fputs( str, rec_file ); fflush(rec_file); };
-			if (!rec_silent) { fputs(str, stdout); fflush(stdout); }
+
+			if (format==Raw)
+				sprintf( sout, "%.2f\t0x%X\n", mtim, raw );
+			else // formats already converted by read_temperature()
+				sprintf( sout, "%.2f\t%.3f\t%.2f\n", mtim, temperature, humidity );
+
+			permit_abort(0); // Prevent abortion during file write to prevent data corruption
+			if (rec_file)  { fputs( sout, rec_file ); fflush(rec_file); };
+			if (!rec_silent) { fputs(sout, stdout); fflush(stdout); }
+			permit_abort(1);
 
 			tim += rec_interval;
 			waittime( tim );
