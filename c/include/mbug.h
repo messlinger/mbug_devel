@@ -57,7 +57,7 @@ enum mbug_transmission_mode {
  *  containing the serial number strings. End of array is marked by a
  *  NULL pointer.
  */
-const mbug_device_list  mbug_get_device_list( unsigned int device_type );
+const mbug_device_list  mbug_get_device_list( unsigned short device_type );
 
 /** Iterate through the entries in an mbug_device_list. When passing the
  * actual mbug_device_list, the first entry is returned. When passing 0,
@@ -72,7 +72,7 @@ const char * mbug_device_list_next( mbug_device_list dev_list );
 /** Open a device specified by it's device type and serial number
  *  (as int, last digits of the serial number are matched only).
  */
-mbug_device mbug_open_int( unsigned int device_type, unsigned long serial );
+mbug_device mbug_open_int( unsigned short device_type, unsigned long serial );
 
 /** Open a device specified by it's id string (equals the USB serial number,
  * as returned by mbug_device_list: "MBUG-TTTT-SSSSSS"). The leading "MBUG-"

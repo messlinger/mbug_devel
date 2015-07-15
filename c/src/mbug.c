@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
+#include <stdint.h>
 
 #ifdef _WIN32
 	#include "lusb0_usb.h"	// has been renamed in v 1.2.5
@@ -35,11 +36,11 @@ struct mbug_device_struct {
 	// device_handle* is used for control and i/o.
 	struct usb_device* usb_device;
 	struct usb_dev_handle* usb_dev_handle;
-	int device_type;
+	uint16_t device_type;
 	char id[MBUG_MAX_ID_LEN+1];
-	int timeout;
-	int ep_out, ep_in;
-	int size_out, size_in;
+	int32_t timeout;
+	int32_t ep_out, ep_in;
+	int32_t size_out, size_in;
 	void* aux;	// Auxiliary data, managed by device specific libraries
 };
 
@@ -89,7 +90,7 @@ unsigned short _bin(unsigned short bcd)
 
 //-----------------------------------------------------------------------------------------
 
-const mbug_device_list mbug_get_device_list(unsigned int device_type)
+const mbug_device_list mbug_get_device_list(unsigned short device_type)
 {
 	static char* device_list[MBUG_MAX_DEVICES+1];
 	static char serial_numbers[MBUG_MAX_DEVICES+1][MBUG_MAX_ID_LEN+1];
@@ -181,7 +182,7 @@ const char * mbug_device_list_next( mbug_device_list dev_list )
 
 //-----------------------------------------------------------------------------------------
 // Open by type and serial number. serial=0 will open the first available device.
-mbug_device mbug_open_int( unsigned int device_type, unsigned long serial_num )
+mbug_device mbug_open_int( unsigned short device_type, unsigned long serial_num )
 {
 	struct usb_bus* bus =0 ;
 	struct usb_device* dev = 0;
@@ -399,7 +400,7 @@ int mbug_read( mbug_device dev, void* data, int size )
 	if (ret<0) return -1;
 
 	memcpy( data, data_in, size );
-	return ret;
+	return ret>=size ? 0 : -1;
 }
 
 //-----------------------------------------------------------------------------------------
@@ -421,7 +422,7 @@ int mbug_write( mbug_device dev, const void* data, int size )
 		data_out,
 		dev->size_out,
 		dev->timeout);
-	return ret;
+	return ret>=size ? 0 : -1;
 }
 
 //-----------------------------------------------------------------------------------------
