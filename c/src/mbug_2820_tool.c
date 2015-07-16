@@ -59,7 +59,7 @@ const char* usage =
 "                                                                              \n"
 "    n             Number of measurements to take. To take an infinite number  \n"
 "    num           of measurements (default), specify 0 or \"inf\".            \n"
-"    number        Use Ctrl+C to terminate at any time without loss of data.   \n"
+"    number        Use Ctrl+C to terminate an ongoing measurement.             \n"
 "                                                                              \n"
 ;
 

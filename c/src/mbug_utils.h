@@ -14,6 +14,7 @@
 	#include <windows.h>
 #elif __linux__
 	#include <unistd.h>
+	#include <signal.h>
 #else
 	#error "OS not supported"
 #endif
@@ -163,33 +164,45 @@ void waittime( double timestamp )
 
 
 /* -----------------------------------------------------------------------------------------------------
- * Want to be able to abort the program, even during blocking calls (sleep/read), but NOT during file 
+ * Want to be able to abort the program, even during blocking calls (sleep/read), but NOT during file
  * output to prevent data corruption. Install a signal handler, that only aborts if permitted. If not
  * permitted to abort, remember the signal and exit immediately when permitted again.
  */
 
-volatile struct { 
+volatile struct {
 	unsigned permit:1, abort : 1;
 	} permit_abort_flag = { 1, 0 };
 
 #ifdef _WIN32
-	BOOL permit_abort_handler( DWORD fdwCtrlType ) 
+	BOOL permit_abort_handler( DWORD fdwCtrlType )
 	{
 		if (permit_abort_flag.permit) return FALSE; // Will delegate to normal handler and abort
 		permit_abort_flag.abort = 1;
 		return TRUE; // Will not abort
 	}
 #elif __linux__
+	struct sigaction sigact, oldact; // will be initialized to all 0 since global
+	void permit_abort_handler( int signum )
+	{
+		if (permit_abort_flag.permit) { // delegate to normal handler
+			sigaction(SIGINT, &oldact, 0 );  raise(SIGINT);  }   // restore old handler and re-raise signal
+		permit_abort_flag.abort = 1;
+	}
 #endif
 
 void permit_abort(int permit)
 {
 	static int handler_registered = 0;
-	if (!handler_registered)
-		#ifdef _WIN32  
+	if (!handler_registered) {
+		#ifdef _WIN32
 			SetConsoleCtrlHandler( (PHANDLER_ROUTINE) permit_abort_handler, TRUE );
 		#elif __linux__
+			sigact.sa_handler = permit_abort_handler;
+			sigaction(SIGINT, &sigact, &oldact ); // SIGINT is sent on Ctrl-C
 		#endif
+		handler_registered = 1;
+	}
 	permit_abort_flag.permit = permit ? 1 : 0;
 	if (permit && permit_abort_flag.abort) exit(0);
+	
 }
