@@ -30,7 +30,7 @@ void center_window( hWnd );
 void show_rec_control( int show );
 
 HWND hMainDlg;
-HICON hIcon, hIconOpen;
+HICON hIcon, hIconSmall, hIconOpen;
 HBITMAP hBmpDnArrow, hBmpUpArrow;
 HFONT hFontBig;
 
@@ -53,11 +53,13 @@ WinMain( HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nCmdShow )
 
 	// Load icons from ressources
 	hIcon = LoadIcon( hInst, MAKEINTRESOURCE( IDI_ICON ) );
+	hIconSmall = (HICON) LoadImage ( hInst, MAKEINTRESOURCE(IDI_ICON), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR );
 	hIconOpen = (HICON)LoadImage( hInst, MAKEINTRESOURCE(IDI_ICON_OPEN), IMAGE_ICON, 16,16, LR_DEFAULTCOLOR );
 	hBmpDnArrow = (HBITMAP)LoadImage( 0, MAKEINTRESOURCE(OBM_DNARROW), IMAGE_BITMAP, 0,0, LR_DEFAULTCOLOR | LR_DEFAULTSIZE | LR_SHARED );
 	hBmpUpArrow = (HBITMAP)LoadImage( 0, MAKEINTRESOURCE(OBM_UPARROW), IMAGE_BITMAP, 0,0, LR_DEFAULTCOLOR | LR_DEFAULTSIZE | LR_SHARED );
 	// Set icons
-	SendMessage(hMainDlg, WM_SETICON, 1, (LPARAM)hIcon); // NOTE: Set main window icon BEFORE showing the window, else it will overlay the caption
+	SendMessage(hMainDlg, WM_SETICON, ICON_BIG, (LPARAM)hIcon); // NOTE: Set main window icon BEFORE showing the window, else it will overlay the caption
+	SendMessage(hMainDlg, WM_SETICON, ICON_SMALL, (LPARAM)hIconSmall);
 	SendDlgItemMessage(hMainDlg, IDC_BUTTON_LOGFILE, BM_SETIMAGE, IMAGE_ICON, (LPARAM)hIconOpen );
 	// Set display fonts
 	hFontBig = create_point_font( 26, "Arial" );

@@ -307,9 +307,11 @@ int main( int argc, char* argv[] )
 		if (err<0) fputs( "#### Error setting acquisition mode\n", stdout );
 
 		// File header
+		fseek( rec_file, 0, SEEK_END );
+		if (ftell(rec_file) > 0)  fprintf( rec_file, "\n\n" );
 		tim = floattime();
-		sprintf( sout, "\n\n# %s\n# Start recording at %.2f (%s)\n", mbug_id(thermometer), tim, strtime(tim) );
-		sprintf( sout, "# timestamp" );
+		sprintf( sout, "# %s\n# Start recording at %.2f (%s)\n# timestamp", 
+			       mbug_id(thermometer), tim, strtime(tim) );
 		for (i=0; channels[i]>=0 ;i++) {
 			sprintf( str, "\tchan[%d]", channels[i] );
 			strcat( sout, str );

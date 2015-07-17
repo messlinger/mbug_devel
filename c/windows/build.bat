@@ -63,7 +63,7 @@ cl /Fembug_demo.exe  %_src%/mbug_demo.cpp  /EHsc  /link  mbug.lib
 
 ::---------------------------------------------------------------------------- ::
 :: Build GUI applications
-:: NOTE: MFC dependent GUI application must be separately built from the respective Visual C projects
+:: NOTE: MFC dependent GUI applications must be separately built with the respective Visual C projects
 
 set _gui_src=../msvc/mbug_2820_gui/
 rc  %_gui_src%/mbug_2820_gui.rc

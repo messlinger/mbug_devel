@@ -1,6 +1,10 @@
 
+#include <stdint.h>
+
+
 #ifndef MBUG_H
 #define MBUG_H
+
 #ifdef __cplusplus
   extern "C" {
 #endif
@@ -20,6 +24,7 @@
 */
 
 //------------------------------------------------------------------------------
+
 
 typedef const char * const *  mbug_device_list;
 struct mbug_device_struct;
@@ -73,7 +78,7 @@ const char * mbug_device_list_next( mbug_device_list dev_list );
 /** Open a device specified by it's device type and serial number
  *  (as int, last digits of the serial number are matched only).
  */
-mbug_device mbug_open_int( unsigned short device_type, unsigned long serial );
+mbug_device mbug_open_int( uint16_t device_type, uint32_t serial_num );
 
 /** Open a device specified by it's id string (equals the USB serial number,
  * as returned by mbug_device_list: "MBUG-TTTT-SSSSSS"). The leading "MBUG-"
@@ -83,11 +88,11 @@ mbug_device mbug_open_str( const char* id );
 
 /** Extract device type from id string. Returns < 0 for invalid ids.
  */
-int mbug_type_from_id( const char *id );
+int16_t mbug_type_from_id( const char *id );
 
 /** Extract serial number from id string. Returns < 0 for invalid ids.
  */
-long mbug_serial_from_id( const char *id );
+int32_t mbug_serial_from_id( const char *id );
 
 /** Close a previously opened device.
  */

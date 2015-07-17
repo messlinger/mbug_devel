@@ -267,11 +267,13 @@ int main( int argc, char* argv[] )
 		if (err<0) fputs( "#### Error setting acquisition mode\n", stdout );
 
 		// File header
+		fseek( rec_file, 0, SEEK_END );
+		if (ftell(rec_file) > 0)  fprintf( rec_file, "\n\n" );
 		tim = floattime();
-		sprintf( sout, "\n\n# %s\n# Start recording at %.2f (%s)\n", mbug_id(device), tim, strtime(tim) );
+		sprintf( sout, "# %s\n# Start recording at %.2f (%s)\n", mbug_id(device), tim, strtime(tim) );
 		if (format==Raw) 
-			 sprintf( sout, "# timestamp\tdata\n" );
-		else sprintf( sout, "# timestamp\ttemp\thumidity\n" );
+			 strcat( sout, "# timestamp\tdata\n" );
+		else strcat( sout, "# timestamp\ttemp\thumidity\n" );
 		if (rec_file)  fputs(sout, rec_file);
 		if (!rec_silent)  fputs(sout, stdout);
 

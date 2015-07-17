@@ -32,9 +32,9 @@ CMbug_2820_guiDlg::CMbug_2820_guiDlg(CWnd* pParent /*=NULL*/)
 	m_logfile = 0;
 	m_simulator = 0;
 
+
 	m_hIcon_open = (HICON)LoadImage( AfxGetApp()->m_hInstance, MAKEINTRESOURCE(IDI_ICON_OPEN),
 								IMAGE_ICON, 16,16, LR_DEFAULTCOLOR );
-								
 	m_hBitmap_dnarrow = (HBITMAP)LoadImage( 0, MAKEINTRESOURCE(OBM_DNARROW), IMAGE_BITMAP,
 								0,0, LR_DEFAULTCOLOR | LR_DEFAULTSIZE | LR_SHARED );
 	m_hBitmap_uparrow = (HBITMAP)LoadImage( 0, MAKEINTRESOURCE(OBM_UPARROW), IMAGE_BITMAP,
@@ -85,7 +85,7 @@ BOOL CMbug_2820_guiDlg::OnInitDialog()
 
 	// Symbol für dieses Dialogfeld festlegen. Wird automatisch erledigt
 	//  wenn das Hauptfenster der Anwendung kein Dialogfeld ist
-	SetIcon(m_hIcon, TRUE);			// Großes Symbol verwenden
+	SetIcon(m_hIcon, 1);
 
 	// ZU ERLEDIGEN: Hier zusätzliche Initialisierung einfügen
 
