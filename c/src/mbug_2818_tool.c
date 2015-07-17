@@ -308,7 +308,8 @@ int main( int argc, char* argv[] )
 
 		// File header
 		tim = floattime();
-		sprintf( sout, "\n\n# %s\n# Start recording at %.2f\n# timestamp", mbug_id(thermometer), tim );
+		sprintf( sout, "\n\n# %s\n# Start recording at %.2f (%s)\n", mbug_id(thermometer), tim, strtime(tim) );
+		sprintf( sout, "# timestamp" );
 		for (i=0; channels[i]>=0 ;i++) {
 			sprintf( str, "\tchan[%d]", channels[i] );
 			strcat( sout, str );

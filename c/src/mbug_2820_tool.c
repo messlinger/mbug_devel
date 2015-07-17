@@ -268,10 +268,10 @@ int main( int argc, char* argv[] )
 
 		// File header
 		tim = floattime();
-		if (format==Raw)
-			sprintf( sout, "\n\n# %s\n# Start recording at %.2f\n# timestamp\tdata\n", mbug_id(device), tim );
-		else
-			sprintf( sout, "\n\n# %s\n# Start recording at %.2f\n# timestamp\ttemp\thumidity\n", mbug_id(device), tim );
+		sprintf( sout, "\n\n# %s\n# Start recording at %.2f (%s)\n", mbug_id(device), tim, strtime(tim) );
+		if (format==Raw) 
+			 sprintf( sout, "# timestamp\tdata\n" );
+		else sprintf( sout, "# timestamp\ttemp\thumidity\n" );
 		if (rec_file)  fputs(sout, rec_file);
 		if (!rec_silent)  fputs(sout, stdout);
 

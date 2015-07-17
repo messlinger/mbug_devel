@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
-#include <stdint.h>
 
 #ifdef _WIN32
 	#include "lusb0_usb.h"	// has been renamed in v 1.2.5
@@ -90,7 +89,7 @@ unsigned short _bin(unsigned short bcd)
 
 //-----------------------------------------------------------------------------------------
 
-const mbug_device_list mbug_get_device_list(unsigned short device_type)
+const mbug_device_list mbug_get_device_list( uint16_t device_type )
 {
 	static char* device_list[MBUG_MAX_DEVICES+1];
 	static char serial_numbers[MBUG_MAX_DEVICES+1][MBUG_MAX_ID_LEN+1];
@@ -182,7 +181,7 @@ const char * mbug_device_list_next( mbug_device_list dev_list )
 
 //-----------------------------------------------------------------------------------------
 // Open by type and serial number. serial=0 will open the first available device.
-mbug_device mbug_open_int( unsigned short device_type, unsigned long serial_num )
+mbug_device mbug_open_int( uint16_t device_type, uint32_t serial_num )
 {
 	struct usb_bus* bus =0 ;
 	struct usb_device* dev = 0;
@@ -321,8 +320,8 @@ mbug_device mbug_open_int( unsigned short device_type, unsigned long serial_num 
 // Open by id string ("MBUG-TTTT-SSSSSS"). The leading "MBUG-" may be omitted.
 mbug_device mbug_open_str( const char* id )
 {
-	unsigned int device_type = 0;
-	unsigned long serial_num = 0;
+	uint16_t device_type = 0;
+	uint32_t serial_num = 0;
 	device_type = mbug_type_from_id( id );
 	if (device_type==0)
 		return NULL;
@@ -335,9 +334,9 @@ mbug_device mbug_open_str( const char* id )
 //-----------------------------------------------------------------------------------------
 // Extract the device type from a given id string
 // Return value < 0 indiates an invalid id
-int mbug_type_from_id( const char *id )
+int16_t mbug_type_from_id( const char *id )
 {
-	unsigned int device_type = 0;
+	unsigned long device_type = 0;
 	char *endp = 0;
 	if (!strncmp( id, "MBUG-", 5 ) || !strncmp( id, "mbug-", 5 ))
 		id += 5;
@@ -346,12 +345,13 @@ int mbug_type_from_id( const char *id )
 	device_type = strtoul( id, &endp, 10 );
 	if (*endp != '-' || device_type<1000)
 		return -1;
-	return device_type;
+	if (device_type > 9999) return -1;
+	return (int16_t)device_type;
 }
 
 // Extract the serial number from a given id string
 // Return value < 0 indiates an invalid id
-long mbug_serial_from_id( const char *id )
+int32_t mbug_serial_from_id( const char *id )
 {
 	unsigned long serial_num = 0;
 	char *endp = 0;
@@ -362,7 +362,7 @@ long mbug_serial_from_id( const char *id )
 	serial_num = strtoul( id+5, &endp, 10 );
 	if (*endp!='\0')
 		return -1;
-	return serial_num;
+	return (int32_t)serial_num;
 }
 
 //-----------------------------------------------------------------------------------------

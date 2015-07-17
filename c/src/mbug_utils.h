@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 #include <sys/timeb.h>
 #ifdef _WIN32
 	#include <windows.h>
@@ -146,6 +147,21 @@ double floattime( void )
 		gettimeofday( &tv, 0 );
 		return tv.tv_sec + 1e-6*tv.tv_usec;
 	#endif
+}
+
+
+/** Convert the passed timestamp as ascii string (via asctime at the moment, but ma ychange in the future).
+    Pass a timestamp <= 0 to use the current system time instad.
+ */
+const char * strtime( double timestamp )
+{
+	char * str = 0;
+	time_t ltime = 0;
+	if (timestamp <= 0)  timestamp = floattime();
+	ltime = (time_t)timestamp;
+	str = asctime( gmtime( &ltime ) );
+	str[strlen(str)-1] = 0;
+	return str;
 }
 
 
