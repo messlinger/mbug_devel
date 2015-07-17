@@ -12,10 +12,11 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 //-----------------------------------------------------------------------------------------------
 // Icons
 IDI_ICON                ICON    DISCARDABLE     "..\\..\\icon\\usb_16_32.ico"
+IDI_ICON_OPEN           ICON    DISCARDABLE     "..\\..\\icon\\open_16.ico"
 
 //-----------------------------------------------------------------------------------------------
 // Dialog
-IDD_DIALOG DIALOG DISCARDABLE  0, 0, 140, 130
+IDD_DIALOG DIALOG DISCARDABLE  0, 0, 140, 191
 STYLE DS_MODALFRAME | DS_3DLOOK | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION |
     WS_SYSMENU
 CAPTION "MBUG-2820"
@@ -25,15 +26,28 @@ BEGIN
     LTEXT           " ---.--- °C",IDC_VALUE_TEMP,14,16,105,24
     CONTROL         "",IDC_BEAT_TEMP,"Static",SS_BLACKRECT | NOT WS_VISIBLE |
                     WS_DISABLED,125,14,3,3
+
     GROUPBOX        "Humidity",IDC_FRAME_TEMP,7,50,126,38
     LTEXT           " ---.--- °C",IDC_VALUE_HUM,14,59,105,24
     CONTROL         "",IDC_BEAT_HUM,"Static",SS_BLACKRECT | NOT WS_VISIBLE |
                     WS_DISABLED,125,57,3,3
+
     LTEXT           "Device:",IDC_FRAME_TEMP,12,98,26,8
     COMBOBOX        IDC_COMBO_DEVICE,43,96,83,81,CBS_DROPDOWNLIST | CBS_SORT |
                     WS_VSCROLL | WS_TABSTOP
+
     LTEXT           "Status:",IDC_FRAME_TEMP,12,115,23,8
-    LTEXT           "None",IDC_VALUE_STATUS,44,115,87,8
+    LTEXT           "None",IDC_VALUE_STATUS,44,115,85,8
+
+	GROUPBOX        "Record",IDC_FRAME_REC,7,134,126,51
+	PUSHBUTTON      "",IDC_BUTTON_SHOW_REC,129,120,11,10,BS_BITMAP | BS_CENTER |
+					BS_VCENTER,WS_EX_TRANSPARENT
+	EDITTEXT        IDC_EDIT_LOGFILE,13,147,114,12,ES_AUTOHSCROLL
+	PUSHBUTTON      "Open",IDC_BUTTON_LOGFILE,109,165,18,14,BS_ICON |
+					BS_CENTER | BS_VCENTER
+	PUSHBUTTON      "Start",IDC_BUTTON_START_REC,13,165,46,14
+	PUSHBUTTON      "Stop",IDC_BUTTON_STOP_REC,63,165,41,14
+
 END
 
 

@@ -27,8 +27,7 @@ public:
 // Dialogfelddaten
 	//{{AFX_DATA(CMbug_2820_guiDlg)
 	enum { IDD = IDD_MBUG_2820_GUI_DIALOG };
-	CStatic	m_test_img;
-	CStatic	m_test;
+	CButton	m_button_more;
 	CButton	m_button_logfile;
 	CEdit	m_edit_logfile;
 	CStatic	m_disp_hum;
@@ -47,12 +46,15 @@ public:
 
 // Implementierung
 protected:
-	HICON m_hIcon, m_hIcon_open;
+	HICON m_hIcon, m_hIcon_open, m_hIcon_down;
+	HBITMAP m_hBitmap_dnarrow, m_hBitmap_uparrow;
 	CFont m_big_font;
 	UINT m_acq_timer;
 	double m_temperature;
 	double m_humidity;
 	mbug_device m_device;
+	bool m_simulator;
+	FILE* m_logfile;
 
 	void print_status( const char* msg);
 	void print_temperature( double temp );
@@ -60,6 +62,8 @@ protected:
 	void open_device( const char* id );
 	void close_device( int verbose = 1 );
 	void update_measurement(void);
+	void show_rec_control( int show );
+	void close_logfile( void );
 
 	// Generierte Message-Map-Funktionen
 	//{{AFX_MSG(CMbug_2820_guiDlg)
@@ -72,8 +76,9 @@ protected:
 	afx_msg void OnClose();
 	afx_msg void OnDestroy();
 	afx_msg void OnButtonLogfile();
-	afx_msg void OnStaticTestClicked();
-	afx_msg void OnStaticImgClicked();
+	afx_msg void OnButtonMore();
+	afx_msg void OnButtonStartRec();
+	afx_msg void OnButtonStopRec();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

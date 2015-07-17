@@ -27,7 +27,7 @@ Type=0
 HeaderFile=mbug_2820_guiDlg.h
 ImplementationFile=mbug_2820_guiDlg.cpp
 Filter=D
-LastObject=IDC_STATIC_IMG
+LastObject=IDC_BUTTON_MORE
 BaseClass=CDialog
 VirtualFilter=dWC
 
@@ -44,7 +44,7 @@ Class=CMbug_2820_guiDlg
 [DLG:IDD_MBUG_2820_GUI_DIALOG (Englisch (USA))]
 Type=1
 Class=CMbug_2820_guiDlg
-ControlCount=15
+ControlCount=16
 Control1=IDC_GROUP_TEMPERATURE,button,1342177287
 Control2=IDC_LABEL_VALUE_TEMPERATURE,static,1342308364
 Control3=IDC_LABEL_DEVICE,static,1342308352
@@ -57,7 +57,8 @@ Control9=IDC_LABEL_VALUE_HUMIDITY,static,1342308364
 Control10=IDC_HEARTBEAT_HUM,static,1207959556
 Control11=IDC_EDIT_LOGFILE,edit,1350631552
 Control12=IDC_BUTTON_LOGFILE,button,1342246720
-Control13=IDC_BUTTON1,button,1342242816
-Control14=IDC_BUTTON2,button,1342242816
-Control15=IDC_STATIC,button,1342177287
+Control13=IDC_BUTTON_START,button,1342242816
+Control14=IDC_BUTTON_STOP,button,1342242816
+Control15=IDC_GROUP_LOG,button,1342177287
+Control16=IDC_BUTTON_MORE,button,1342246784
 
