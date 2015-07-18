@@ -48,7 +48,7 @@ class AB440S(mbug_2151_target):
         mbug_2151_target.__init__(self, dev)
         self.addr = addr
 
-    def _addr_sequence(self, addr, on):
+    def _sequence(self, addr, on):
         # Address sequence for AB440S (PT2262 compatible):
         # 10x DIP-switches: 1 2 3 4 5 A B C D E  ON:  floating
         #                   |                    OFF: gnd
@@ -90,7 +90,7 @@ class AB440S(mbug_2151_target):
              '34AE'  -> 0b0011010001
         """
         self.addr = addr
-        seq = self._addr_sequence(addr, on)
+        seq = self._sequence(addr, on)
         self._send( seq, force )
 
     def __setitem__(self, addr, on):
@@ -126,7 +126,7 @@ class LUC308554(mbug_2151_target):
         mbug_2151_target.__init__(self, dev)
         self.addr = addr
 
-    def _addr_sequence(self, syscode, addr, on):
+    def _sequence(self, syscode, addr, on):
         # The 7-bit system code is fixed internally via solder pads at a the address
         # pins of the HS-2262 encoder.  For the ease of use, we treat a closed
         # solder pad as 1, an open solder pad as 0 and pin 1 as the leftmost bit.
@@ -168,7 +168,7 @@ class LUC308554(mbug_2151_target):
             syscode = self.syscode
             self.addr = addr
 
-        seq = self._addr_sequence(syscode, addr, on)
+        seq = self._sequence(syscode, addr, on)
         self._send( seq, force )
     
     def __setitem__(self, addr, on):
@@ -208,7 +208,7 @@ class HE302EU(mbug_2151_target):
         mbug_2151_target.__init__(self, dev)
         self.addr = addr
 
-    def _addr_sequence(self, addr, on):
+    def _sequence(self, addr, on):
         # Address sequence for HE302EU:
         # 4 Group numbers:  1,2,3,4 (typed roman on the remote control)
         # 4 Switch numbers: 1,2,3,4
@@ -288,7 +288,7 @@ class HE302EU(mbug_2151_target):
         interprested as group switch command.
         """
         self.addr = addr
-        seq = self._addr_sequence(addr, on)
+        seq = self._sequence(addr, on)
         self._send( seq, force )
 
     def __setitem__(self, addr, on):
@@ -307,8 +307,6 @@ class HE302EU(mbug_2151_target):
     def off(self):
         if self.addr==None: raise ValueError('Target address has not yet been set.')
         self.switch(self.addr,0)        
-      
-        
      
 #---------------------------------------------------------------------------
 
@@ -331,7 +329,7 @@ class DMV7008(mbug_2151_target):
         try: self.syscode, self.addr = addr[0], addr[1]
         except: self.syscode, self.addr = 0, None
 
-    def _addr_sequence(self, syscode, addr, cmd):
+    def _sequence(self, syscode, addr, cmd):
         # Addresses consist of a 12 bit system code + 8 bits addr/cmd code.
         # The system code is randlomly chosen for a given remote control,
         # and can be learned by the receivers. Per system, there are 4 known
@@ -382,7 +380,7 @@ class DMV7008(mbug_2151_target):
         except:
             syscode = self.syscode
             self.addr = addr
-        seq = self._addr_sequence( syscode, addr, on)
+        seq = self._sequence( syscode, addr, on)
         self._send( seq, force )
         
     def dim(self, addr, level, force=0):
@@ -408,7 +406,7 @@ class DMV7008(mbug_2151_target):
         # may have been used in the meantime
         self._dev.set_timebase(self._timebase)
         self._dev.set_iterations(1)
-        seq = self._addr_sequence(addr, cmd)        
+        seq = self._sequence(addr, cmd)        
         self._dev.set_sequence(seq, self._seq_type)
         for i in range(steps):
             self._wait_busy()
@@ -459,7 +457,6 @@ class IKT201(mbug_2151_target):
         self.addr = addr
 
     def _sequence(self, syscode, channels, on=None, level=None, rel=None, gradual=0):
-        
         syscode = int(syscode-1)&0x0f
         try: # to iterate
             channels = [int(i%10) for i in channels] 
@@ -542,13 +539,11 @@ class IKT201(mbug_2151_target):
         if self.addr==None: raise ValueError('Target address has not yet been set.')
         self.switch(self.addr,0)        
 
-
 #-----------------------------------------------------------------------
-
 
 class RS200(mbug_2151_target):
     """RS-200 Remote power system (Europe Supplies/Conrad). This device class represents a
-    bunch of addressable switchesor a single switch (if instantiated with given address)."""
+    bunch of addressable switches or a single switch (if instantiated with given address)."""
 
     # Transmission parameters
     _timebase = 1e-6
@@ -611,7 +606,7 @@ class RS200(mbug_2151_target):
         except:
             syscode = self.syscode
             self.addr = addr
-        seq = self._sequence(addr, on)
+        seq = self._sequence(syscode, addr, on=on)
         self._send( seq, force )
 
     def __setitem__(self, addr, on):
